@@ -1,0 +1,1 @@
+module.exports = loaddir('config')[process.env.RUN || 'dev']
