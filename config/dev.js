@@ -16,5 +16,35 @@ module.exports = {
             // If not connected, return errors immediately rather than waiting for reconnect
             bufferMaxEntries: 0
         }
+    },
+    mq: {
+        connOpt: {
+            host: '192.168.8.58',
+            port: 5672,
+            login: 'guest',
+            password: 'guest',
+            connectionTimeout: 10000,
+            authMechanism: 'AMQPLAIN',
+            vhost: '/',
+            ssl: {
+                enabled: false
+            }
+        },
+        exchangeOpt: {
+            type: 'direct',
+            durable: false,
+            autoDelete: false,
+            confirm: true
+        },
+        queueOpt: {
+            autoDelete: false
+        },
+        queueSubOpt: {
+            ack: true, 
+            prefetchCount: 1
+        },
+        msgOpt: {
+            contentEncoding: 'utf-8',
+        }
     }
 }

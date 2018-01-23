@@ -5,4 +5,4 @@ conn.on('open', function () {
 conn.on('error', function (err) {
     console.log("mongodb error: ", err);
 })
-module.exports = conn;
+module.exports = conn

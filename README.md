@@ -1,3 +1,24 @@
-###start
--RUN=dev ./fly.sh  加载config文件夹中dev.js
--RUN=build ./fly.sh  加载config文件夹中build.js
+##start
+	RUN=dev ./fly.sh  加载config文件夹中dev.js
+	RUN=build ./fly.sh  加载config文件夹中build.js
+
+### 批量修改文件名
+	for i in `ls`; do mv -f $i `echo $i | sed 's/str1/str2/'`; done
+	str1修改前， str2修改后
+	使用例子：
+	for i in `ls`; do mv -f $i `echo $i | sed 's/.data//'`; done
+
+###mq容器与链接
+	docker run -d --name rabbitmq --publish 5671:5671 \
+	--publish 5672:5672 --publish 4369:4369 --publish 25672:25672 --publish 15671:15671 --publish 15672:15672 \
+	rabbitmq:management
+	使用nodejs代码连接时：
+	var amqp = require('amqp');
+	var i = 0;
+	var connection = amqp.createConnection({
+	  host: '192.168.8.58',
+	  port: 5672,
+	  login: 'guest',
+	  password: 'guest',
+	  connectionTimeout: 10000,
+	});
