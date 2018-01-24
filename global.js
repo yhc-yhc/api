@@ -16,21 +16,21 @@ global.mqPub = require('./mq/conn.js').mqPub
 global.mqSub = require('./mq/conn.js').mqSub
 
 cache.on("error", function(err) {
-	console.log("redis Error: " + err);
-});
+	console.log("redis Error: " + err)
+})
 cache.on("ready", function(rs) {
-	console.log("redis Ready: ", config.redis.host, config.redis.port);
+	console.log("redis Ready: ", config.redis.host, config.redis.port)
 })
 
 async function main() {
 	mqSub('exchange_a', 'route_a')
 	mqSub('exchange_b', 'route_b')
 
-	cache.set("test", "test val", 'EX', 10);
+	cache.set("test", "test val", 'EX', 10)
 	setInterval(async _ => {
 		let test = await getCache('test')
 		log(test)
-	}, 10000);
+	}, 10000)
 	let userCount = await model.user.count()
 	log('user num: ', userCount)
 	log(moment().format('YYYY/MM/DD HHmmss'))
