@@ -22,3 +22,4 @@
 	  password: 'guest',
 	  connectionTimeout: 10000,
 	});
+	curl serverIp:15672

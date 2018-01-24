@@ -1,4 +1,5 @@
 module.exports = {
+    host: 'localhost',
     port: 3000,
     redis: {
         host: "192.168.8.107",
@@ -40,11 +41,28 @@ module.exports = {
             autoDelete: false
         },
         queueSubOpt: {
-            ack: true, 
+            ack: true,
             prefetchCount: 1
         },
         msgOpt: {
             contentEncoding: 'utf-8',
         }
+    },
+    sms: {
+        url: 'https://yun.tim.qq.com/v5/tlssmssvr/sendsms',
+        appkey: '291db2d72f0ccc3ead9d16e7060d7832',
+        sdkappid: '1400043867',
+        vCodeExpireTime: 50,
+        tpl_map: {
+            register: {
+                86: 51141,
+                others: 51296
+            }
+        },
+        tpl_sign: {
+            86: '相集',
+            others: 'PictureAir'
+        }
+
     }
 }
