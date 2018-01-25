@@ -1,10 +1,20 @@
+const path = require('path')
+
 module.exports = {
     host: 'localhost',
     port: 3000,
+    log: {
+        base: path.join(process.env.HOME, '/logs/api'),
+        err: '/error',
+        res: '/res'
+    },
     redis: {
         host: "192.168.8.107",
         port: "3008",
         password: "pIctur3"
+    },
+    cacheExpire: {
+        smsvcode: 50
     },
     mongodb: {
         // url: 'mongodb://pictureworks:123qweasd@10.10.20.232,10.10.20.233,10.10.20.234:27000/pictureAir',
@@ -52,7 +62,6 @@ module.exports = {
         url: 'https://yun.tim.qq.com/v5/tlssmssvr/sendsms',
         appkey: '291db2d72f0ccc3ead9d16e7060d7832',
         sdkappid: '1400043867',
-        vCodeExpireTime: 50,
         tpl_map: {
             register: {
                 86: 51141,
