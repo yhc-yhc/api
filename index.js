@@ -10,6 +10,7 @@ app.use(bodyParser())
 
 app.use(async(ctx, next) => {
 	const start = new Date()
+	ctx.method == 'GET' ? ctx.req.query = ctx.request.query : ctx.req.body = ctx.request.body
 	let ms
 	try {
 		await next()
@@ -47,7 +48,7 @@ app.use(async(ctx, next) => {
 
 // api is exists
 app.use(async(ctx, next) => {
-	let url = ctx.request.url
+	let url = ctx.url
 	if (ctx.method == 'GET') {
 		url = url.split('?')[0]
 	}
@@ -61,7 +62,7 @@ app.use(async(ctx, next) => {
 
 // api params is correct
 app.use(async(ctx, next) => {
-	const params = ctx.request.method == 'GET' ? ctx.request.query : ctx.request.body
+	const params = ctx.method == 'GET' ? ctx.req.query : ctx.req.body
 	let b = true 
 	for (let k in httpStatus[ctx._url][ctx.method].params) {
 		if (httpStatus[ctx._url][ctx.method].params[k]) {
@@ -82,38 +83,3 @@ app.use(async(ctx, next) => {
 router(app)
 
 app.listen(config.port, () => log(`Koa start at ${config.port}...`))
-
-
-// url valid
-
-// app.use(async(ctx, next) => {
-// 	let exists_valid = false
-// 	if (exists_valid) {
-// 		await next()
-// 	} else {
-// 		 throw new Error({
-// 			status: 4001,
-// 			message: 'api address not found',
-// 			data: {
-// 				url: ctx.url
-// 			}
-// 		})
-// 	}
-
-// 	let param_valid = false 
-// 	if (param_valid) {
-// 		await next()
-// 	} else {
-// 		throw new Error({
-// 			status: 4002,
-// 			message: 'params pass error',
-// 			data: {
-// 				method: ctx.request.method,
-// 				url: ctx.url,
-// 				params: ctx.request.method == 'GET' ? ctx.request.query : ctx.request.body
-// 			}
-// 		})
-// 	}
-
-// 	log(6)
-// })

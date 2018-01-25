@@ -1,24 +1,22 @@
 const Router = require('koa-router')
 const router = new Router()
-router.get('sendsms', async(ctx, next) => {
-	let code = await cache.getAsync(`smscode_`)
-	if (code) {
-		throw httpStatus[ctx._url][ctx.method].error.smsSending || httpStatus.errorLoss
-	}
-	let vcode = ('' + Math.random()).match(/\d{6}/)[0]
-	cache.set("smscode_", vcode, 'EX', config.cacheExpire.smsvcode)
-		// await sendsms(86, 18625908643, config.sms.tpl_map.register, [vcode])
-})
 
 router.post('sendsms', async(ctx, next) => {
-	// log(ctx.request.body)
-	let code = await cache.getAsync(`smscode_`)
-		// log(code)
-	if (code) return ctx.body = extRes.resFomat(425, 'sms Sending')
-
+	const body = ctx.req.body
+	const api = httpStatus[ctx._url][ctx.method]
+	let cacheKey = `smscode_${body.areaCode}${body.phone}`
+	let code = await cache.getAsync(cacheKey)
+	if (code) {
+		log(cacheKey, code)
+		throw api.error.smsSending || httpStatus.errorLoss
+	}
 	let vcode = ('' + Math.random()).match(/\d{6}/)[0]
-	cache.set("smscode_", vcode, 'EX', config.sms.vCodeExpireTime)
-		// await sendsms(86, 18625908643, config.sms.tpl_map.register, [vcode])
-	ctx.body = extRes.resFomat(200, 'success')
+	cache.set(cacheKey, vcode, 'EX', config.cacheExpire.smsvcode)
+	const rs = await sendsms(body.areaCode, body.phone, config.sms.tpl_map.register, [vcode])
+	if (rs.body.result) {
+		log(rs.body)
+		throw api.error.getSmsErr || httpStatus.errorLoss
+	}
 })
+
 module.exports = router

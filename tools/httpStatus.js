@@ -1,36 +1,36 @@
 module.exports = {
+	success: {
+		status: 200,
+		message: 'success'
+	},
 	notFound: {
 		status: 404,
 		message: 'url not found or method error'
-	},
-	errorLoss: {
-		status: 5001,
-		message: 'not found this error msg'
 	},
 	paramErr: {
 		status: 5002,
 		message: 'param loss'
 	},
-	success: {
-		status: 200,
-		message: 'success'
-	},
-	2222: {
-		a: 1
+	errorLoss: {
+		status: 5001,
+		message: 'not found this error msg'
 	},
 	'/user/sendsms': {
-		'GET': {
+		'POST': {
 			params: {
 				phone: 1,
-				code: 1
+				areaCode: 1
 			},
 			error: {
 				smsSending: {
 					status: 425,
 					message: 'sms sending'
+				},
+				getSmsErr: {
+					status: 426,
+					message: 'error after server request'
 				}
 			}
 		}
-
 	}
 }

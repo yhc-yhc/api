@@ -14,7 +14,7 @@ module.exports = {
         password: "pIctur3"
     },
     cacheExpire: {
-        smsvcode: 50
+        smsvcode: 90
     },
     mongodb: {
         // url: 'mongodb://pictureworks:123qweasd@10.10.20.232,10.10.20.233,10.10.20.234:27000/pictureAir',
