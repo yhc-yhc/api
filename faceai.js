@@ -121,6 +121,7 @@ function faceDetection(src) {
 					}
 				}
 				console.log(113, Object.keys(face2m).length)
+				log(124, ary)
 				resolve(ary)
 			}
 		})
