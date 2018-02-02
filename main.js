@@ -64,7 +64,7 @@ async function main() {
 		}
 	}
 	log('====================================')
-	awiat Promise.delay(2000)
+	await Promise.delay(2000)
 	await main()
 }
 
