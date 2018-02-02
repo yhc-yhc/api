@@ -17,7 +17,7 @@ module.exports = {
         smsvcode: 90
     },
     mongodb: {
-        url: 'mongodb://10.26.143.51,10.26.143.74,10.26.142.237:1008:27000/pictureAir',
+        url: 'mongodb://10.26.143.51,10.26.143.74,10.26.142.237:1008/pictureAir',
         opt: {
             autoIndex: false, // Don't build indexes
             reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
