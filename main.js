@@ -17,7 +17,7 @@ async function main() {
 		.limit(1000).exec()
 	log('will process: ', photos.length)
 	for (const photo of photos) {
-		const ary = await faceai.process(photo.thumbnail.x512.path)
+		const ary = await faceai.process(photo.thumbnail.x1024.path)
 		log(21, ary)
 		if (!ary.length) {
 			await model.photo.update({
