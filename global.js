@@ -1,4 +1,4 @@
-global.Promise_ = require('bluebird')
+global.Promise = require('bluebird')
 global.log = console.log
 global.loaddir = require('./tools/loaddir.js')
 global.config = require('./config.js')
@@ -10,11 +10,11 @@ global.moment = require('moment')
 global.util = require('util')
 global.crypto = require('crypto')
 global.httpStatus = require('./tools/httpStatus.js')
-global.request = Promise_.promisifyAll(Promise_.promisify(require('request')))
+global.request = Promise.promisifyAll(Promise.promisify(require('request')))
 global.redis = require('redis')
 global.cache = redis.createClient(config.redis)
-Promise_.promisifyAll(redis.RedisClient.prototype);
-Promise_.promisifyAll(redis.Multi.prototype);
+Promise.promisifyAll(redis.RedisClient.prototype);
+Promise.promisifyAll(redis.Multi.prototype);
 global.mongoose = require('mongoose')
 global.model = require('./mongodb/model.js')
 global.amqp = require('amqp')
