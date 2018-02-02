@@ -1,7 +1,7 @@
 require('./global.js')
 const faceai = require('./faceai.js')
 
-async function main() {
+async function faceProcess() {
 	let photoCount = await model.photo.count()
 	log(`total has ${photoCount} photos`)
 	const photos = await model.photo
@@ -19,6 +19,17 @@ async function main() {
 	for (const photo of photos) {
 		const ary = await faceai.process(photo.thumbnail.x512.path)
 		log(21, ary)
+		if (!ary.length) {
+			await model.photo.update({
+				rawFileName: photo.rawFileName
+			}, {
+				$set: {
+					faces: ['none']
+				}
+			}, {
+				multi: true
+			}).exec()
+		}
 		for (key of ary) {
 			log(key)
 			const face = new model.face()
@@ -51,6 +62,12 @@ async function main() {
 			}).exec()
 		}
 	}
+}
+
+async function main() {
+	setInterval(_ => {
+		await faceProcess()
+	}, 2000)
 }
 
 main()
