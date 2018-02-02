@@ -11,13 +11,13 @@ async function main() {
 			},
 			presetName: 'thumbnail'
 		}, {
-			thumbnail: 1,
+			originalInfo: 1,
 			rawFileName: 1
 		})
 		.limit(1000).exec()
 	log('will process: ', photos.length)
 	for (const photo of photos) {
-		const ary = await faceai.process(photo.thumbnail.x1024.path)
+		const ary = await faceai.process(photo.originalInfo.path)
 		log(21, ary)
 		if (!ary.length) {
 			await model.photo.update({
