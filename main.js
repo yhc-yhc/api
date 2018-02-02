@@ -25,7 +25,30 @@ async function main() {
 			face.name = key
 			const rs = await face.save()
 			log(rs)
-			await model.photo.update({rawFileName: photo.rawFileName}, {$addToSet: {faces: rs._id}}, {multi: true})
+			await model.photo.update({
+				rawFileName: photo.rawFileName,
+				'faces.0': {
+					$exists: true
+				}
+			}, {
+				$addToSet: {
+					faces: rs._id
+				}
+			}, {
+				multi: true
+			})
+			await model.photo.update({
+				rawFileName: photo.rawFileName,
+				'faces.0': {
+					$exists: false
+				}
+			}, {
+				$set: {
+					faces: [rs._id]
+				}
+			}, {
+				multi: true
+			})
 		}
 	}
 }
