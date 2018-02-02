@@ -39,6 +39,10 @@ async function main() {
 	mqSub('exchange_b', 'route_b')
 
 	cache.set("test", "test val", 'EX', 10)
+	let token = await cache.getAsync('access_token:' + 'c964b871b3c993c8aea71ef9918e8926')
+	log(43, JSON.parse(token))
+	let test = await cache.getAsync('test')
+	log(test)
 	// setInterval(async _ => {
 	// 	let test = await cache.getAsync('test')
 	// 	log(test)
