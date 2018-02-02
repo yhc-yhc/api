@@ -25,7 +25,7 @@ async function main() {
 			face.name = key
 			const rs = await face.save()
 			log(rs)
-			// awati model.photo.update({}, {})
+			awati model.photo.update({rawFileName: photo.rawFileName}, {$addToSet: {faces: rs._id}}, {multi: true})
 		}
 	}
 }
