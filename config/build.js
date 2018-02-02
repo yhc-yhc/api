@@ -9,7 +9,7 @@ module.exports = {
         res: '/res'
     },
     redis: {
-        host: "47.89.32.70",
+        host: "10.25.155.219",
         port: "3008",
         password: "pw#p@Ictur3"
     },
