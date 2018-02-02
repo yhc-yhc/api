@@ -74,7 +74,7 @@ async function main() {
 // main()
 
 async function process(src) {
-	return new Promise((resolve, reject) => {
+	return new Promise(async (resolve, reject) => {
 		let exists = await fse.exists(src)
 		if (!exists) {
 			return resolve([])
