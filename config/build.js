@@ -29,7 +29,7 @@ module.exports = {
     },
     mq: {
         connOpt: {
-            host: '192.168.8.58',
+            host: '172.18.0.20',
             port: 5672,
             login: 'guest',
             password: 'guest',

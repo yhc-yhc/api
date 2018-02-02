@@ -9,8 +9,10 @@
 	for i in `ls`; do mv -f $i `echo $i | sed 's/.data//'`; done
 
 ###mq容器与链接
+	docker network create --subnet=172.18.0.0/16 pictureair;
 	docker run -d --name rabbitmq --publish 5671:5671 \
 	--publish 5672:5672 --publish 4369:4369 --publish 25672:25672 --publish 15671:15671 --publish 15672:15672 \
+	--net pictureair --ip 172.18.0.20 \
 	rabbitmq:management
 	使用nodejs代码连接时：
 	var amqp = require('amqp');
