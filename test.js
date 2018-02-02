@@ -1,49 +1,30 @@
-var amqp = require('amqp');
-var i = 0;
-var connection = amqp.createConnection({
-  host: '192.168.8.58',
-  port: 5672,
-  login: 'guest',
-  password: 'guest',
-  connectionTimeout: 10000,
-});
 
-// add this for better debuging 
-connection.on('error', function(e) {
-  console.log("Error from amqp: ", e);
-});
+function asynclike() {
+  return new Promise((resolve, reject) => {
 
-connection.on('ready', function() {
-  console.log('mq ready ...')
+    setTimeout(_=> {
+      const ary = [1]
+      resolve(ary)
+    }, 3000)
+  })
+}
 
-  exchange = connection.exchange('engine', {
-    type: 'direct',
-    autoDelete: false,
-    // durable: true
-  });
-  connection.queue("new_file", {
-    autoDelete: false
-  }, function(queue) {
-    queue.bind('engine', 'new_file', function() {
-      setInterval(function() {
-        i++;
-        console.log('publish message ' + i)
-        exchange.publish('new_file', 'this is a '+ i +' testing message ......');
-      }, Math.random() * 2000);
+function asynclike_() {
+  const Promise_ = require('bluebird')
+  return new Promise_((resolve, reject) => {
+    setTimeout(_=> {
+      const ary = [2]
+      resolve(ary)
+    }, 2000)
+  })
+}
 
-      // setTimeout(function() {
-      //   console.log("Single queue bind callback succeeded");
-      //   //exchange.destroy();  
-      //   //queue.destroy();  
-      //   connection.end();
-      //   connection.destroy();
-      // }, 5000);
 
-    });
 
-    // queue.subscribe(function(message) {
-    //   console.log('At 5 second recieved message is:' + message.data );
-    // });
-
-  });
-});
+async function main() {
+  let rs = await asynclike()
+  console.log(rs)
+  let rs_ = await asynclike_()
+  console.log(rs_)
+}
+main()

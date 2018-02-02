@@ -120,7 +120,7 @@ function faceDetection(src) {
 						ary.push(key)
 					}
 				}
-				console.log(113, Object.keys(face2m).length)
+				console.log('now face number is : ', Object.keys(face2m).length)
 				log(124, ary)
 				resolve(ary)
 			}
