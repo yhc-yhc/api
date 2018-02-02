@@ -1,16 +1,16 @@
 
-docker rm -f api || echo api not exists;
+docker rm -f faceai || echo faceai not exists;
 docker network create --subnet=172.18.0.0/16 pictureair;
 docker run -itd \
 --privileged=true \
 --net pictureair --ip 172.18.0.18 \
--v /etc/localtime:/etc/localtime \
 -v ~/logs:/root/logs \
+-v ~/faces:/root/faces \
 -v `pwd`:/src \
 -w /src \
 -p 3001:3000 \
 -e fly=product \
---name api \
+--name faceai \
 node:8.9.4 \
 /bin/bash -c "$* npm start"
-docker logs -f api
+docker logs -f faceai
