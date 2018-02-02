@@ -89,6 +89,7 @@ function faceDetection(src) {
 			if (err) {
 				reject(err)
 			} else {
+				const obj = {}
 				// resolve([asvl, faces])
 				console.log('==============>', src, faces.nFace)
 				for (let i = 0; i < faces.nFace; i++) {
@@ -116,10 +117,11 @@ function faceDetection(src) {
 						const p = await img1.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
 						await require('fs-extra').ensureDir(`/data/website/faces/`)
 						await p.write(`/data/website/faces/${key}.jpg`)
+						obj[key] = p
 					}
 				}
 				console.log(113, Object.keys(face2m).length)
-				resolve([key, p])
+				resolve(obj)
 			}
 		})
 	})

@@ -9,7 +9,6 @@ docker run -itd \
 -v /data:/data \
 -v `pwd`:/src \
 -w /src \
--p 3001:3000 \
 -e fly=product \
 --name faceai \
 node:8.9.4 \
