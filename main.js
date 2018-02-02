@@ -17,8 +17,10 @@ async function main() {
 		.limit(1000).exec()
 	log('will process: ', photos.length)
 	for (const photo of photos) {
-		const obj = await faceai.faceProcess(photo.originalInfo.path)
-		for (key in obj) {
+		const ary = await faceai.faceProcess(photo.originalInfo.path)
+		log(21, ary)
+		for (key of ary) {
+			log(key)
 			const face = new model.face()
 			face.name = key
 			face.code = obj[key]
