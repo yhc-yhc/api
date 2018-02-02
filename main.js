@@ -65,7 +65,7 @@ async function faceProcess() {
 }
 
 async function main() {
-	setInterval(_ => {
+	setInterval(async _ => {
 		await faceProcess()
 	}, 2000)
 }
