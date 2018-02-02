@@ -17,8 +17,10 @@ module.exports = {
         smsvcode: 90
     },
     mongodb: {
-        url: 'mongodb://10.26.143.51,10.26.143.74,10.26.142.237:1008/pictureAir',
+        url: 'mongodb://10.26.143.51:1008,10.26.143.74:1008,10.26.142.237:1008/pictureAir?replicaSet=pictureWorks',
         opt: {
+            user: 'pw',
+            pass: 'pw#Mongo@3456',
             autoIndex: false, // Don't build indexes
             reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
             reconnectInterval: 500, // Reconnect every 500ms

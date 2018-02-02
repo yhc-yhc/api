@@ -74,6 +74,10 @@ async function main() {
 
 async function process(src) {
 	return new Promise((resolve, reject) => {
+		let exists = await fse.exists(src)
+		if (!exists) {
+			return resolve([])
+		}
 		const image = fs.readFileSync(src)
 		var imageRawBuffer = new Buffer(image, 'base64')
 
@@ -106,7 +110,7 @@ async function process(src) {
 						const img = await Jimp.read(src)
 						const img1 = await img.clone()
 						const p = await img1.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
-						await require('fs-extra').ensureDir(`/data/website/faces/`)
+						await fse.ensureDir(`/data/website/faces/`)
 						await p.write(`/data/website/faces/${key}.jpg`)
 						ary.push(key)
 					}
