@@ -101,7 +101,7 @@ function faceDetection(src) {
 					for (let fk in face2m) {
 						if (fk == key) continue
 						let score = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
-						console.log(key, fk, score, score < scoreLine)
+						// console.log(key, fk, score, score < scoreLine)
 
 						if (score > scoreLine) {
 							addFlag = false
@@ -114,12 +114,12 @@ function faceDetection(src) {
 						const img = await Jimp.read(src)
 						const img1 = await img.clone()
 						const p = await img1.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
-						await require('fs-extra').ensureDir(`./faces/`)
-						await p.write(`./faces/${key}.jpg`)
+						await require('fs-extra').ensureDir(`/data/website/faces/`)
+						await p.write(`/data/website/faces/${key}.jpg`)
 					}
 				}
 				console.log(113, Object.keys(face2m).length)
-				resolve(0)
+				resolve([key, p])
 			}
 		})
 	})

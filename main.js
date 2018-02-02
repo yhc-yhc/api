@@ -9,7 +9,14 @@ async function main() {
 	.limit(1000).exec()
 	log('will process: ', photos.length)
 	for (const photo of photos) {
-		await faceai.faceProcess(photo.originalInfo.path)
+		const {k, p} = await faceai.faceProcess(photo.originalInfo.path)
+		const face = new model.face()
+		face.name = k 
+		face.code = p 
+		const rs = await face.save()
+		log(rs)
+		// awati model.photo.update({}, {})
+
 	}
 }
 
