@@ -112,7 +112,6 @@ async function process(src) {
 					}
 				}
 				console.log('now face number is : ', Object.keys(face2m).length)
-				log(124, ary)
 				resolve(ary)
 			}
 		})

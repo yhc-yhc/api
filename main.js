@@ -32,11 +32,11 @@ async function main() {
 				}
 			}, {
 				$addToSet: {
-					faces: rs._id
+					faces: rs._id.toString()
 				}
 			}, {
 				multi: true
-			})
+			}).exec()
 			await model.photo.update({
 				rawFileName: photo.rawFileName,
 				'faces.0': {
@@ -44,11 +44,11 @@ async function main() {
 				}
 			}, {
 				$set: {
-					faces: [rs._id]
+					faces: [rs._id.toString()]
 				}
 			}, {
 				multi: true
-			})
+			}).exec()
 		}
 	}
 }
