@@ -73,14 +73,6 @@ async function main() {
 // main()
 
 async function process(src) {
-	try {
-		await faceDetection(src)
-	} catch (e) {
-		console.log(e)
-	}
-}
-
-function faceDetection(src) {
 	return new Promise((resolve, reject) => {
 		const image = fs.readFileSync(src)
 		var imageRawBuffer = new Buffer(image, 'base64')
@@ -90,7 +82,6 @@ function faceDetection(src) {
 				reject(err)
 			} else {
 				const ary = []
-				// resolve([asvl, faces])
 				console.log('==============>', src, faces.nFace)
 				for (let i = 0; i < faces.nFace; i++) {
 					const feature = ArcSoftFR.extractFeature(hFREngine, asvl, faces.info[i])
@@ -145,5 +136,5 @@ function doFaceDetection(filename, faces_callback, width, height, format) {
 		throw new Error('wrong number of arguments')
 	}
 }
-exports.faceProcess = process
+exports.process = process
 exports.face2m = face2m

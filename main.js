@@ -17,7 +17,7 @@ async function main() {
 		.limit(1000).exec()
 	log('will process: ', photos.length)
 	for (const photo of photos) {
-		const ary = await faceai.faceProcess(photo.thumbnail.x512.path)
+		const ary = await faceai.process(photo.thumbnail.x512.path)
 		log(21, ary)
 		for (key of ary) {
 			log(key)
@@ -25,7 +25,7 @@ async function main() {
 			face.name = key
 			const rs = await face.save()
 			log(rs)
-				// awati model.photo.update({}, {})
+			// awati model.photo.update({}, {})
 		}
 	}
 }
