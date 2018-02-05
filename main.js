@@ -61,7 +61,7 @@ async function main() {
 						multi: true
 					}).exec()
 				} else {
-					const face = await model.face.find({
+					const face = await model.face.findOne({
 						name: face_map[faceId]
 					}).exec()
 					await model.face.update({
