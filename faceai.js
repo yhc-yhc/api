@@ -86,7 +86,7 @@ async function process(src) {
 			if (err) {
 				reject(err)
 			} else {
-				const ary = []
+				const obj_map = {}
 				console.log('==============>', src, faces.nFace)
 				for (let i = 0; i < faces.nFace; i++) {
 					const feature = ArcSoftFR.extractFeature(hFREngine, asvl, faces.info[i])
@@ -102,6 +102,7 @@ async function process(src) {
 
 						if (score > scoreLine) {
 							addFlag = false
+							obj_map[key] = fk
 							break
 						}
 					}
@@ -113,11 +114,11 @@ async function process(src) {
 						const p = await img1.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
 						await fse.ensureDir(`/data/website/faces/`)
 						await p.write(`/data/website/faces/${key}.jpg`)
-						ary.push(key)
+						obj_map[key] = 0
 					}
 				}
 				console.log('now face number is : ', Object.keys(face2m).length)
-				resolve(ary)
+				resolve(obj_map)
 			}
 		})
 	})

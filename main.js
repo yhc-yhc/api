@@ -17,49 +17,85 @@ async function main() {
 		.limit(1000).exec()
 	log('will process: ', photos.length)
 	for (const photo of photos) {
-		const ary = await faceai.process(photo.originalInfo.path)
-		log(21, ary)
-		if (!ary.length) {
+		const face_map = await faceai.process(photo.originalInfo.path)
+		log(21, face_map)
+		if (!Object.keys(face_map).length) {
 			await model.photo.update({
 				rawFileName: photo.rawFileName
 			}, {
 				$set: {
-					faces: ['none']
+					faces: ['noface']
 				}
 			}, {
 				multi: true
 			}).exec()
 		} else {
-			for (key of ary) {
-				log(key)
-				const face = new model.face()
-				face.name = key
-				const rs = await face.save()
-				log(rs)
-				await model.photo.update({
-					rawFileName: photo.rawFileName,
-					'faces.0': {
-						$exists: true
-					}
-				}, {
-					$addToSet: {
-						faces: rs._id.toString()
-					}
-				}, {
-					multi: true
-				}).exec()
-				await model.photo.update({
-					rawFileName: photo.rawFileName,
-					'faces.0': {
-						$exists: false
-					}
-				}, {
-					$set: {
-						faces: [rs._id.toString()]
-					}
-				}, {
-					multi: true
-				}).exec()
+			for (let faceId in face_map) {
+				if (!face_map[faceId]) {
+					const face = new model.face()
+					face.name = key
+					face.photos = [photo._id.toString()]
+					const rs = await face.save()
+					await model.photo.update({
+						rawFileName: photo.rawFileName,
+						'faces.0': {
+							$exists: false
+						}
+					}, {
+						$set: {
+							faces: [rs._id.toString()]
+						}
+					}, {
+						multi: true
+					}).exec()
+					await model.photo.update({
+						rawFileName: photo.rawFileName,
+						'faces.0': {
+							$exists: true
+						}
+					}, {
+						$addToSet: {
+							faces: rs._id.toString()
+						}
+					}, {
+						multi: true
+					}).exec()
+				} else {
+					const face = await model.face.find({
+						name: face_map[faceId]
+					}).exec()
+					await model.face.update({
+						name: face_map[faceId]
+					}, {
+						$addToSet: {
+							photos: photo._id.toString()
+						}
+					})
+					await model.photo.update({
+						rawFileName: photo.rawFileName,
+						'faces.0': {
+							$exists: false
+						}
+					}, {
+						$set: {
+							faces: [face._id.toString()]
+						}
+					}, {
+						multi: true
+					}).exec()
+					await model.photo.update({
+						rawFileName: photo.rawFileName,
+						'faces.0': {
+							$exists: true
+						}
+					}, {
+						$addToSet: {
+							faces: face._id.toString()
+						}
+					}, {
+						multi: true
+					}).exec()
+				}
 			}
 		}
 	}
