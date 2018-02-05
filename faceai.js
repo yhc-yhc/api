@@ -77,7 +77,7 @@ async function process(src) {
 	return new Promise(async (resolve, reject) => {
 		let exists = await fse.exists(src)
 		if (!exists) {
-			return resolve([])
+			return resolve({})
 		}
 		const image = fs.readFileSync(src)
 		var imageRawBuffer = new Buffer(image, 'base64')

@@ -33,7 +33,7 @@ async function main() {
 			for (let faceId in face_map) {
 				if (!face_map[faceId]) {
 					const face = new model.face()
-					face.name = key
+					face.name = faceId
 					face.photos = [photo._id.toString()]
 					const rs = await face.save()
 					await model.photo.update({
