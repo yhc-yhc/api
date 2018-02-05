@@ -14,7 +14,9 @@ async function main() {
 			originalInfo: 1,
 			rawFileName: 1
 		})
-		.limit(1000).exec()
+		.limit(1000).sort({
+			_id: -1
+		}).exec()
 	log('will process: ', photos.length)
 	for (const photo of photos) {
 		const face_map = await faceai.process(photo.originalInfo.path)
