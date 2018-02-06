@@ -51,6 +51,7 @@ async function engine() {
 				if (!face_map[faceId]) {
 					const face = new model.face()
 					face.name = faceId
+					face.disabled = false
 					face.photos = [photo._id.toString()]
 					const rs = await face.save()
 					await model.photo.update({
