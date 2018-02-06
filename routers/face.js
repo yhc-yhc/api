@@ -35,8 +35,8 @@ router.post('serachByImage', upload.single('file'), async(ctx, next) => {
 	ctx.body = {
 		photos: []
 	}
-
-	if (!faceName) {
+	log(faceName)
+	if (faceName) {
 		const face = await model.face.findOne({
 			name: faceName
 		})
