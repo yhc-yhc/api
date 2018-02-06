@@ -105,7 +105,7 @@ async function getFaces(src) {
 	return new Promise(async(resolve, reject) => {
 		let exists = await fse.exists(src)
 		if (!exists) {
-			reject(0)
+			reject(src, ' not exists ...')
 		}
 		const image = fs.readFileSync(src)
 		var imageRawBuffer = new Buffer(image, 'base64')
@@ -165,7 +165,7 @@ function doFaceDetection(filename, faces_callback, width, height, format) {
 		throw new Error('wrong number of arguments')
 	}
 }
-exports = {
+module.exports = {
 	process,
 	face2m,
 	loadFaceToMap
