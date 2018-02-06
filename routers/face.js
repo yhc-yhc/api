@@ -33,9 +33,15 @@ router.post('serachByImage', upload.single('file'), async(ctx, next) => {
 	fse.unlink(path)
 
 	if (!faceName) {
-		const face =  await model.face.find({name: faceName})
+		const face = await model.face.find({
+			name: faceName
+		})
 		ctx.body = {
-			photos: await model.photos.find(faces: {$in: face.photos})
+			photos: await model.photos.find({
+				faces: {
+					$in: face.photos
+				}
+			})
 		}
 	} else {
 		ctx.body = {
