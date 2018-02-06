@@ -40,7 +40,9 @@ module.exports = {
 	},
 	'/face/serachByImage': {
 		'POST': {
-			file: 1
+			params: {
+				file: 1
+			}
 		}
 	}
 }
