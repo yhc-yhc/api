@@ -37,7 +37,7 @@ router.post('serachByImage', upload.single('file'), async(ctx, next) => {
 			name: faceName
 		})
 		ctx.body = {
-			photos: await model.photos.find({
+			photos: await model.photo.find({
 				faces: {
 					$in: face.photos
 				}

@@ -148,6 +148,10 @@ async function searchSameFace(src) {
 		faces
 	} = await getFaces(src)
 	const feature = await getFaceFeature(asvl, faces.info[0])
+	if (!faces.nFace) {
+		log('cant find face: ', src)
+		return 0
+	}
 	return searchFeature(feature)
 }
 
