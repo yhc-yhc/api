@@ -32,21 +32,23 @@ router.post('serachByImage', upload.single('file'), async(ctx, next) => {
 	let faceName = await faceai.searchSameFace(path)
 	fse.unlink(path)
 
+	ctx.body = {
+		photos: []
+	}
+
 	if (!faceName) {
-		const face = await model.face.find({
+		const face = await model.face.findOne({
 			name: faceName
 		})
-		ctx.body = {
-			photos: await model.photo.find({
-				faces: {
-					$in: face.photos
-				}
-			})
-		}
-	} else {
-		ctx.body = {
-			photos: []
-		}
+		if (face && face.photos) {
+			ctx.body = {
+				photos: await model.photo.find({
+					faces: {
+						$in: face.photos
+					}
+				})
+			}
+		} 
 	}
 })
 
