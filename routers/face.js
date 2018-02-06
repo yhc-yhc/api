@@ -1,7 +1,7 @@
 const Router = require('koa-router')
 const router = new Router()
 
-router.post('list', async(ctx, next) => {
+router.get('list', async(ctx, next) => {
 	const faces = await model.face.find({
 		disabled: false
 	}, {
