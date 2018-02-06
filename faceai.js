@@ -95,6 +95,7 @@ async function loadFaceToMap(src) {
 		} = await getFaces(src)
 		if (faces.nFace == 0) {
 			console.log(src, 'has no face')
+			await model.face.update({name: src.replace('.jpg', '')}, {$set: {disabled: true}})
 			return
 		}
 		const feature = await getFaceFeature(asvl, faces.info[0])

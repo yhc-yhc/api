@@ -2,7 +2,7 @@ require('./global.js')
 const faceai = require('./faceai.js')
 
 async function loadFace() {
-	const faces = await model.face.find({}, {
+	const faces = await model.face.find({disabled: false}, {
 		name: 1
 	})
 	for (const face of faces) {
