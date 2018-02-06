@@ -4,6 +4,7 @@ const multer = require('koa-multer')
 const upload = multer({
 	dest: 'uploads/'
 })
+const faceai = require('./faceai.js')
 
 router.get('list', async(ctx, next) => {
 	const faces = await model.face.find({
@@ -28,7 +29,19 @@ router.post('serachByImage', upload.single('file'), async(ctx, next) => {
 		mimetype
 	} = ctx.req.file
 	log(originalname, path, mimetype)
+	let faceName = await faceai.searchSameFace(path)
 	fse.unlink(path)
+
+	if (!faceName) {
+		const face =  await model.face.find({name: faceName})
+		ctx.body = {
+			photos: await model.photos.find(faces: {$in: face.photos})
+		}
+	} else {
+		ctx.body = {
+			photos: []
+		}
+	}
 })
 
 module.exports = router

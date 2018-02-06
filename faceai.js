@@ -171,5 +171,6 @@ function doFaceDetection(filename, faces_callback, width, height, format) {
 module.exports = {
 	process,
 	face2m,
-	loadFaceToMap
+	loadFaceToMap,
+	searchSameFace
 }
