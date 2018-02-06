@@ -12,6 +12,10 @@ async function loadFace() {
 
 async function main() {
 	await loadFace()
+	await engine()
+}
+
+async function engine() {
 	let photoCount = await model.photo.count()
 	log(`total has ${photoCount} photos`)
 	const photos = await model.photo
@@ -113,7 +117,7 @@ async function main() {
 	}
 	log('====================================')
 	await Promise.delay(2000)
-	await main()
+	await engine()
 }
 
 main()
