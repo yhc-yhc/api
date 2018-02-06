@@ -5,6 +5,7 @@ async function loadFace() {
 	const faces = await model.face.find({disabled: false}, {
 		name: 1
 	})
+	log(`will load ${faces.length} ...`)
 	for (const face of faces) {
 		await faceai.loadFaceToMap(face.name + '.jpg')
 	}
