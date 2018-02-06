@@ -4,7 +4,7 @@ const multer = require('koa-multer')
 const upload = multer({
 	dest: 'uploads/'
 })
-const faceai = require('./faceai.js')
+const faceai = require('../faceai.js')
 
 router.get('list', async(ctx, next) => {
 	const faces = await model.face.find({
