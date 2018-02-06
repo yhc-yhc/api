@@ -19,7 +19,7 @@ router.get('list', async(ctx, next) => {
 	}
 })
 
-router.post('serachByImage', upload.single('file'), async(ctx, next) => {
+router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 	const body = ctx.req.body
 	const api = httpStatus[ctx._url][ctx.method]
 	log(body)

@@ -40,7 +40,7 @@ app.use(async(ctx, next) => {
 		ctx.body = {
 			status: 200,
 			message: 'success',
-			reslut: ctx.body
+			result: ctx.body
 		}
 	} else {
 		ctx.body = httpStatus.success

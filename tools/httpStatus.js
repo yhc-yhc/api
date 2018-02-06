@@ -38,7 +38,7 @@ module.exports = {
 
 		}
 	},
-	'/face/serachByImage': {
+	'/face/searchByImage': {
 		'POST': {
 			// params: {
 			// 	file: 1
