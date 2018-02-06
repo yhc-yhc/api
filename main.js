@@ -35,7 +35,7 @@ async function engine() {
 	log('will process: ', photos.length)
 	for (const photo of photos) {
 		const face_map = await faceai.process(photo.originalInfo.path)
-		log(21, face_map)
+		// log(21, face_map)
 		if (!Object.keys(face_map).length) {
 			await model.photo.update({
 				rawFileName: photo.rawFileName
