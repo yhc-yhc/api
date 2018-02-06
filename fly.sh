@@ -8,8 +8,8 @@ docker run -itd \
 -v ~/logs:/root/logs \
 -v /data:/data \
 -v `pwd`:/src \
--p 77777:77777 \
--p 88888:88888 \
+-p 7777:7777 \
+-p 8888:8888 \
 -w /src \
 -e fly=product \
 --name faceai \
