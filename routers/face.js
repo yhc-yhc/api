@@ -24,7 +24,7 @@ router.post('serachByImage', upload.single('file'), async(ctx, next) => {
 	const api = httpStatus[ctx._url][ctx.method]
 	log(body)
 	if (!ctx.req.file) {
-		throw httpStatus.notFound
+		throw httpStatus.paramErr
 	}
 	const {
 		originalname,
