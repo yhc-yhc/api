@@ -88,13 +88,14 @@ async function process(src) {
 }
 
 async function loadFaceToMap(src) {
+	let src_ = '/data/website/faces/' + src
 	try {
 		const {
 			asvl,
 			faces
-		} = await getFaces(src)
+		} = await getFaces(src_)
 		if (faces.nFace == 0) {
-			console.log(src, 'has no face')
+			console.log(src_, 'has no face')
 			await model.face.update({name: src.replace('.jpg', '')}, {$set: {disabled: true}})
 			return
 		}

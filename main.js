@@ -6,7 +6,7 @@ async function loadFace() {
 		name: 1
 	})
 	for (const face of faces) {
-		await faceai.loadFaceToMap('/data/website/faces/' + face.name + '.jpg')
+		await faceai.loadFaceToMap(face.name + '.jpg')
 	}
 }
 
