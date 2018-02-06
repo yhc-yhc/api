@@ -67,9 +67,6 @@ async function process(src) {
 		for (let i = 0; i < faces.nFace; i++) {
 			const feature = await getFaceFeature(asvl, faces.info[i])
 			let key = `${src.replace(/\//g, '-')}_${i}`
-			if (!Object.keys(face2m).length) {
-				face2m[key] = feature
-			}
 			let key_ = await searchFeature(feature)
 			if (!key_) {
 				face2m[key_] = feature
