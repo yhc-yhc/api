@@ -1,7 +1,17 @@
 require('./global.js')
 const faceai = require('./faceai.js')
 
+async function loadFace() {
+	const faces = await model.face.find({}, {
+		name: 1
+	})
+	for (const face of faces) {
+		await faceai.loadFaceToMap(face.name + '.jpg')
+	}
+}
+
 async function main() {
+	await loadFace()
 	let photoCount = await model.photo.count()
 	log(`total has ${photoCount} photos`)
 	const photos = await model.photo

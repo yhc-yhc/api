@@ -27,7 +27,7 @@ if (ret != 0) {
 	process.exit()
 }
 var hFDEngine = ref.deref(phFDEngine)
-//print FD Engine version
+	//print FD Engine version
 var pVersionFD = ArcSoftFD.AFD_FSDK_GetVersion(hFDEngine)
 var versionFD = pVersionFD.deref()
 console.log('' + versionFD.lCodebase + ' ' + versionFD.lMajor + ' ' + versionFD.lMinor + ' ' + versionFD.lBuild)
@@ -54,30 +54,58 @@ console.log(versionFR.Version)
 console.log(versionFR.BuildDate)
 console.log(versionFR.CopyRight)
 
-const facet2m = {
-	faceMap: {},
-	t: Date.now()
-}
 const face2m = {}
 let scoreLine = 0.667
 
-async function main() {
-	console.log('main')
-	const ary = ['./img/1.jpg', './img/2.jpg', './img/3.jpg', './img/4.jpg', './img/5.jpg', './img/6.jpg', './img/7.jpg', './img/8.jpg']
-		// const ary = ['./img/1.jpg']
-
-	for (let src of ary) {
-		await process(src)
-	}
-	console.log(Object.keys(face2m).length)
-}
-// main()
-
 async function process(src) {
-	return new Promise(async (resolve, reject) => {
+	const obj = {}
+	try {
+		const {
+			asvl,
+			faces
+		} = await getFaces(src)
+		for (let i = 0; i < faces.nFace; i++) {
+			const feature = await getFaceFeature(asvl, faces.info[i])
+			let key = `${src.replace(/\//g, '-')}_${i}`
+			if (!Object.keys(face2m).length) {
+				face2m[key] = feature
+			}
+			let key_ = await searchFeature(feature)
+			if (!key_) {
+				face2m[key_] = feature
+				const img = await Jimp.read(src)
+				const img1 = await img.clone()
+				const p = await img1.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
+				await fse.ensureDir(`/data/website/faces/`)
+				await p.write(`/data/website/faces/${key}.jpg`)
+			}
+			obj[key] = key_
+		}
+	} catch (e) {
+		console.log(e)
+	}
+	return obj
+}
+
+async function loadFaceToMap(src) {
+	try {
+		const {
+			asvl,
+			faces
+		} = await getFaces(src)
+		const feature = await getFeature(asvl, faces.info[0])
+		face2m[src.replace('.jpg', '')] = feature
+		console.log('now face number is : ', Object.keys(face2m).length)
+	} catch (e) {
+		console.log(e)
+	}
+}
+
+async function getFaces(src) {
+	return new Promise(async(resolve, reject) => {
 		let exists = await fse.exists(src)
 		if (!exists) {
-			return resolve({})
+			reject(0)
 		}
 		const image = fs.readFileSync(src)
 		var imageRawBuffer = new Buffer(image, 'base64')
@@ -86,42 +114,38 @@ async function process(src) {
 			if (err) {
 				reject(err)
 			} else {
-				const obj_map = {}
-				console.log('==============>', src, faces.nFace)
-				for (let i = 0; i < faces.nFace; i++) {
-					const feature = ArcSoftFR.extractFeature(hFREngine, asvl, faces.info[i])
-					let key = `${src.replace(/\//g, '-')}_${i}`
-					if (!Object.keys(face2m).length) {
-						face2m[key] = feature
-					}
-					let addFlag = true
-					for (let fk in face2m) {
-						if (fk == key) continue
-						let score = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
-						// console.log(key, fk, score, score < scoreLine)
-
-						if (score > scoreLine) {
-							addFlag = false
-							obj_map[key] = fk
-							break
-						}
-					}
-
-					if (addFlag) {
-						face2m[key] = feature
-						const img = await Jimp.read(src)
-						const img1 = await img.clone()
-						const p = await img1.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
-						await fse.ensureDir(`/data/website/faces/`)
-						await p.write(`/data/website/faces/${key}.jpg`)
-						obj_map[key] = 0
-					}
-				}
-				console.log('now face number is : ', Object.keys(face2m).length)
-				resolve(obj_map)
+				resolve({
+					asvl,
+					faces
+				})
 			}
 		})
 	})
+}
+
+async function getFaceFeature(asvl, face) {
+	return ArcSoftFR.extractFeature(hFREngine, asvl, face)
+}
+
+async function searchFeature(feature) {
+	let key = 0
+	for (let fk in face2m) {
+		let score = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
+		if (score > scoreLine) {
+			key = fk
+			break
+		}
+	}
+	return key
+}
+
+async function searchSameFace(src) {
+	const {
+		asvl,
+		faces
+	} = await getFaces(src)
+	const feature = await getFaceFeature(asvl, faces.info[0])
+	return searchFeature(feature)
 }
 
 function doFaceDetection(filename, faces_callback, width, height, format) {
@@ -141,5 +165,8 @@ function doFaceDetection(filename, faces_callback, width, height, format) {
 		throw new Error('wrong number of arguments')
 	}
 }
-exports.process = process
-exports.face2m = face2m
+exports = {
+	process,
+	face2m,
+	loadFaceToMap
+}
