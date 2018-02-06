@@ -32,5 +32,10 @@ module.exports = {
 				}
 			}
 		}
+	},
+	'/faces/list': {
+		'GET': {
+			
+		}
 	}
 }
