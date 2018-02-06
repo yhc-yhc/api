@@ -69,7 +69,7 @@ async function process(src) {
 			let key = `${src.replace(/\//g, '-')}_${i}`
 			let key_ = await searchFeature(feature)
 			if (!key_) {
-				face2m[key_] = feature
+				face2m[key] = feature
 				const img = await Jimp.read(src)
 				const img1 = await img.clone()
 				const p = await img1.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
