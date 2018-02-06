@@ -93,7 +93,7 @@ async function loadFaceToMap(src) {
 			asvl,
 			faces
 		} = await getFaces(src)
-		const feature = await getFeature(asvl, faces.info[0])
+		const feature = await getFaceFeature(asvl, faces.info[0])
 		face2m[src.replace('.jpg', '')] = feature
 		console.log('now face number is : ', Object.keys(face2m).length)
 	} catch (e) {
