@@ -33,8 +33,13 @@ module.exports = {
 			}
 		}
 	},
-	'/faces/list': {
+	'/face/list': {
 		'GET': {
+
+		}
+	},
+	'/face/serachByImage': {
+		'POST': {
 			
 		}
 	}
