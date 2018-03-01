@@ -123,6 +123,7 @@ async function getFaceFeature(asvl, face) {
 
 async function searchFeature(feature) {
 	let key = 0
+	console.time('search feature')
 	for (let fk in face2m) {
 		let score = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
 		if (score > scoreLine) {
@@ -130,6 +131,7 @@ async function searchFeature(feature) {
 			break
 		}
 	}
+	console.timeEnd('search feature')
 	return key
 }
 
@@ -140,12 +142,6 @@ async function searchSameFace(src) {
 			asvl,
 			faces
 		} = await getFaces(imgMat)
-		const img = await imgMat.clone()
-		const faceArea = await img.crop(faces.info[0].left, faces.info[0].top, faces.info[0].right - faces.info[0].left, faces.info[0].bottom - faces.info[0].top)
-		// const {
-		// 	asvl1,
-		// 	faces1
-		// } = await getFaces(faceArea)
 		if (!faces.nFace) {
 			log('cant find face: ', src)
 			return 0
