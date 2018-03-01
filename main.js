@@ -25,7 +25,7 @@ async function engine() {
 		.find({
 			shootOn: {
 				$gte: new Date(oneDayAgo)
-			}
+			},
 			'faces.0': {
 				$exists: false
 			},
