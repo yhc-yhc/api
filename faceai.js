@@ -99,7 +99,7 @@ async function process(src) {
 }
 
 async function loadFaceToMap(name, feature) {
-	face2m[name] = faceFeature
+	face2m[name] = feature
 }
 
 async function getFaces(imgMat) {
