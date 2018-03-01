@@ -43,11 +43,9 @@ router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 		const face = await model.face.findOne({
 			name: faceName
 		})
-		if (face && face.photos) {
+		if (face) {
 			const photos = await model.photo.find({
-				_id: {
-					$in: face.photos
-				}
+				faces: face._id
 			})
 			log(photos.length)
 			ctx.body = {
