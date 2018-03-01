@@ -99,10 +99,6 @@ async function process(src) {
 }
 
 async function loadFaceToMap(name, feature) {
-	var faceFeature = new AFR_FSDK_FACEMODEL()
-	var buffer = new Buffer(feature, 'base64')
-	faceFeature.lFeatureSize = buffer.length
-	faceFeature.pbFeature = buffer
 	face2m[name] = faceFeature
 }
 
