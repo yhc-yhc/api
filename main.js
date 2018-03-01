@@ -34,7 +34,7 @@ async function engine() {
 			originalInfo: 1,
 			rawFileName: 1
 		})
-		.limit(1).sort({
+		.limit(100).sort({
 			_id: -1
 		}).exec()
 	log('will process: ', photos.length)

@@ -1,41 +1,47 @@
-var ffi = require('ffi')
-var ref = require('ref')
-var fs = require('fs')
-var ArcSoftFD = require('./ArcSoftFD.js')
-var ArcSoftFR = require('./ArcSoftFR.js')
-var ArcSoftBase = require('./ArcSoftBase.js')
-var Jimp = require("jimp")
+const ffi = require('ffi')
+const ref = require('ref')
+const fs = require('fs')
+const StructType = require('ref-struct')
+const ArcSoftFD = require('./ArcSoftFD.js')
+const ArcSoftFR = require('./ArcSoftFR.js')
+const ArcSoftBase = require('./ArcSoftBase.js')
+const Jimp = require("jimp")
 const fse = require('fs-extra')
 
-var APPID = '5Q3UUrYv2T1qAXtsdGFJXaTMjHdgvUpiktzxLhZLcYC1'
-var FD_SDKKEY = 'DcHzisteEJPMcDM9ZtPkRGbuvA9FJRUuqvaQNjCBucer'
-var FR_SDKKEY = 'DcHzisteEJPMcDM9ZtPkRGc35ZQS8XUwaVtYQ4mCuyT6'
+let APPID = '5Q3UUrYv2T1qAXtsdGFJXaTMjHdgvUpiktzxLhZLcYC1'
+let FD_SDKKEY = 'DcHzisteEJPMcDM9ZtPkRGbuvA9FJRUuqvaQNjCBucer'
+let FR_SDKKEY = 'DcHzisteEJPMcDM9ZtPkRGc35ZQS8XUwaVtYQ4mCuyT6'
 
 //init Engine
-var MAX_FACE_NUM = 50
-var FD_WORKBUF_SIZE = 20 * 1024 * 1024
-var FR_WORKBUF_SIZE = 40 * 1024 * 1024
-var pFDWorkMem = ArcSoftBase.malloc(FD_WORKBUF_SIZE)
-var pFRWorkMem = ArcSoftBase.malloc(FR_WORKBUF_SIZE)
+let MAX_FACE_NUM = 50
+let FD_WORKBUF_SIZE = 20 * 1024 * 1024
+let FR_WORKBUF_SIZE = 40 * 1024 * 1024
+const pFDWorkMem = ArcSoftBase.malloc(FD_WORKBUF_SIZE)
+const pFRWorkMem = ArcSoftBase.malloc(FR_WORKBUF_SIZE)
 
-var phFDEngine = ref.ref(new Buffer(ArcSoftBase.MIntPtr_t.size))
-var ret = ArcSoftFD.AFD_FSDK_InitialFaceEngine(APPID, FD_SDKKEY, pFDWorkMem, FD_WORKBUF_SIZE, phFDEngine, ArcSoftFD.OrientPriority.AFD_FSDK_OPF_0_HIGHER_EXT, 32, MAX_FACE_NUM)
+const AFR_FSDK_FACEMODEL = StructType({
+    pbFeature: base.MHandleType,
+    lFeatureSize: base.MInt32
+})
+
+const phFDEngine = ref.ref(new Buffer(ArcSoftBase.MIntPtr_t.size))
+const ret = ArcSoftFD.AFD_FSDK_InitialFaceEngine(APPID, FD_SDKKEY, pFDWorkMem, FD_WORKBUF_SIZE, phFDEngine, ArcSoftFD.OrientPriority.AFD_FSDK_OPF_0_HIGHER_EXT, 32, MAX_FACE_NUM)
 if (ret != 0) {
 	ArcSoftBase.free(pFDWorkMem)
 	ArcSoftBase.free(pFRWorkMem)
 	console.log('AFD_FSDK_InitialFaceEngine ret == ' + ret)
 	process.exit()
 }
-var hFDEngine = ref.deref(phFDEngine)
+const hFDEngine = ref.deref(phFDEngine)
 	//print FD Engine version
-var pVersionFD = ArcSoftFD.AFD_FSDK_GetVersion(hFDEngine)
-var versionFD = pVersionFD.deref()
+const pVersionFD = ArcSoftFD.AFD_FSDK_GetVersion(hFDEngine)
+const versionFD = pVersionFD.deref()
 console.log('' + versionFD.lCodebase + ' ' + versionFD.lMajor + ' ' + versionFD.lMinor + ' ' + versionFD.lBuild)
 console.log(versionFD.Version)
 console.log(versionFD.BuildDate)
 console.log(versionFD.CopyRight)
 
-var phFREngine = ref.ref(new Buffer(ArcSoftBase.MIntPtr_t.size))
+const phFREngine = ref.ref(new Buffer(ArcSoftBase.MIntPtr_t.size))
 ret = ArcSoftFR.AFR_FSDK_InitialEngine(APPID, FR_SDKKEY, pFRWorkMem, FR_WORKBUF_SIZE, phFREngine)
 if (ret != 0) {
 	ArcSoftFD.AFD_FSDK_UninitialFaceEngine(hFDEngine)
@@ -44,11 +50,11 @@ if (ret != 0) {
 	console.log('AFR_FSDK_InitialEngine ret == ' + ret)
 	System.exit(0)
 }
-var hFREngine = ref.deref(phFREngine)
+const hFREngine = ref.deref(phFREngine)
 
 //print FR Engine version
-var pVersionFR = ArcSoftFR.AFR_FSDK_GetVersion(hFREngine)
-var versionFR = pVersionFR.deref()
+const pVersionFR = ArcSoftFR.AFR_FSDK_GetVersion(hFREngine)
+const versionFR = pVersionFR.deref()
 console.log('' + versionFR.lCodebase + ' ' + versionFR.lMajor + ' ' + versionFR.lMinor + ' ' + versionFR.lBuild)
 console.log(versionFR.Version)
 console.log(versionFR.BuildDate)

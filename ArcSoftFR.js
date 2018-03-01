@@ -121,7 +121,6 @@ function compareFaceSimilarity(hEngine, base64A, base64B) {
     faceFeatureB.lFeatureSize = bufferB.length;
     faceFeatureB.pbFeature = bufferB;
 
-    console.log(1)
     var ret = Library.AFR_FSDK_FacePairMatching(hEngine, faceFeatureA.ref(), faceFeatureB.ref(), pfSimilScore);
     if (ret != 0) {
         console.log('AFR_FSDK_FacePairMatching failed:ret == ' + ret);
