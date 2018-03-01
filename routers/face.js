@@ -45,7 +45,7 @@ router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 		})
 		if (face) {
 			const photos = await model.photo.find({
-				faces: face._id
+				faces: face._id.toString()
 			})
 			log(photos.length)
 			ctx.body = {
