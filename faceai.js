@@ -7,6 +7,7 @@ const ArcSoftFR = require('./ArcSoftFR.js')
 const ArcSoftBase = require('./ArcSoftBase.js')
 const Jimp = require("jimp")
 const fse = require('fs-extra')
+const base = require('./ArcSoftBase.js')
 
 let APPID = '5Q3UUrYv2T1qAXtsdGFJXaTMjHdgvUpiktzxLhZLcYC1'
 let FD_SDKKEY = 'DcHzisteEJPMcDM9ZtPkRGbuvA9FJRUuqvaQNjCBucer'
