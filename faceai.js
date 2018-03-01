@@ -69,18 +69,18 @@ async function process(src) {
 		for (let i = 0; i < faces.nFace; i++) {
 			const img = await imgMat.clone()
 			const faceArea = await img.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
-			const {
-				asvl1,
-				faces1
-			} = await getFaces(faceArea)
-			if (!faces1.nFace) continue
+			// const {
+			// 	asvl1,
+			// 	faces1
+			// } = await getFaces(faceArea)
+			// if (!faces1.nFace) continue
 			const feature = await getFaceFeature(asvl, faces.info[i])
 			let key = `${src.replace(/\//g, '-')}_${i}`
 			let key_ = await searchFeature(feature)
 			if (!key_) {
 				face2m[key] = feature
 				await fse.ensureDir(`/data/website/faces/`)
-				await p.write(`/data/website/faces/${key}.jpg`)
+				await faceArea.write(`/data/website/faces/${key}.jpg`)
 			}
 			obj[key] = key_
 		}
@@ -138,11 +138,11 @@ async function searchSameFace(src) {
 		} = await getFaces(imgMat)
 		const img = await imgMat.clone()
 		const faceArea = await img.crop(faces.info[0].left, faces.info[0].top, faces.info[0].right - faces.info[0].left, faces.info[0].bottom - faces.info[0].top)
-		const {
-			asvl1,
-			faces1
-		} = await getFaces(faceArea)
-		if (!faces.nFace || !faces1.nFace) {
+		// const {
+		// 	asvl1,
+		// 	faces1
+		// } = await getFaces(faceArea)
+		if (!faces.nFace) {
 			log('cant find face: ', src)
 			return 0
 		}
