@@ -80,7 +80,7 @@ function extractFeature(hEngine, asvl, face) {
         console.log('AFR_FSDK_ExtractFRFeature ret == ' + ret);
         faceFeature.lFeatureSize = 0;
         faceFeature.pbFeature = ref.NULL;
-        return faceFeature;
+        return null;
     } else {
         var faceFeatureCopy = new AFR_FSDK_FACEMODEL();
         faceFeatureCopy.lFeatureSize = faceFeature.lFeatureSize;

@@ -82,6 +82,7 @@ async function process(src) {
 			// } = await getFaces(faceArea)
 			// if (!faces1.nFace) continue
 			const feature = await getFaceFeature(asvl, faces.info[i])
+			if (!feature) continue
 			let key = `${src.replace(/\//g, '-')}_${i}`
 			let key_ = await searchFeature(feature)
 			if (!key_) {
@@ -154,6 +155,7 @@ async function searchSameFace(src) {
 			return 0
 		}
 		const feature = await getFaceFeature(asvl, faces.info[0])
+		if (!feature) return 0
 		return searchFeature(feature)
 	} catch (e) {
 		console.log('searchSameFace', src, e)

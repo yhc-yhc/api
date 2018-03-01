@@ -3,7 +3,8 @@ const faceai = require('./faceai.js')
 
 async function loadFace() {
 	const faces = await model.face.find({disabled: false}, {
-		name: 1
+		name: 1,
+		feature: 1
 	})
 	log(`will load ${faces.length} faces from db ...`)
 	for (const face of faces) {
