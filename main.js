@@ -7,7 +7,7 @@ async function loadFace() {
 	})
 	log(`will load ${faces.length} faces from db ...`)
 	for (const face of faces) {
-		await faceai.loadFaceToMap(face.name + '.jpg')
+		await faceai.loadFaceToMap(face.name, face.feature)
 	}
 }
 
@@ -19,8 +19,13 @@ async function main() {
 async function engine() {
 	let photoCount = await model.photo.count()
 	log(`total has ${photoCount} photos`)
+	let oneDayAgo = moment().add(-1, 'days').format('YYYY/MM/DD HHmmss')
+
 	const photos = await model.photo
 		.find({
+			shootOn: {
+				$gte: new Date(oneDayAgo)
+			}
 			'faces.0': {
 				$exists: false
 			},
@@ -29,7 +34,7 @@ async function engine() {
 			originalInfo: 1,
 			rawFileName: 1
 		})
-		.limit(1000).sort({
+		.limit(1).sort({
 			_id: -1
 		}).exec()
 	log('will process: ', photos.length)
@@ -52,7 +57,7 @@ async function engine() {
 					const face = new model.face()
 					face.name = faceId
 					face.disabled = false
-					face.photos = [photo._id.toString()]
+					face.feature = faceai.face2m[faceId]
 					const rs = await face.save()
 					await model.photo.update({
 						rawFileName: photo.rawFileName,
@@ -82,13 +87,6 @@ async function engine() {
 					const face = await model.face.findOne({
 						name: face_map[faceId]
 					}).exec()
-					await model.face.update({
-						name: face_map[faceId]
-					}, {
-						$addToSet: {
-							photos: photo._id.toString()
-						}
-					})
 					await model.photo.update({
 						rawFileName: photo.rawFileName,
 						'faces.0': {

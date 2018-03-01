@@ -1,5 +1,5 @@
 module.exports = {
 	name: '',
 	disabled: false,
-	photos: []
+	feature: ''
 }

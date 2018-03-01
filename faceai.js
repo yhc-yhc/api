@@ -60,19 +60,25 @@ let scoreLine = 0.667
 async function process(src) {
 	const obj = {}
 	try {
+		const imgMat = await Jimp.read(src)
 		const {
 			asvl,
 			faces
-		} = await getFaces(src)
+		} = await getFaces(imgMat)
+
 		for (let i = 0; i < faces.nFace; i++) {
+			const img = await imgMat.clone()
+			const faceArea = await img.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
+			const {
+				asvl1,
+				faces1
+			} = await getFaces(faceArea)
+			if (!faces1.nFace) continue
 			const feature = await getFaceFeature(asvl, faces.info[i])
 			let key = `${src.replace(/\//g, '-')}_${i}`
 			let key_ = await searchFeature(feature)
 			if (!key_) {
 				face2m[key] = feature
-				const img = await Jimp.read(src)
-				const img1 = await img.clone()
-				const p = await img1.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
 				await fse.ensureDir(`/data/website/faces/`)
 				await p.write(`/data/website/faces/${key}.jpg`)
 			}
@@ -84,36 +90,17 @@ async function process(src) {
 	return obj
 }
 
-async function loadFaceToMap(src) {
-	let src_ = '/data/website/faces/' + src
-	try {
-		const {
-			asvl,
-			faces
-		} = await getFaces(src_)
-		if (faces.nFace == 0) {
-			console.log(src_, 'has no face')
-			await model.face.update({name: src.replace('.jpg', '')}, {$set: {disabled: true}})
-			return
-		}
-		const feature = await getFaceFeature(asvl, faces.info[0])
-		face2m[src.replace('.jpg', '')] = feature
-		console.log('now face number is : ', Object.keys(face2m).length)
-	} catch (e) {
-		console.log(e)
-	}
+async function loadFaceToMap(name, feature) {
+	var faceFeature = new AFR_FSDK_FACEMODEL()
+	var buffer = new Buffer(feature, 'base64')
+	faceFeature.lFeatureSize = buffer.length
+	faceFeature.pbFeature = buffer
+	face2m[name] = faceFeature
 }
 
-async function getFaces(src) {
+async function getFaces(imgMat) {
 	return new Promise(async(resolve, reject) => {
-		let exists = await fse.exists(src)
-		if (!exists) {
-			reject(src, ' not exists ...')
-		}
-		const image = fs.readFileSync(src)
-		var imageRawBuffer = new Buffer(image, 'base64')
-
-		doFaceDetection(imageRawBuffer, async function(err, asvl, faces) {
+		doFaceDetection(imgMat, async function(err, asvl, faces) {
 			if (err) {
 				reject(err)
 			} else {
@@ -143,27 +130,40 @@ async function searchFeature(feature) {
 }
 
 async function searchSameFace(src) {
-	const {
-		asvl,
-		faces
-	} = await getFaces(src)
-	const feature = await getFaceFeature(asvl, faces.info[0])
-	if (!faces.nFace) {
-		log('cant find face: ', src)
+	try {
+		const imgMat = await Jimp.read(src)
+		const {
+			asvl,
+			faces
+		} = await getFaces(imgMat)
+		const img = await imgMat.clone()
+		const faceArea = await img.crop(faces.info[0].left, faces.info[0].top, faces.info[0].right - faces.info[0].left, faces.info[0].bottom - faces.info[0].top)
+		const {
+			asvl1,
+			faces1
+		} = await getFaces(faceArea)
+		if (!faces.nFace || !faces1.nFace) {
+			log('cant find face: ', src)
+			return 0
+		}
+		const feature = await getFaceFeature(asvl, faces.info[0])
+		return searchFeature(feature)
+	} catch (e) {
+		console.log('searchSameFace', src, e)
 		return 0
 	}
-	return searchFeature(feature)
+
 }
 
-function doFaceDetection(filename, faces_callback, width, height, format) {
+function doFaceDetection(img, faces_callback, width, height, format) {
 
 	if (arguments.length === 2) {
-		ArcSoftBase.loadImage(filename, function(err, inputImage) {
+		ArcSoftBase.loadImage(img, function(err, inputImage) {
 			if (err) throw err
 			ArcSoftFD.process(hFDEngine, inputImage, faces_callback)
 		})
 	} else if (arguments.length === 5) {
-		ArcSoftBase.loadYUVImage(filename, width, height, format, (err, inputImage) => {
+		ArcSoftBase.loadYUVImage(img, width, height, format, (err, inputImage) => {
 			if (err) throw err
 			ArcSoftFD.process(hFDEngine, inputImage, faces_callback)
 		})

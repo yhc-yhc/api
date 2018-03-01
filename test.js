@@ -1,4 +1,4 @@
-
+require('./global.js')
 function asynclike() {
   return new Promise((resolve, reject) => {
 
@@ -22,6 +22,8 @@ function asynclike_() {
 
 
 async function main() {
+  let t = moment().add(-1, 'days').format('YYYY/MM/DD')
+  console.log(t)
   let rs = await asynclike()
   console.log(rs)
   let rs_ = await asynclike_()

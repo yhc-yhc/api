@@ -134,102 +134,99 @@ function loadYUVImage(filePath, width, height, format, result_callback) {
     });
 }
 
-function loadImage(filePath, result_callback) {
-    Jimp.read(filePath, function(err, img) {
-        if (err) throw err;
 
-        if (bUseBGRToEngine) {
-            var y_channel = new Buffer(img.bitmap.width * img.bitmap.height * 3);
-            var asvl = new ASVLOFFSCREEN();
+function loadImage(img, result_callback) {
+    if (bUseBGRToEngine) {
+        var y_channel = new Buffer(img.bitmap.width * img.bitmap.height * 3);
+        var asvl = new ASVLOFFSCREEN();
+        img.scan(0, 0, img.bitmap.width, img.bitmap.height, function(i, j, idx) {
+            var r = this.bitmap.data[idx + 0];
+            var g = this.bitmap.data[idx + 1];
+            var b = this.bitmap.data[idx + 2];
+
+            y_channel[(j * this.bitmap.width + i) * 3] = b;
+            y_channel[(j * this.bitmap.width + i) * 3 + 1] = g;
+            y_channel[(j * this.bitmap.width + i) * 3 + 2] = r;
+        });
+
+        asvl.u32PixelArrayFormat = Format.ASVL_PAF_RGB24_B8G8R8;
+        asvl.i32Width = img.bitmap.width;
+        asvl.i32Height = img.bitmap.height;
+        asvl.pi32Pitch[0] = asvl.i32Width * 3;
+        asvl.pi32Pitch[1] = 0;
+        asvl.pi32Pitch[2] = 0;
+        asvl.pi32Pitch[3] = 0;
+
+        asvl.ppu8Plane[0] = y_channel;
+        asvl.ppu8Plane[1] = ref.NULL;
+        asvl.ppu8Plane[2] = ref.NULL;
+        asvl.ppu8Plane[3] = ref.NULL;
+
+        //make a strong reference, prevent garbage collection to free the memory
+        asvl.gc_ppu8Plane0 = y_channel;
+    } else {
+        if (((img.bitmap.width & 0x1) != 0) || ((img.bitmap.height & 0x1) != 0)) {
+            img = img.crop(0, 0, img.bitmap.width & 0xFFFFFFFE, img.bitmap.height & 0xFFFFFFFE);
+        }
+
+        var y_channel = new Buffer(img.bitmap.width * img.bitmap.height);
+        var u_channel = new Buffer(img.bitmap.width * img.bitmap.height / 4);
+        var v_channel = new Buffer(img.bitmap.width * img.bitmap.height / 4);
+        if (USING_FLOAT) {
             img.scan(0, 0, img.bitmap.width, img.bitmap.height, function(i, j, idx) {
                 var r = this.bitmap.data[idx + 0];
                 var g = this.bitmap.data[idx + 1];
                 var b = this.bitmap.data[idx + 2];
 
-                y_channel[(j * this.bitmap.width + i) * 3] = b;
-                y_channel[(j * this.bitmap.width + i) * 3 + 1] = g;
-                y_channel[(j * this.bitmap.width + i) * 3 + 2] = r;
+                var y = (0.299 * r + 0.587 * g + 0.114 * b);
+                var u = (-0.169) * r - 0.331 * g + 0.499 * b + 128.0;
+                var v = 0.499 * r - 0.418 * g - 0.0813 * b + 128.0;
+
+                y_channel[j * this.bitmap.width + i] = y;
+                u_channel[(j >> 1) * (this.bitmap.width >> 1) + (i >> 1)] = u;
+                v_channel[(j >> 1) * (this.bitmap.width >> 1) + (i >> 1)] = v;
             });
-
-            asvl.u32PixelArrayFormat = Format.ASVL_PAF_RGB24_B8G8R8;
-            asvl.i32Width = img.bitmap.width;
-            asvl.i32Height = img.bitmap.height;
-            asvl.pi32Pitch[0] = asvl.i32Width * 3;
-            asvl.pi32Pitch[1] = 0;
-            asvl.pi32Pitch[2] = 0;
-            asvl.pi32Pitch[3] = 0;
-
-            asvl.ppu8Plane[0] = y_channel;
-            asvl.ppu8Plane[1] = ref.NULL;
-            asvl.ppu8Plane[2] = ref.NULL;
-            asvl.ppu8Plane[3] = ref.NULL;
-
-            //make a strong reference, prevent garbage collection to free the memory
-            asvl.gc_ppu8Plane0 = y_channel;
         } else {
-            if (((img.bitmap.width & 0x1) != 0) || ((img.bitmap.height & 0x1) != 0)) {
-                img = img.crop(0, 0, img.bitmap.width & 0xFFFFFFFE, img.bitmap.height & 0xFFFFFFFE);
-            }
+            img.scan(0, 0, img.bitmap.width, img.bitmap.height, function(i, j, idx) {
+                var r = this.bitmap.data[idx + 0];
+                var g = this.bitmap.data[idx + 1];
+                var b = this.bitmap.data[idx + 2];
 
-            var y_channel = new Buffer(img.bitmap.width * img.bitmap.height);
-            var u_channel = new Buffer(img.bitmap.width * img.bitmap.height / 4);
-            var v_channel = new Buffer(img.bitmap.width * img.bitmap.height / 4);
-            if (USING_FLOAT) {
-                img.scan(0, 0, img.bitmap.width, img.bitmap.height, function(i, j, idx) {
-                    var r = this.bitmap.data[idx + 0];
-                    var g = this.bitmap.data[idx + 1];
-                    var b = this.bitmap.data[idx + 2];
+                var y = ((77 * r + 150 * g + 29 * b + 128) >> 8);
+                var u = (((-43) * r - 84 * g + 127 * b + 128) >> 8) + 128;
+                var v = ((127 * r - 106 * g - 21 * b + 128) >> 8) + 128;
 
-                    var y = (0.299 * r + 0.587 * g + 0.114 * b);
-                    var u = (-0.169) * r - 0.331 * g + 0.499 * b + 128.0;
-                    var v = 0.499 * r - 0.418 * g - 0.0813 * b + 128.0;
+                y = y < 0 ? 0 : (y > 255 ? 255 : y);
+                u = u < 0 ? 0 : (u > 255 ? 255 : u);
+                v = v < 0 ? 0 : (v > 255 ? 255 : v);
 
-                    y_channel[j * this.bitmap.width + i] = y;
-                    u_channel[(j >> 1) * (this.bitmap.width >> 1) + (i >> 1)] = u;
-                    v_channel[(j >> 1) * (this.bitmap.width >> 1) + (i >> 1)] = v;
-                });
-            } else {
-                img.scan(0, 0, img.bitmap.width, img.bitmap.height, function(i, j, idx) {
-                    var r = this.bitmap.data[idx + 0];
-                    var g = this.bitmap.data[idx + 1];
-                    var b = this.bitmap.data[idx + 2];
-
-                    var y = ((77 * r + 150 * g + 29 * b + 128) >> 8);
-                    var u = (((-43) * r - 84 * g + 127 * b + 128) >> 8) + 128;
-                    var v = ((127 * r - 106 * g - 21 * b + 128) >> 8) + 128;
-
-                    y = y < 0 ? 0 : (y > 255 ? 255 : y);
-                    u = u < 0 ? 0 : (u > 255 ? 255 : u);
-                    v = v < 0 ? 0 : (v > 255 ? 255 : v);
-
-                    y_channel[j * this.bitmap.width + i] = y;
-                    u_channel[(j >> 1) * (this.bitmap.width >> 1) + (i >> 1)] = u;
-                    v_channel[(j >> 1) * (this.bitmap.width >> 1) + (i >> 1)] = v;
-                });
-            }
-
-            var asvl = new ASVLOFFSCREEN();
-            asvl.u32PixelArrayFormat = Format.ASVL_PAF_I420;
-            asvl.i32Width = img.bitmap.width;
-            asvl.i32Height = img.bitmap.height;
-            asvl.pi32Pitch[0] = asvl.i32Width;
-            asvl.pi32Pitch[1] = asvl.i32Width / 2;
-            asvl.pi32Pitch[2] = asvl.i32Width / 2;
-            asvl.pi32Pitch[3] = 0;
-
-            asvl.ppu8Plane[0] = y_channel;
-            asvl.ppu8Plane[1] = u_channel;
-            asvl.ppu8Plane[2] = v_channel;
-            asvl.ppu8Plane[3] = ref.NULL;
-
-            //make a strong reference, prevent garbage collection to free the memory
-            asvl.gc_ppu8Plane0 = y_channel;
-            asvl.gc_ppu8Plane1 = u_channel;
-            asvl.gc_ppu8Plane2 = v_channel;
+                y_channel[j * this.bitmap.width + i] = y;
+                u_channel[(j >> 1) * (this.bitmap.width >> 1) + (i >> 1)] = u;
+                v_channel[(j >> 1) * (this.bitmap.width >> 1) + (i >> 1)] = v;
+            });
         }
 
-        result_callback(0, asvl);
-    });
+        var asvl = new ASVLOFFSCREEN();
+        asvl.u32PixelArrayFormat = Format.ASVL_PAF_I420;
+        asvl.i32Width = img.bitmap.width;
+        asvl.i32Height = img.bitmap.height;
+        asvl.pi32Pitch[0] = asvl.i32Width;
+        asvl.pi32Pitch[1] = asvl.i32Width / 2;
+        asvl.pi32Pitch[2] = asvl.i32Width / 2;
+        asvl.pi32Pitch[3] = 0;
+
+        asvl.ppu8Plane[0] = y_channel;
+        asvl.ppu8Plane[1] = u_channel;
+        asvl.ppu8Plane[2] = v_channel;
+        asvl.ppu8Plane[3] = ref.NULL;
+
+        //make a strong reference, prevent garbage collection to free the memory
+        asvl.gc_ppu8Plane0 = y_channel;
+        asvl.gc_ppu8Plane1 = u_channel;
+        asvl.gc_ppu8Plane2 = v_channel;
+    }
+
+    result_callback(0, asvl);
 }
 
 exports.MRECT = MRECT;
