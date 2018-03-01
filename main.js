@@ -19,7 +19,7 @@ async function main() {
 async function engine() {
 	let photoCount = await model.photo.count()
 	log(`total has ${photoCount} photos`)
-	let oneDayAgo = moment().add(-1, 'days').format('YYYY/MM/DD HHmmss')
+	let oneDayAgo = moment().add(-1, 'days').format('YYYY/MM/DD')
 
 	const photos = await model.photo
 		.find({
