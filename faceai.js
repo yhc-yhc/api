@@ -26,7 +26,7 @@ const AFR_FSDK_FACEMODEL = StructType({
 })
 
 const phFDEngine = ref.ref(new Buffer(ArcSoftBase.MIntPtr_t.size))
-const ret = ArcSoftFD.AFD_FSDK_InitialFaceEngine(APPID, FD_SDKKEY, pFDWorkMem, FD_WORKBUF_SIZE, phFDEngine, ArcSoftFD.OrientPriority.AFD_FSDK_OPF_0_HIGHER_EXT, 32, MAX_FACE_NUM)
+let ret = ArcSoftFD.AFD_FSDK_InitialFaceEngine(APPID, FD_SDKKEY, pFDWorkMem, FD_WORKBUF_SIZE, phFDEngine, ArcSoftFD.OrientPriority.AFD_FSDK_OPF_0_HIGHER_EXT, 32, MAX_FACE_NUM)
 if (ret != 0) {
 	ArcSoftBase.free(pFDWorkMem)
 	ArcSoftBase.free(pFRWorkMem)
