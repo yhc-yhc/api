@@ -145,7 +145,7 @@ async function searchFeature(feature) {
 			ary.push(k)
 		}
 	}
-	console.log(ary, ary.length)
+	// console.log(ary, ary.length)
 	console.timeEnd('search')
 	return ary
 }
