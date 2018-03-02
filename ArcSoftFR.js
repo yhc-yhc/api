@@ -137,7 +137,7 @@ function compareFaceSimilarity(hEngine, featureA, featureB) {
 
     var ret = Library.AFR_FSDK_FacePairMatching(hEngine, featureA.ref(), featureB.ref(), pfSimilScore);
     if (ret != 0) {
-        console.log('AFR_FSDK_FacePairMatching failed:ret == ' + ret);
+        // console.log('AFR_FSDK_FacePairMatching failed:ret == ' + ret);
         return 0.0;
     }
     return pfSimilScore.readFloatLE(0);

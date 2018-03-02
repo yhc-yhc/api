@@ -22,7 +22,6 @@ router.get('list', async(ctx, next) => {
 router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 	const body = ctx.req.body
 	const api = httpStatus[ctx._url][ctx.method]
-	log(body)
 	if (!ctx.req.file) {
 		throw httpStatus.paramErr
 	}
@@ -32,7 +31,9 @@ router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 		mimetype
 	} = ctx.req.file
 	// log(originalname, path, mimetype)
+	console.time('SearchFeature: ')
 	let faceName = await faceai.searchSameFace(path)
+	console.timeEnd('SearchFeature: ')
 	fse.unlink(path)
 
 	ctx.body = {
@@ -40,7 +41,7 @@ router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 	}
 	// log(faceName)
 	if (faceName) {
-		console.time('SearchDB')
+		console.time('SearchDB: ')
 		const face = await model.face.findOne({
 			name: faceName
 		})
@@ -53,7 +54,7 @@ router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 				photos: photos
 			}
 		}
-		console.timeEnd('SearchDB')
+		console.timeEnd('SearchDB: ')
 	}
 })
 
