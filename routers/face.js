@@ -46,7 +46,7 @@ router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 			name: faceAry
 		})
 		const ary = faces.map(face => face._id.toString())
-		if (face) {
+		if (ary[0]) {
 			const photos = await model.photo.find({
 				faces: ary
 			})
