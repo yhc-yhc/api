@@ -84,13 +84,13 @@ async function process(src) {
 			const feature = await getFaceFeature(asvl, faces.info[i])
 			if (!feature) continue
 			let key = `${src.replace(/\//g, '-')}_${i}`
-			let key_ = await searchFeature(feature)
-			if (!key_) {
+			let keyAry = await searchFeature(feature)
+			if (!keyAry[0]) {
 				face2m[key] = feature
 				await fse.ensureDir(`/data/website/faces/`)
 				await faceArea.write(`/data/website/faces/${key}.jpg`)
 			}
-			obj[key] = key_
+			obj[key] = keyAry[0]
 		}
 	} catch (e) {
 		console.log(e)
@@ -126,7 +126,7 @@ async function getFaceFeature(asvl, face) {
 }
 
 async function searchFeature(feature) {
-	let key = 0
+	const ary = []
 	console.time('search')
 		// for (let fk in face2m) {
 		// 	let score = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
@@ -140,16 +140,14 @@ async function searchFeature(feature) {
 		obj[fk] = Promise.resolve().then(_ => ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk]))
 	}
 	const rs = await Promise.props(obj)
-	const ary = []
 	for (let k in rs) {
 		if (rs[k] > scoreLine) {
 			ary.push(k)
 		}
 	}
 	console.log(ary, ary.length)
-	key = ary[0]
 	console.timeEnd('search')
-	return key
+	return ary
 }
 
 async function searchSameFace(src) {

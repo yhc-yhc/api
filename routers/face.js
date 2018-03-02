@@ -32,22 +32,23 @@ router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 	} = ctx.req.file
 	// log(originalname, path, mimetype)
 	console.time('SearchFeature: ')
-	let faceName = await faceai.searchSameFace(path)
+	let faceAry = await faceai.searchSameFace(path)
 	console.timeEnd('SearchFeature: ')
 	fse.unlink(path)
 
 	ctx.body = {
 		photos: []
 	}
-	// log(faceName)
-	if (faceName) {
+	// log(faceAry)
+	if (faceAry[0]) {
 		console.time('SearchDB: ')
-		const face = await model.face.findOne({
-			name: faceName
+		const faces = await model.face.find({
+			name: faceAry
 		})
+		const ary = faces.map(face => face._id.toString())
 		if (face) {
 			const photos = await model.photo.find({
-				faces: face._id.toString()
+				faces: ary
 			})
 			// log(photos.length)
 			ctx.body = {
