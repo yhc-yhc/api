@@ -21,8 +21,8 @@ const pFDWorkMem = ArcSoftBase.malloc(FD_WORKBUF_SIZE)
 const pFRWorkMem = ArcSoftBase.malloc(FR_WORKBUF_SIZE)
 
 const AFR_FSDK_FACEMODEL = StructType({
-    pbFeature: base.MHandleType,
-    lFeatureSize: base.MInt32
+	pbFeature: base.MHandleType,
+	lFeatureSize: base.MInt32
 })
 
 const phFDEngine = ref.ref(new Buffer(ArcSoftBase.MIntPtr_t.size))
@@ -76,11 +76,11 @@ async function process(src) {
 		for (let i = 0; i < faces.nFace; i++) {
 			const img = await imgMat.clone()
 			const faceArea = await img.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
-			// const {
-			// 	asvl1,
-			// 	faces1
-			// } = await getFaces(faceArea)
-			// if (!faces1.nFace) continue
+				// const {
+				// 	asvl1,
+				// 	faces1
+				// } = await getFaces(faceArea)
+				// if (!faces1.nFace) continue
 			const feature = await getFaceFeature(asvl, faces.info[i])
 			if (!feature) continue
 			let key = `${src.replace(/\//g, '-')}_${i}`
@@ -100,9 +100,9 @@ async function process(src) {
 
 async function loadFaceToMap(name, feature) {
 	var faceFeature = new AFR_FSDK_FACEMODEL();
-    var buffer = new Buffer(feature, 'base64')
-    faceFeature.lFeatureSize = buffer.length;
-    faceFeature.pbFeature = buffer;
+	var buffer = new Buffer(feature, 'base64')
+	faceFeature.lFeatureSize = buffer.length;
+	faceFeature.pbFeature = buffer;
 	face2m[name] = faceFeature
 }
 
@@ -128,24 +128,26 @@ async function getFaceFeature(asvl, face) {
 async function searchFeature(feature) {
 	let key = 0
 	console.time('search')
-	// for (let fk in face2m) {
-	// 	let score = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
-	// 	if (score > scoreLine) {
-	// 		key = fk
-	// 		break
-	// 	}
-	// }
-	var obj = {}
+		// for (let fk in face2m) {
+		// 	let score = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
+		// 	if (score > scoreLine) {
+		// 		key = fk
+		// 		break
+		// 	}
+		// }
+	const obj = {}
 	for (let fk in face2m) {
 		obj[fk] = Promise.resolve().then(_ => ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk]))
 	}
-	const rs = Promise.props(obj)
-	console.log(rs)
+	const rs = await Promise.props(obj)
+	const ary = []
 	for (let k in rs) {
-		if (rs[k] > scoreLine) 
-			key = k
-		break
+		if (rs[k] > scoreLine) {
+			ary.push(k)
+		}
 	}
+	console.log(ary, ary.length)
+	key = ary[0]
 	console.timeEnd('search')
 	return key
 }
