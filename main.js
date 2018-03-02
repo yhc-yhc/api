@@ -58,7 +58,7 @@ async function engine() {
 					const face = new model.face()
 					face.name = faceId
 					face.disabled = false
-					face.feature = faceai.face2m[faceId]
+					face.feature = faceai.face2m[faceId].pbFeature.toString('base64')
 					const rs = await face.save()
 					await model.photo.update({
 						rawFileName: photo.rawFileName,

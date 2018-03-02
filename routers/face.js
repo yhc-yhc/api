@@ -40,6 +40,7 @@ router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 	}
 	// log(faceName)
 	if (faceName) {
+		console.time('SearchDB')
 		const face = await model.face.findOne({
 			name: faceName
 		})
@@ -52,6 +53,7 @@ router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 				photos: photos
 			}
 		}
+		console.timeEnd('SearchDB')
 	}
 })
 

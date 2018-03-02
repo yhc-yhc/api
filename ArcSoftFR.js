@@ -90,7 +90,8 @@ function extractFeature(hEngine, asvl, face) {
             faceFeature.pbFeature.address(),
             faceFeatureCopy.lFeatureSize);
         faceFeatureCopy.pbFeature = buf
-        return buf.toString('base64')
+        // return buf.toString('base64')
+        return faceFeatureCopy
     }
 }
 
@@ -106,22 +107,35 @@ function extractFeature(hEngine, asvl, face) {
 //     return pfSimilScore.readFloatLE(0);
 // }
 
-function compareFaceSimilarity(hEngine, base64A, base64B) {
+// function compareFaceSimilarity(hEngine, base64A, base64B) {
+//     var pfSimilScore = new Buffer(ref.sizeof.float);
+//     pfSimilScore.type = ref.refType(ref.types.float);
+//     pfSimilScore.writeFloatLE(0, 0.0);
+
+//     var faceFeatureA = new AFR_FSDK_FACEMODEL();
+//     var bufferA = new Buffer(base64A, 'base64')
+//     faceFeatureA.lFeatureSize = bufferA.length;
+//     faceFeatureA.pbFeature = bufferA;
+
+//     var faceFeatureB = new AFR_FSDK_FACEMODEL();
+//     var bufferB = new Buffer(base64B, 'base64')
+//     faceFeatureB.lFeatureSize = bufferB.length;
+//     faceFeatureB.pbFeature = bufferB;
+
+//     var ret = Library.AFR_FSDK_FacePairMatching(hEngine, faceFeatureA.ref(), faceFeatureB.ref(), pfSimilScore);
+//     if (ret != 0) {
+//         console.log('AFR_FSDK_FacePairMatching failed:ret == ' + ret);
+//         return 0.0;
+//     }
+//     return pfSimilScore.readFloatLE(0);
+// }
+
+function compareFaceSimilarity(hEngine, featureA, featureB) {
     var pfSimilScore = new Buffer(ref.sizeof.float);
     pfSimilScore.type = ref.refType(ref.types.float);
     pfSimilScore.writeFloatLE(0, 0.0);
 
-    var faceFeatureA = new AFR_FSDK_FACEMODEL();
-    var bufferA = new Buffer(base64A, 'base64')
-    faceFeatureA.lFeatureSize = bufferA.length;
-    faceFeatureA.pbFeature = bufferA;
-
-    var faceFeatureB = new AFR_FSDK_FACEMODEL();
-    var bufferB = new Buffer(base64B, 'base64')
-    faceFeatureB.lFeatureSize = bufferB.length;
-    faceFeatureB.pbFeature = bufferB;
-
-    var ret = Library.AFR_FSDK_FacePairMatching(hEngine, faceFeatureA.ref(), faceFeatureB.ref(), pfSimilScore);
+    var ret = Library.AFR_FSDK_FacePairMatching(hEngine, featureA.ref(), featureB.ref(), pfSimilScore);
     if (ret != 0) {
         console.log('AFR_FSDK_FacePairMatching failed:ret == ' + ret);
         return 0.0;
