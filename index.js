@@ -1,5 +1,5 @@
 require('./global.js')
-require('./main.js')
+	// require('./main.js')
 const Koa = require('koa')
 const logger = require('koa-logger')
 const router = require('./router.js')
@@ -30,20 +30,21 @@ app.use(async(ctx, next) => {
 	} catch (err) {
 		ctx.body = {
 			status: err.status || 500,
-			message: err.message,
-			stack: err.stack
+			msg: err.message,
+			result: {
+				router: err.router,
+				stack: err.stack
+			}
 		}
 		throw err
 	}
 
 	if (ctx.body) {
-		ctx.body = {
-			status: 200,
-			message: 'success',
-			result: ctx.body
-		}
+		const obj = Object.assign({}, httpStatus.common.success)
+		obj.result = ctx.body
+		ctx.body = obj
 	} else {
-		ctx.body = httpStatus.success
+		ctx.body = httpStatus.common.success
 	}
 })
 
@@ -53,10 +54,20 @@ app.use(async(ctx, next) => {
 	if (ctx.method == 'GET') {
 		url = url.split('?')[0]
 	}
+	const ary = url.split('/')
+	let service = ary[1]
+	let fun = ary[2]
 	ctx._url = url
-	let b = httpStatus[url] && httpStatus[url][ctx.method]
+	ctx.service = service 
+	ctx.fun = fun
+	let b = httpStatus[service] && httpStatus[service][fun] 
+	&& httpStatus[service][fun].method.toUpperCase() == ctx.method.toUpperCase()
 	if (!b) {
-		throw httpStatus.notFound
+		throw {
+			status: 1007,
+			message: httpStatus.common.system['10007']['en-US'],
+			router: ctx.url
+		}
 	}
 	await next()
 })
@@ -64,22 +75,38 @@ app.use(async(ctx, next) => {
 // api params is correct
 app.use(async(ctx, next) => {
 	const params = ctx.method == 'GET' ? ctx.req.query : ctx.req.body
-	let b = true 
-	for (let k in httpStatus[ctx._url][ctx.method].params) {
-		if (httpStatus[ctx._url][ctx.method].params[k]) {
-			if (!params[k]) {
-				b = false 
-				break
-			}
+	const header = ctx.header
+	let b = true
+	const  headers = httpStatus[ctx.service][ctx.fun].headers
+	for (let header in headers) {
+		if (!ctx.headers[header]) {
+			b = false 
+			break
 		}
 	}
 	if (!b) {
-		throw httpStatus.paramErr
+		throw {
+			status: 10006,
+			message: httpStatus.common.system['10006']['en-US'],
+			router: ctx.url
+		}
+	}
+	const  _params = httpStatus[ctx.service][ctx.fun].params
+	for (let param in _params) {
+		if (!params[param]) {
+			b = false 
+			break
+		}
+	}
+	if (!b) {
+		throw {
+			status: 10006,
+			message: httpStatus.common.system['10006']['en-US'],
+			router: ctx.url
+		}
 	}
 	await next()
 })
-
-
 
 router(app)
 

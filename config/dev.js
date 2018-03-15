@@ -2,7 +2,7 @@ const path = require('path')
 
 module.exports = {
     host: 'localhost',
-    port: 3000,
+    port: 8888,
     log: {
         base: path.join(process.env.HOME, '/logs/api'),
         err: '/error',

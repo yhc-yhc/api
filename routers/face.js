@@ -6,6 +6,17 @@ const upload = multer({
 })
 const faceai = require('../faceai.js')
 
+router.post('getFacesOfCard', async(ctx, next) => {
+	ctx.body = [{
+		"code": "PACC324YKBWUHD78",
+		"date": "2018/02/21",
+		"faces": [{
+			"_id": "5a9788bfac7cb9001c91fbec",
+			"url": "media/924fe72bd415d0c0e3a096d64e26f02bb81c721fe578aa945d28b739fe20b81aafa0a5a1a0198a12dca381648813bc93"
+		}]
+	}]
+})
+
 router.get('list', async(ctx, next) => {
 	const faces = await model.face.find({
 		disabled: false

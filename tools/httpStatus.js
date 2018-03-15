@@ -1,7 +1,8 @@
 module.exports = {
 	success: {
 		status: 200,
-		message: 'success'
+		msg: 'success',
+		result: {}
 	},
 	notFound: {
 		status: 404,
