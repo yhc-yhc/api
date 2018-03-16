@@ -62,6 +62,7 @@ console.log(versionFR.BuildDate)
 console.log(versionFR.CopyRight)
 
 const face2m = {}
+const featureMap = {}
 let scoreLine = 0.667
 
 async function process(src) {
@@ -75,21 +76,20 @@ async function process(src) {
 
 		for (let i = 0; i < faces.nFace; i++) {
 			const img = await imgMat.clone()
-			const faceArea = await img.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
-				// const {
-				// 	asvl1,
-				// 	faces1
-				// } = await getFaces(faceArea)
-				// if (!faces1.nFace) continue
 			const feature = await getFaceFeature(asvl, faces.info[i])
-			let b = feature && feature.pbFeature && feature.pbFeature.toString('base64')
-			if (!b) continue
+			if (!feature) continue
 			let key = `${src.replace(/\//g, '-')}_${i}`
-			let keyAry = await searchFeature(feature)
+			var faceFeature = new AFR_FSDK_FACEMODEL()
+			var buffer = new Buffer(feature, 'base64')
+			faceFeature.lFeatureSize = buffer.length
+			faceFeature.pbFeature = buffer
+			let keyAry = await searchFeature(faceFeature)
 			if (!keyAry[0]) {
-				face2m[key] = feature
+				face2m[key] = faceFeature
+				featureMap[key] = feature
 				await fse.ensureDir(`/data/website/faces/`)
-				await faceArea.write(`/data/website/faces/${key}.jpg`)
+				await img.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
+					.write(`/data/website/faces/${key}.jpg`)
 			}
 			obj[key] = keyAry[0]
 		}
@@ -191,7 +191,7 @@ function doFaceDetection(img, faces_callback, width, height, format) {
 }
 module.exports = {
 	process,
-	face2m,
+	featureMap,
 	loadFaceToMap,
 	searchSameFace
 }

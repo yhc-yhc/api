@@ -61,7 +61,7 @@ async function engine() {
 					let url = 'media/' + endeurl.enurl(str)
 					face.url = url
 					face.disabled = false
-					face.feature = faceai.face2m[faceId].pbFeature.toString('base64')
+					face.feature = faceai.featureMap[faceId]
 					const rs = await face.save()
 					await model.photo.update({
 						rawFileName: photo.rawFileName,

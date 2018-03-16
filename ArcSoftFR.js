@@ -82,16 +82,9 @@ function extractFeature(hEngine, asvl, face) {
         faceFeature.pbFeature = ref.NULL;
         return null;
     } else {
-        var faceFeatureCopy = new AFR_FSDK_FACEMODEL();
-        faceFeatureCopy.lFeatureSize = faceFeature.lFeatureSize;
-
         var buf = new Buffer(faceFeature.lFeatureSize);
-        base.memcpy(buf.address(),
-            faceFeature.pbFeature.address(),
-            faceFeatureCopy.lFeatureSize);
-        faceFeatureCopy.pbFeature = buf
-            // return buf.toString('base64')
-        return faceFeatureCopy
+        base.memcpy(buf.address(), faceFeature.pbFeature.address(), faceFeature.lFeatureSize)
+        return buf.toString('base64')
     }
 }
 
