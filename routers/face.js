@@ -10,6 +10,7 @@ router.post('getFacesOfCard', async(ctx, next) => {
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
 	const photos = await model.photo.find({
 		'customerIds.code': ctx.params.code,
+		siteId: ctx.params.siteId,
 		shootOn: {
 			$gte: new Date(ctx.params.date),
 			$lt: new Date(dateEnd)
@@ -33,17 +34,24 @@ router.post('getFacesOfCard', async(ctx, next) => {
 		}
 	}, {
 		_id: 1,
-		url: 1
+		url: 1,
+		bindInfo: 1
 	})
+	let cardInfo = ctx.params.siteId + '_' + ctx.params.date + '_' + ctx.params.code
 	const faceMap = faces.reduce((pre, cur) => {
-		pre[cur._id] = cur.url
+		const bind = cur.bindInfo.indexOf(cardInfo) < 0 ? false : true
+		pre[cur._id] = {
+			url: cur.url,
+			bind: bind
+		}
 		return pre
 	}, {})
 	let ary = []
 	for (let key in faceObj) {
 		const obj = {}
 		obj._id = key
-		obj.url = faceMap[key]
+		obj.url = faceMap[key].url
+		obj.bind = faceMap[key].bind
 		obj.num = faceObj[key]
 		ary.push(obj)
 	}
