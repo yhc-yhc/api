@@ -90,7 +90,7 @@ function extractFeature(hEngine, asvl, face) {
             faceFeature.pbFeature.address(),
             faceFeatureCopy.lFeatureSize);
         faceFeatureCopy.pbFeature = buf
-        // return buf.toString('base64')
+            // return buf.toString('base64')
         return faceFeatureCopy
     }
 }
@@ -130,20 +130,36 @@ function extractFeature(hEngine, asvl, face) {
 //     return pfSimilScore.readFloatLE(0);
 // }
 
-function compareFaceSimilarity(hEngine, featureA, featureB) {
-    var pfSimilScore = new Buffer(ref.sizeof.float);
-    pfSimilScore.type = ref.refType(ref.types.float);
-    pfSimilScore.writeFloatLE(0, 0.0);
+// function compareFaceSimilarity(hEngine, featureA, featureB) {
+//     var pfSimilScore = new Buffer(ref.sizeof.float);
+//     pfSimilScore.type = ref.refType(ref.types.float);
+//     pfSimilScore.writeFloatLE(0, 0.0);
 
-    var ret = Library.AFR_FSDK_FacePairMatching(hEngine, featureA.ref(), featureB.ref(), pfSimilScore);
-    if (ret != 0) {
-        // console.log('AFR_FSDK_FacePairMatching failed:ret == ' + ret);
-        return 0.0;
-    }
-    return pfSimilScore.readFloatLE(0);
+//     var ret = Library.AFR_FSDK_FacePairMatching(hEngine, featureA.ref(), featureB.ref(), pfSimilScore);
+//     if (ret != 0) {
+//         // console.log('AFR_FSDK_FacePairMatching failed:ret == ' + ret);
+//         return 0.0;
+//     }
+//     return pfSimilScore.readFloatLE(0);
+// }
+
+function compareFaceSimilarity(hEngine, featureA, featureB) {
+    return new Promise((resolve, reject) => {
+        var pfSimilScore = new Buffer(ref.sizeof.float)
+        pfSimilScore.type = ref.refType(ref.types.float)
+        pfSimilScore.writeFloatLE(0, 0.0)
+
+        var ret = Library.AFR_FSDK_FacePairMatching(hEngine, featureA.ref(), featureB.ref(), pfSimilScore)
+        let result = 0
+        if (ret != 0) {
+            // console.log('AFR_FSDK_FacePairMatching failed:ret == ' + ret)
+        }
+        result = pfSimilScore.readFloatLE(0)
+        resolve(result)
+    })
 }
 
-exports.AFR_FSDK_Version = AFR_FSDK_Version;
+exports.AFR_FSDK_Version = AFR_FSDK_Version
 exports.AFR_FSDK_FACERES = AFR_FSDK_FACERES;
 exports.AFR_FSDK_FACEMODEL = AFR_FSDK_FACEMODEL;
 exports.AFR_FSDK_GetVersion = Library.AFR_FSDK_GetVersion;

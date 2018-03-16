@@ -99,10 +99,10 @@ async function process(src) {
 }
 
 async function loadFaceToMap(name, feature) {
-	var faceFeature = new AFR_FSDK_FACEMODEL();
+	var faceFeature = new AFR_FSDK_FACEMODEL()
 	var buffer = new Buffer(feature, 'base64')
-	faceFeature.lFeatureSize = buffer.length;
-	faceFeature.pbFeature = buffer;
+	faceFeature.lFeatureSize = buffer.length
+	faceFeature.pbFeature = buffer
 	face2m[name] = faceFeature
 }
 
@@ -137,7 +137,7 @@ async function searchFeature(feature) {
 		// }
 	const obj = {}
 	for (let fk in face2m) {
-		obj[fk] = Promise.resolve().then(_ => ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk]))
+		obj[fk] = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
 	}
 	const rs = await Promise.props(obj)
 	for (let k in rs) {
