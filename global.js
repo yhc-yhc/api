@@ -51,6 +51,8 @@ global.loadCert = async _ => {
 	}
 }
 
+global.endeurl = require('./tools/endeurl.js')
+
 async function main() {
 	// init logs
 	log('all the logs will write at: ', config.log.base)

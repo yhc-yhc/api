@@ -15,18 +15,39 @@ router.post('getFacesOfCard', async(ctx, next) => {
 			$lt: new Date(dateEnd)
 		}
 	}, {
-		faces: 1
+		faceIds: 1
 	})
-	const faces = photos.reduce((pre, cur) => {
-		cur.faces.reduce((ppre, ccur) => {
+	const faceObj = photos.reduce((pre, cur) => {
+		cur.faceIds.reduce((ppre, ccur) => {
 			ppre[ccur] = ppre[ccur] || 0
-			ppre[ccur] ++
-			return ppre
+			ppre[ccur]++
+				return ppre
 		}, pre)
 		return pre
 	}, {})
-	log(ctx.params.date, dateEnd, faces)
-	ctx.body = faces
+	const faces = await model.face.find({
+		_id: {
+			$in: Object.keys(faceObj)
+		}
+	}, {
+		_id: 1,
+		url: 1
+	})
+	const faceMap = faces.reduce((pre, cur) => {
+		pre[cur._id] = cur.url
+		return pre
+	}, {})
+	let ary = []
+	for (let key in faceObj) {
+		if (key == 'noface') continue
+		const obj = {}
+		obj._id = key
+		obj.url = faceMap[key]
+		obj.num = faceObj[key]
+		ary.push(obj)
+	}
+	ary = ary.sort((pre, cur) => cur.num - pre.num)
+	ctx.body = ary
 })
 
 router.get('list', async(ctx, next) => {

@@ -1,5 +1,5 @@
 require('./global.js')
-	// require('./main.js')
+require('./main.js')
 const Koa = require('koa')
 const logger = require('koa-logger')
 const router = require('./router.js')

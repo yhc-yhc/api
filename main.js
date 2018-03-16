@@ -20,14 +20,14 @@ async function main() {
 async function engine() {
 	let photoCount = await model.photo.count()
 	log(`total has ${photoCount} photos`)
-	let oneDayAgo = moment().add(-100, 'days').format('YYYY/MM/DD')
+	let oneDayAgo = moment().add(-15, 'days').format('YYYY/MM/DD')
 
 	const photos = await model.photo
 		.find({
 			shootOn: {
 				$gte: new Date(oneDayAgo)
 			},
-			'faces.0': {
+			'faceIds.0': {
 				$exists: false
 			},
 			presetName: 'thumbnail'
@@ -35,7 +35,7 @@ async function engine() {
 			originalInfo: 1,
 			rawFileName: 1
 		})
-		.limit(10).sort({
+		.limit(4).sort({
 			_id: -1
 		}).exec()
 	log('will process: ', photos.length)
@@ -47,7 +47,7 @@ async function engine() {
 				rawFileName: photo.rawFileName
 			}, {
 				$set: {
-					faces: ['noface']
+					faceIds: ['noface']
 				}
 			}, {
 				multi: true
@@ -57,29 +57,32 @@ async function engine() {
 				if (!face_map[faceId]) {
 					const face = new model.face()
 					face.name = faceId
+					let str = 'faces/' + faceId + '.jpg'
+					let url = 'media/' + endeurl.enurl(str)
+					face.url = url
 					face.disabled = false
 					face.feature = faceai.face2m[faceId].pbFeature.toString('base64')
 					const rs = await face.save()
 					await model.photo.update({
 						rawFileName: photo.rawFileName,
-						'faces.0': {
+						'faceIds.0': {
 							$exists: false
 						}
 					}, {
 						$set: {
-							faces: [rs._id.toString()]
+							faceIds: [rs._id.toString()]
 						}
 					}, {
 						multi: true
 					}).exec()
 					await model.photo.update({
 						rawFileName: photo.rawFileName,
-						'faces.0': {
+						'faceIds.0': {
 							$exists: true
 						}
 					}, {
 						$addToSet: {
-							faces: rs._id.toString()
+							faceIds: rs._id.toString()
 						}
 					}, {
 						multi: true
@@ -90,24 +93,24 @@ async function engine() {
 					}).exec()
 					await model.photo.update({
 						rawFileName: photo.rawFileName,
-						'faces.0': {
+						'faceIds.0': {
 							$exists: false
 						}
 					}, {
 						$set: {
-							faces: [face._id.toString()]
+							faceIds: [face._id.toString()]
 						}
 					}, {
 						multi: true
 					}).exec()
 					await model.photo.update({
 						rawFileName: photo.rawFileName,
-						'faces.0': {
+						'faceIds.0': {
 							$exists: true
 						}
 					}, {
 						$addToSet: {
-							faces: face._id.toString()
+							faceIds: face._id.toString()
 						}
 					}, {
 						multi: true
@@ -117,7 +120,7 @@ async function engine() {
 		}
 	}
 	log('====================================')
-	await Promise.delay(2000)
+	await Promise.delay(400)
 	await engine()
 }
 

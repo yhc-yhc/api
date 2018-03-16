@@ -182,7 +182,7 @@ module.exports = {
     isUpload: {type: Boolean, default: false},
     uploadCount: {type: Number, default: 0},
     disabled: {type: Boolean, default: false},
-    faces: {type: [String], index: true},
+    faceIds: {type: [String], index: true},
     bundleWithPPP: {type: Boolean, default: false} //如果为true,不能单独购买,只能买了pp+之后才能拥有
 }
 

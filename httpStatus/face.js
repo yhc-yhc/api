@@ -14,7 +14,8 @@ module.exports = {
 			date: '2018/02/21',
 			faces: [{
 				_id: '5a9788bfac7cb9001c91fbec',
-				url: 'media/924fe72bd415d0c0e3a096d64e26f02bb81c721fe578aa945d28b739fe20b81aafa0a5a1a0198a12dca381648813bc93'
+				url: 'media/924fe72bd415d0c0e3a096d64e26f02bb81c721fe578aa945d28b739fe20b81aafa0a5a1a0198a12dca381648813bc93',
+				num: 5
 			}]
 		}],
 		resDesc: {
@@ -22,7 +23,8 @@ module.exports = {
 			date: ['Int', "照片日期"],
 			faces: ['Araay', "照片包含的人脸数组"],
 			'face._id': ['String', '人脸唯一Id'],
-			'face.url': ['String', "人脸图片地址"]
+			'face.url': ['String', "人脸图片地址"],
+			'face.num': ['Number', "人脸在这张卡中出现的次数"]
 		}
 	},
 	bindFaceToCode: {
