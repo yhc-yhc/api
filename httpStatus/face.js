@@ -3,10 +3,11 @@ module.exports = {
 		method: 'POST',
 		desc: "列出用户所有卡，显示出每张卡下所有的人脸和照片",
 		headers: {
-			token: [1, 'String', "标识用户身份"]
+			// token: [1, 'String', "标识用户身份"]
 		},
 		params: {
-			code: [1, 'String', "customerIds.code的值"]
+			code: [1, 'String', "customerIds.code的值"],
+			date: [1, 'String', "时间的字符串格式，YYYY/MM/DD"]
 		},
 		response: [{
 			code: 'PACC324YKBWUHD78',

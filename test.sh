@@ -12,5 +12,5 @@ docker run -itd \
 -e fly=product \
 --name faceai \
 node:8.9.4 \
-/bin/bash -c "RUN=$1 npm start"
+/bin/bash -c "npm install && RUN=$1 npm start"
 docker logs -f faceai

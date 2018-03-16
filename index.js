@@ -29,7 +29,7 @@ app.use(async(ctx, next) => {
 		await next()
 	} catch (err) {
 		ctx.body = {
-			status: err.status || 500,
+			status: err.status || 10001,
 			msg: err.message,
 			result: {
 				router: err.router,
@@ -58,10 +58,10 @@ app.use(async(ctx, next) => {
 	let service = ary[1]
 	let fun = ary[2]
 	ctx._url = url
-	ctx.service = service 
+	ctx.service = service
 	ctx.fun = fun
-	let b = httpStatus[service] && httpStatus[service][fun] 
-	&& httpStatus[service][fun].method.toUpperCase() == ctx.method.toUpperCase()
+	let b = httpStatus[service] && httpStatus[service][fun] &&
+		httpStatus[service][fun].method.toUpperCase() == ctx.method.toUpperCase()
 	if (!b) {
 		throw {
 			status: 1007,
@@ -75,13 +75,40 @@ app.use(async(ctx, next) => {
 // api params is correct
 app.use(async(ctx, next) => {
 	const params = ctx.method == 'GET' ? ctx.req.query : ctx.req.body
+	ctx.params = params
 	const header = ctx.header
 	let b = true
-	const  headers = httpStatus[ctx.service][ctx.fun].headers
+	const headers = httpStatus[ctx.service][ctx.fun].headers
 	for (let header in headers) {
 		if (!ctx.headers[header]) {
-			b = false 
+			b = false
 			break
+		}
+		if (header == 'token') {
+			const token = ctx.headers[header]
+			if (!certs.public) {
+				await loadCert()
+			}
+			let tokenObj = {}
+			try {
+				tokenObj = jwt.verify(token, certs.public, {
+					algorithm: 'RS512'
+				})
+			} catch (err) {
+				err.url = ctx.url
+				throw err
+			}
+			let userStr = await cache.getAsync('access_token:' + tokenObj.audience)
+			if (!userStr) {
+				throw {
+					status: 10005,
+					message: httpStatus.common.system['10005']['en-US'],
+					router: ctx.url
+				}
+			} else {
+				log(userStr)
+				ctx.user = JSON.parse(userStr)
+			}
 		}
 	}
 	if (!b) {
@@ -91,10 +118,10 @@ app.use(async(ctx, next) => {
 			router: ctx.url
 		}
 	}
-	const  _params = httpStatus[ctx.service][ctx.fun].params
+	const _params = httpStatus[ctx.service][ctx.fun].params
 	for (let param in _params) {
 		if (!params[param]) {
-			b = false 
+			b = false
 			break
 		}
 	}

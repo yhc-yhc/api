@@ -38,8 +38,8 @@ module.exports = {
 			'zh-CN': 'IP限制不能请求该资源'
 		},
 		10005: {
-			'en-US': 'Permission denied, need a high level appkey',
-			'zh-CN': '该资源需要appkey拥有授权'
+			'en-US': 'Permission denied, need login again',
+			'zh-CN': '请重新登录'
 		},
 		10006: {
 			'en-US': 'Miss required parameter, see doc for more info',
