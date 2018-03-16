@@ -57,7 +57,7 @@ async function engine() {
 				if (!face_map[faceId]) {
 					const face = new model.face()
 					face.name = faceId
-					let str = 'faces/' + faceId + '.jpg'
+					let str = '/faces/' + faceId + '.jpg'
 					let url = 'media/' + endeurl.enurl(str)
 					face.url = url
 					face.disabled = false
