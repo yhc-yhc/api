@@ -82,7 +82,8 @@ async function process(src) {
 				// } = await getFaces(faceArea)
 				// if (!faces1.nFace) continue
 			const feature = await getFaceFeature(asvl, faces.info[i])
-			if (!feature || !feature.pbFeature || !feature.pbFeature.toString('base64')) continue
+			let b = feature && feature.pbFeature && feature.pbFeature.toString('base64')
+			if (!b) continue
 			let key = `${src.replace(/\//g, '-')}_${i}`
 			let keyAry = await searchFeature(feature)
 			if (!keyAry[0]) {
