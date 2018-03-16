@@ -19,9 +19,11 @@ router.post('getFacesOfCard', async(ctx, next) => {
 	})
 	const faceObj = photos.reduce((pre, cur) => {
 		cur.faceIds.reduce((ppre, ccur) => {
-			ppre[ccur] = ppre[ccur] || 0
-			ppre[ccur]++
-				return ppre
+			if (ccur != 'noface') {
+				ppre[ccur] = ppre[ccur] || 0
+				ppre[ccur]++
+			}
+			return ppre
 		}, pre)
 		return pre
 	}, {})
@@ -39,7 +41,6 @@ router.post('getFacesOfCard', async(ctx, next) => {
 	}, {})
 	let ary = []
 	for (let key in faceObj) {
-		if (key == 'noface') continue
 		const obj = {}
 		obj._id = key
 		obj.url = faceMap[key]
