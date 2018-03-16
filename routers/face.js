@@ -59,6 +59,18 @@ router.post('getFacesOfCard', async(ctx, next) => {
 	ctx.body = ary
 })
 
+router.get('bindFaceToCode', async(ctx, next) => {
+	let cardInfo = ctx.params.siteId + '_' + ctx.params.date + '_' + ctx.params.code
+	const rs = await model.face.update({
+		_id: ctx.params.faceId,
+		disabled: false
+	}, {
+		$addToSet: {
+			bindInfo: cardInfo
+		}
+	})
+})
+
 router.get('list', async(ctx, next) => {
 	const faces = await model.face.find({
 		disabled: false
