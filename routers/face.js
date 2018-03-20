@@ -59,7 +59,7 @@ router.post('getFacesOfCard', async(ctx, next) => {
 	ctx.body = ary
 })
 
-router.get('bindFaceToCode', async(ctx, next) => {
+router.post('bindFaceToCode', async(ctx, next) => {
 	let cardInfo = ctx.params.siteId + '_' + ctx.params.date + '_' + ctx.params.code
 	const rs = await model.face.update({
 		_id: ctx.params.faceId,
@@ -71,31 +71,13 @@ router.get('bindFaceToCode', async(ctx, next) => {
 	})
 })
 
-router.get('list', async(ctx, next) => {
-	const faces = await model.face.find({
-		disabled: false
-	}, {
-		_id: 0,
-		disabled: 0
-	}).limit(1000)
-	ctx.body = {
-		count: faces.length,
-		info: faces
-	}
-})
-
 router.post('searchByImage', upload.single('file'), async(ctx, next) => {
-	const body = ctx.req.body
-	const api = httpStatus[ctx._url][ctx.method]
-	if (!ctx.req.file) {
-		throw httpStatus.paramErr
-	}
+	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
 	const {
 		originalname,
 		path,
 		mimetype
 	} = ctx.req.file
-		// log(originalname, path, mimetype)
 	console.time('SearchFeature: ')
 	let faceAry = await faceai.searchSameFace(path)
 	console.timeEnd('SearchFeature: ')
@@ -112,7 +94,13 @@ router.post('searchByImage', upload.single('file'), async(ctx, next) => {
 		const ary = faces.map(face => face._id.toString())
 		if (ary[0]) {
 			const photos = await model.photo.find({
-					faces: ary
+					faces: ary,
+					siteId: ctx.params.siteId,
+					'customerIds.code': ctx.params.code,
+					shootOn: {
+						$gte: new Date(ctx.params.date),
+						$lt: new Date(dateEnd)
+					}
 				}, {
 					_id: 0,
 					thumbnail: 1
