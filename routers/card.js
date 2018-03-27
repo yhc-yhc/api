@@ -46,7 +46,7 @@ router.get('listCards', async(ctx, next) => {
 		pre[id].date = cur.date
 		pre[id].photos = []
 		pre[id]._photos.push({
-			url: cur.url
+			url: cur.url,
 			pay: cur.pay
 		})
 		pre[id].photoCount = pre[id]._photos.count

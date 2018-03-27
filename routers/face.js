@@ -200,7 +200,7 @@ router.post('searchCardsByImage', upload.single('file'), async(ctx, next) => {
 				pre[id].date = cur.date
 				pre[id].photos = []
 				pre[id]._photos.push({
-					url: cur.url
+					url: cur.url,
 					pay: cur.pay
 				})
 				pre[id].photoCount = pre[id]._photos.count
