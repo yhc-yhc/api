@@ -1,5 +1,5 @@
 require('./global.js')
-require('./main.js')
+// require('./main.js')
 const Koa = require('koa')
 const logger = require('koa-logger')
 const router = require('./router.js')
@@ -50,6 +50,7 @@ app.use(async(ctx, next) => {
 
 // api is exists
 app.use(async(ctx, next) => {
+	ctx.LG = 'en-US'
 	let url = ctx.url
 	if (ctx.method == 'GET') {
 		url = url.split('?')[0]
@@ -65,7 +66,7 @@ app.use(async(ctx, next) => {
 	if (!b) {
 		throw {
 			status: 1007,
-			message: httpStatus.common.system['10007']['en-US'],
+			message: httpStatus.common.system['10007'][ctx.LG],
 			router: ctx.url
 		}
 	}
@@ -80,7 +81,9 @@ app.use(async(ctx, next) => {
 	let b = true
 	const headers = httpStatus[ctx.service][ctx.fun].headers
 	for (let header in headers) {
-		if (!ctx.headers[header]) {
+		if (!headers[header][0]) continue
+		let bflag = headers[header][1] != 'Binary' &&  ctx.headers[header]
+		if (!bflag) {
 			b = false
 			break
 		}
@@ -95,14 +98,17 @@ app.use(async(ctx, next) => {
 					algorithm: 'RS512'
 				})
 			} catch (err) {
-				err.url = ctx.url
-				throw err
+				throw {
+					status: 10005,
+					message: httpStatus.common.system['10005'][ctx.LG],
+					router: ctx.url
+				}
 			}
 			let userStr = await cache.getAsync('access_token:' + tokenObj.audience)
 			if (!userStr) {
 				throw {
 					status: 10005,
-					message: httpStatus.common.system['10005']['en-US'],
+					message: httpStatus.common.system['10005'][ctx.LG],
 					router: ctx.url
 				}
 			} else {
@@ -114,7 +120,7 @@ app.use(async(ctx, next) => {
 	if (!b) {
 		throw {
 			status: 10006,
-			message: httpStatus.common.system['10006']['en-US'],
+			message: httpStatus.common.system['10006'][ctx.LG],
 			router: ctx.url
 		}
 	}
@@ -128,7 +134,7 @@ app.use(async(ctx, next) => {
 	if (!b) {
 		throw {
 			status: 10006,
-			message: httpStatus.common.system['10006']['en-US'],
+			message: httpStatus.common.system['10006'][ctx.LG],
 			router: ctx.url
 		}
 	}

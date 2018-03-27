@@ -1,32 +1,32 @@
-require('./global.js')
-function asynclike() {
-  return new Promise((resolve, reject) => {
+var ary = [{
+  siteId: 'x1',
+  day: '170102',
+  code: 'paxx11',
+  url: 'aaaaaa'
+}, {
+  siteId: 'x1',
+  day: '170103',
+  code: 'paxx11',
+  url: 'aaaaaa'
+}, {
+  siteId: 'x2',
+  day: '170102',
+  code: 'paxx11',
+  url: 'aaaaaa'
+}, {
+  siteId: 'x3',
+  day: '170102',
+  code: 'paxx11',
+  url: 'aaaaaa'
+}, ]
 
-    setTimeout(_=> {
-      const ary = [1]
-      resolve(ary)
-    }, 3000)
-  })
-}
+const abcObj = ary.reduce((pre, cur) => {
+  pre[cur.siteId] = pre[cur.siteId] || {}
+  pre[cur.siteId][cur.day] = pre[cur.siteId][cur.day] || {}
+  pre[cur.siteId][cur.day][cur.code] = pre[cur.siteId][cur.day][cur.code] || 0
+  pre[cur.siteId][cur.day][cur.code] ++
+  return pre
+}, {})
+console.log(abcObj)
 
-function asynclike_() {
-  const Promise_ = require('bluebird')
-  return new Promise_((resolve, reject) => {
-    setTimeout(_=> {
-      const ary = [2]
-      resolve(ary)
-    }, 2000)
-  })
-}
-
-
-
-async function main() {
-  let t = moment().add(-1, 'days').format('YYYY/MM/DD')
-  console.log(t)
-  let rs = await asynclike()
-  console.log(rs)
-  let rs_ = await asynclike_()
-  console.log(rs_)
-}
-main()
+// console.log(JSON.stringify(abcObj))
