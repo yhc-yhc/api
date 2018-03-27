@@ -16,7 +16,7 @@ router.get('listCards', async(ctx, next) => {
 		original: 1,
 		orderHistory: 1,
 		siteId: 1,
-		customerIds.code: 1,
+		'customerIds.code': 1,
 		shootOn: 1
 	})
 	const codePhotos = []
