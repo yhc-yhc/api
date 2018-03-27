@@ -126,7 +126,9 @@ app.use(async(ctx, next) => {
 	}
 	const _params = httpStatus[ctx.service][ctx.fun].params
 	for (let param in _params) {
-		if (!params[param]) {
+		if (!_params[param][0]) continue
+		let bflag = _params[param][1] != 'Binary' &&  params[param]
+		if (!bflag) {
 			b = false
 			break
 		}
