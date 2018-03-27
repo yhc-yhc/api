@@ -70,5 +70,6 @@ router.get('listCards', async(ctx, next) => {
 		})
 	}
 	ctx.body = cards
-
 })
+
+module.exports = router
