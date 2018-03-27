@@ -81,8 +81,8 @@ app.use(async(ctx, next) => {
 	let b = true
 	const headers = httpStatus[ctx.service][ctx.fun].headers
 	for (let header in headers) {
-		if (!headers[header][0]) continue
-		let bflag = headers[header][1] != 'Binary' &&  ctx.headers[header]
+		if (!headers[header][0] || headers[header][1] == 'Binary') continue
+		let bflag = ctx.headers[header]
 		if (!bflag) {
 			b = false
 			break
@@ -126,8 +126,8 @@ app.use(async(ctx, next) => {
 	}
 	const _params = httpStatus[ctx.service][ctx.fun].params
 	for (let param in _params) {
-		if (!_params[param][0]) continue
-		let bflag = _params[param][1] != 'Binary' &&  params[param]
+		if (!_params[param][0] || _params[param][1] == 'Binary') continue
+		let bflag = params[param]
 		if (!bflag) {
 			b = false
 			break
