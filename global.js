@@ -57,12 +57,13 @@ global.endeurl = require('./tools/endeurl.js')
 global.siteInfo = null
 global.getSiteInfo = getSiteInfo
 async function getSiteInfo() {
-	siteInfo = await global.model.park.find({}, {
+	const parks = await global.model.park.find({}, {
 		_id: 0,
 		siteId: 1,
 		name: 1,
 		bgUrl: 1,
-	}).reduce((pre, cur) => {
+	})
+	global.siteInfo = parks.reduce((pre, cur) => {
 		pre[cur.siteId] = {
 			parkName: cur.name,
 			cardImage: cur.bgUrl
