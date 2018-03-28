@@ -54,6 +54,23 @@ global.loadCert = async _ => {
 
 global.endeurl = require('./tools/endeurl.js')
 
+global.siteInfo = null
+global.getSiteInfo = getSiteInfo
+async function getSiteInfo() {
+	siteInfo = await global.model.park.find({}, {
+		_id: 0,
+		siteId: 1,
+		name: 1,
+		bgUrl: 1,
+	}).reduce((pre, cur) {
+		pre[cur.siteId] = {
+			parkName: cur.name,
+			cardImage: cur.bgUrl
+		}
+		return pre
+	}, {})
+}
+
 async function main() {
 	// init logs
 	log('all the logs will write at: ', config.log.base)

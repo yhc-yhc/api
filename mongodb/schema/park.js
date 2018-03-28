@@ -9,7 +9,9 @@ module.exports = {
     address: String, //地址
     chain: String,   //连锁乐园名
     parkId: String,  //parkId 线下使用
-    parkCode: String,    //乐园简码与条码包含的简码相同；
+    siteId: String,  //parkId 线下使用
+    parkCode: String,    //乐园简码与条码包含的简码相同
+    bgUrl: String, // 乐园对就卡的背景图
     name: {type: String},   //乐园名称
     description: {type: String},   //描述
     servers: [  //服务器信息

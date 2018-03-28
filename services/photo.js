@@ -37,14 +37,19 @@ exports.photosToCards = async photos => {
 		const photos = _cards[card]._photos.map(obj => obj.url)
 		const pay = _cards[card]._photos.every(obj => obj.pay)
 		const payCount = _cards[card]._photos.map(obj => obj.pay).length
+		if (!global.siteInfo) {
+			await global.getSiteInfo()
+		}
 		cards.push({
 			code: _cards[card].code,
 			date: _cards[card].date,
 			siteId: _cards[card].siteId,
+			parkName: global.siteInfo[_cards[card].siteId].parkName,
+			cardImage: global.siteInfo[_cards[card].siteId].cardImage,
 			photoCount: _cards[card]._photos.length,
-			photos: _cards[card]._photos.length == 1 ? ary.fill(photos[0]) : photos.slice(0, 2),
 			pay: pay,
-			payCount: payCount
+			payCount: payCount,
+			photos: _cards[card]._photos.length == 1 ? ary.fill(photos[0]) : photos.slice(0, 2)
 		})
 	}
 	return cards
