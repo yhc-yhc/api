@@ -190,7 +190,7 @@ router.post('searchCardsByImage', upload.single('file'), async(ctx, next) => {
 			})
 		}
 	})
-	codePhotos.reduce((pre, cur) => {
+	const _cards = codePhotos.reduce((pre, cur) => {
 		let id = `${cur.code}__${cur.siteId}__${cur.date}`
 		pre[id] = pre[id] || {}
 		pre[id].code = cur.code
@@ -204,19 +204,19 @@ router.post('searchCardsByImage', upload.single('file'), async(ctx, next) => {
 		return pre
 	}, {})
 	const cards = []
-	for (card in codePhotos) {
-		const ayr = new Array(2)
-		const photos = codePhotos[card]._photos.map(obj => obj.url)
-		const pay = codePhotos[card]._photos.every(obj => obj.pay)
-		const payCount = codePhotos[card]._photos.some(obj => obj.pay).length
+	for (card in _cards) {
+		const ary = new Array(2)
+		const photos = _cards[card]._photos.map(obj => obj.url)
+		const pay = _cards[card]._photos.every(obj => obj.pay)
+		const payCount = _cards[card]._photos.map(obj => obj.pay).length
 		cards.push({
-			code: codePhotos[card].code,
-			date: codePhotos[card].date,
-			siteId: codePhotos[card].siteId,
-			photoCount: codePhotos[card]._photos.length,
-			photos: codePhotos[card]._photos.length == 1 ? ary.fill(photos[0]) : photos.silice(0, 2),
+			code: _cards[card].code,
+			date: _cards[card].date,
+			siteId: _cards[card].siteId,
+			photoCount: _cards[card]._photos.length,
+			photos: _cards[card]._photos.length == 1 ? ary.fill(photos[0]) : photos.slice(0, 2),
 			pay: pay,
-			payCount: payCount,
+			payCount: payCount
 		})
 	}
 	ctx.body = cards

@@ -53,18 +53,18 @@ router.get('listCards', async(ctx, next) => {
 	}, {})
 	const cards = []
 	for (card in _cards) {
-		const ayr = new Array(2)
+		const ary = new Array(2)
 		const photos = _cards[card]._photos.map(obj => obj.url)
 		const pay = _cards[card]._photos.every(obj => obj.pay)
-		const payCount = _cards[card]._photos.some(obj => obj.pay).length
+		const payCount = _cards[card]._photos.map(obj => obj.pay).length
 		cards.push({
 			code: _cards[card].code,
 			date: _cards[card].date,
 			siteId: _cards[card].siteId,
 			photoCount: _cards[card]._photos.length,
-			photos: _cards[card]._photos.length == 1 ? ary.fill(photos[0]) : photos.silice(0, 2),
+			photos: _cards[card]._photos.length == 1 ? ary.fill(photos[0]) : photos.slice(0, 2),
 			pay: pay,
-			payCount: payCount,
+			payCount: payCount
 		})
 	}
 	ctx.body = cards
