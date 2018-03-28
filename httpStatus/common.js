@@ -1,13 +1,13 @@
 module.exports = {
 	success: {
 		status: 200,
-		msg: 'success',
+		message: 'success',
 		result: {
 		}
 	},
 	error: {
 		status: 20201,
-		msg: 'No Face Found',
+		message: 'No Face Found',
 		result: {
 			router: '/face/list',
 		}

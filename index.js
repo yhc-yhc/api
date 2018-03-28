@@ -30,7 +30,7 @@ app.use(async(ctx, next) => {
 	} catch (err) {
 		ctx.body = {
 			status: err.status || 10001,
-			msg: err.message,
+			message: err.message,
 			result: {
 				router: err.router,
 				stack: err.stack
