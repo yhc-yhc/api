@@ -16,6 +16,7 @@ global.mongoose = require('mongoose')
 global.model = require('./mongodb/model.js')
 
 global.redis = require('redis')
+global.services = loaddir('./services')
 global.cache = redis.createClient(config.redis)
 Promise.promisifyAll(redis.RedisClient.prototype)
 Promise.promisifyAll(redis.Multi.prototype)
