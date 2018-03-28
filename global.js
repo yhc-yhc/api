@@ -62,7 +62,7 @@ async function getSiteInfo() {
 		siteId: 1,
 		name: 1,
 		bgUrl: 1,
-	}).reduce((pre, cur) {
+	}).reduce((pre, cur) => {
 		pre[cur.siteId] = {
 			parkName: cur.name,
 			cardImage: cur.bgUrl
