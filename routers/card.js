@@ -3,7 +3,7 @@ const router = new Router()
 
 router.get('listCards', async(ctx, next) => {
 	const user = await model.user.findOne({
-		userName: ctx.user.name
+		_id: ctx.user.userid
 	})
 	const codes = user.customerIds.map(obj => obj.code)
 	const photos = await model.photo.find({
@@ -21,7 +21,7 @@ router.get('listCards', async(ctx, next) => {
 	})
 	const codePhotos = []
 	photos.forEach(photo => {
-		const cusCode = photo.customerIds.code.map(obj => obj.code)
+		const cusCode = photo.customerIds.map(obj => obj.code)
 		const _codes = []
 		for (let code of cusCode) {
 			if (codes.indexOf(code) == -1) {
@@ -39,34 +39,32 @@ router.get('listCards', async(ctx, next) => {
 		}
 	})
 	codePhotos.reduce((pre, cur) => {
-		let id = ''
+		let id = `${cur.code}__${cur.siteId}__${cur.date}`
 		pre[id] = pre[id] || {}
 		pre[id].code = cur.code
 		pre[id].siteId = cur.siteId
 		pre[id].date = cur.date
-		pre[id].photos = []
+		pre[id]._photos = pre[id]._photos || []
 		pre[id]._photos.push({
 			url: cur.url,
 			pay: cur.pay
 		})
-		pre[id].photoCount = pre[id]._photos.count
-		pre[id].photos = pre[id]._photos.map(obj => obj.url)
-		pre[id].pay = pre[id]._photos.every(obj => obj.pay)
-		pre[id].payCount = pre[id]._photos.some(obj => obj.pay).length
-
 		return pre
 	}, {})
 	const cards = []
 	for (card in codePhotos) {
 		const ayr = new Array(2)
+		const photos = codePhotos[card]._photos.map(obj => obj.url)
+		const pay = codePhotos[card]._photos.every(obj => obj.pay)
+		const payCount = codePhotos[card]._photos.some(obj => obj.pay).length
 		cards.push({
 			code: codePhotos[card].code,
 			date: codePhotos[card].date,
 			siteId: codePhotos[card].siteId,
-			photoCount: codePhotos[card].photoCount,
-			photos: codePhotos[card].photos.length == 1 ? ary.fill(codePhotos[card].photos[1]) : codePhotos[card].photos.silice(0, 2),
-			pay: codePhotos[card].pay,
-			payCount: codePhotos[card].payCount,
+			photoCount: codePhotos[card]._photos.length,
+			photos: codePhotos[card]._photos.length == 1 ? ary.fill(photos[0]) : photos.silice(0, 2),
+			pay: pay,
+			payCount: payCount,
 		})
 	}
 	ctx.body = cards
