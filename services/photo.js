@@ -1,13 +1,18 @@
-exports.photosToCards = async photos => {
+exports.photosToCards = async (photos, codes) => {
 	const codePhotos = []
 	photos.forEach(photo => {
 		const cusCode = photo.customerIds.map(obj => obj.code)
-		const _codes = []
-		for (let code of cusCode) {
-			if (codes.indexOf(code) == -1) {
-				_codes.push(code)
+		let _codes = []
+		if (codes) {
+			for (let code of cusCode) {
+				if (codes.indexOf(code) == -1) {
+					_codes.push(code)
+				}
 			}
+		} else {
+			_codes = cusCode
 		}
+		
 		for (let code of _codes) {
 			codePhotos.push({
 				code: code,

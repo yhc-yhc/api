@@ -19,7 +19,7 @@ router.get('listCards', async(ctx, next) => {
 		'customerIds.code': 1,
 		shootOn: 1
 	})
-	const cards = await services.photo.photosToCards(photos)
+	const cards = await services.photo.photosToCards(photos, codes)
 	ctx.body = cards
 })
 
