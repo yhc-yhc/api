@@ -72,13 +72,8 @@ router.post('bindFaceToCode', async(ctx, next) => {
 })
 
 router.post('searchPhotosByImage', upload.single('file'), async(ctx, next) => {
-	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
-	const {
-		originalname,
-		path,
-		mimetype
-	} = ctx.req.file
-	if (!path) {
+	const reqFile = ctx.req.file
+	if (!reqFile || !reqFile.path) {
 		throw {
 			status: 10006,
 			message: httpStatus.common.system['10006'][ctx.LG],
@@ -86,47 +81,47 @@ router.post('searchPhotosByImage', upload.single('file'), async(ctx, next) => {
 		}
 	}
 	console.time('SearchFeature: ')
-	let faceAry = await faceai.searchSameFace(path)
+	let faceAry = await faceai.searchSameFace(reqFile.path)
 	console.timeEnd('SearchFeature: ')
-	fse.unlink(path)
+	fse.unlink(reqFile.path)
 
-	ctx.body = {
-		photos: []
+	if (!faceAry[0]) {
+		ctx.body = []
+		return
 	}
-	if (faceAry[0]) {
-		console.time('SearchDB: ')
-		const faces = await model.face.find({
-			name: faceAry
+
+	console.time('SearchDB: ')
+	const faces = await model.face.find({
+		name: faceAry
+	})
+	const ary = faces.map(face => face._id.toString())
+	if (!ary[0]) return
+	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
+	const photos = await model.photo.find({
+			faces: ary,
+			siteId: ctx.params.siteId,
+			'customerIds.code': ctx.params.code,
+			shootOn: {
+				$gte: new Date(ctx.params.date),
+				$lt: new Date(dateEnd)
+			}
+		}, {
+			_id: 0,
+			thumbnail: 1,
+			original: 1,
+			orderHistory: 1
 		})
-		const ary = faces.map(face => face._id.toString())
-		if (ary[0]) {
-			const photos = await model.photo.find({
-					faces: ary,
-					siteId: ctx.params.siteId,
-					'customerIds.code': ctx.params.code,
-					shootOn: {
-						$gte: new Date(ctx.params.date),
-						$lt: new Date(dateEnd)
-					}
-				}, {
-					_id: 0,
-					thumbnail: 1,
-					original: 1,
-					orderHistory: 1
-				})
-				// log(photos.length)
-			ctx.body = photos.map(photo => {
-				return {
-					_id: photo._id,
-					x512: photo.thumbnail.x512.url,
-					x1024: photo.thumbnail.x1024.url,
-					url: photo.original.url,
-					pay: orderHistory[0] ? true : false
-				}
-			})
+		// log(photos.length)
+	ctx.body = photos.map(photo => {
+		return {
+			_id: photo._id,
+			x512: photo.thumbnail.x512.url,
+			x1024: photo.thumbnail.x1024.url,
+			url: photo.original.url,
+			pay: orderHistory[0] ? true : false
 		}
-		console.timeEnd('SearchDB: ')
-	}
+	})
+	console.timeEnd('SearchDB: ')
 })
 
 router.post('searchCardsByImage', upload.single('file'), async(ctx, next) => {
