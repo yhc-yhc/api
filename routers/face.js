@@ -125,28 +125,23 @@ router.post('searchPhotosByImage', upload.single('file'), async(ctx, next) => {
 })
 
 router.post('searchCardsByImage', upload.single('file'), async(ctx, next) => {
-	let obj = ctx.req.file
-	if (!obj) {
+	const reqFile = ctx.req.file
+	if (!reqFile || !reqFile.path) {
 		throw {
 			status: 10006,
 			message: httpStatus.common.system['10006'][ctx.LG],
 			router: ctx.url
 		}
 	}
-	const {
-		originalname,
-		path,
-		mimetype
-	} = obj
 	console.time('SearchFeature: ')
-	let faceAry = await faceai.searchSameFace(path)
+	let faceAry = await faceai.searchSameFace(reqFile.path)
 	console.timeEnd('SearchFeature: ')
-	fse.unlink(path)
+	fse.unlink(reqFile.path)
 
-	ctx.body = {
-		photos: []
+	if (!faceAry[0]) {
+		ctx.body = []
+		return
 	}
-	if (!faceAry[0]) return
 	console.time('SearchDB: ')
 	const faces = await model.face.find({
 		name: faceAry
