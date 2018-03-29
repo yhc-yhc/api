@@ -101,7 +101,7 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
 	const photos = await model.photo.find({
-			faces: {
+			faceIds: {
 				$in: ary
 			},
 			siteId: ctx.params.siteId,
@@ -113,17 +113,18 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 		}, {
 			_id: 0,
 			thumbnail: 1,
-			original: 1,
+			originalInfo: 1,
 			orderHistory: 1
 		})
 		// log(photos.length)
 	ctx.body = photos.map(photo => {
+		let pay = orderHistory[0] ? true : false
 		return {
 			_id: photo._id,
 			x512: photo.thumbnail.x512.url,
 			x1024: photo.thumbnail.x1024.url,
-			url: photo.original.url,
-			pay: orderHistory[0] ? true : false
+			url: pay ? photo.originalInfo.url : '',
+			pay: pay
 		}
 	})
 	console.timeEnd('SearchDB: ')
@@ -148,7 +149,7 @@ router.post('searchCardsByImage', async(ctx, next) => {
 	const ary = faces.map(face => face._id.toString())
 	if (!ary[0]) return
 	const photos = await model.photo.find({
-		faces: {
+		faceIds: {
 			$in: ary
 		},
 	}, {
