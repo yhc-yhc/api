@@ -1,9 +1,7 @@
 const Router = require('koa-router')
 const router = new Router()
-const multer = require('koa-multer')
-const upload = multer({
-	dest: 'uploads/'
-})
+const asyncBusboy = require('async-busboy')
+
 const faceai = require('../faceai.js')
 
 router.post('getFacesOfCard', async(ctx, next) => {
@@ -71,19 +69,11 @@ router.post('bindFaceToCode', async(ctx, next) => {
 	})
 })
 
-router.post('searchPhotosByImage', upload.single('file'), async(ctx, next) => {
-	const reqFile = ctx.req.file
-	if (!reqFile || !reqFile.path) {
-		throw {
-			status: 10006,
-			message: httpStatus.common.system['10006'][ctx.LG],
-			router: ctx.url
-		}
-	}
+router.post('searchPhotosByImage', async(ctx, next) => {
 	console.time('SearchFeature: ')
-	let faceAry = await faceai.searchSameFace(reqFile.path)
+	let faceAry = await faceai.searchSameFace(ctx.files.file)
 	console.timeEnd('SearchFeature: ')
-	fse.unlink(reqFile.path)
+	fse.unlink(ctx.files.file)
 
 	if (!faceAry[0]) {
 		ctx.body = []
@@ -124,19 +114,12 @@ router.post('searchPhotosByImage', upload.single('file'), async(ctx, next) => {
 	console.timeEnd('SearchDB: ')
 })
 
-router.post('searchCardsByImage', upload.single('file'), async(ctx, next) => {
-	const reqFile = ctx.req.file
-	if (!reqFile || !reqFile.path) {
-		throw {
-			status: 10006,
-			message: httpStatus.common.system['10006'][ctx.LG],
-			router: ctx.url
-		}
-	}
+router.post('searchCardsByImage', async(ctx, next) => {
+	
 	console.time('SearchFeature: ')
-	let faceAry = await faceai.searchSameFace(reqFile.path)
+	let faceAry = await faceai.searchSameFace(ctx.files.file)
 	console.timeEnd('SearchFeature: ')
-	fse.unlink(reqFile.path)
+	fse.unlink(ctx.files.file)
 
 	if (!faceAry[0]) {
 		ctx.body = []

@@ -4,6 +4,8 @@ const Koa = require('koa')
 const logger = require('koa-logger')
 const router = require('./router.js')
 const bodyParser = require('koa-bodyparser')
+const asyncBusboy = require('async-busboy')
+
 
 const app = new Koa()
 app.use(logger())
@@ -75,14 +77,24 @@ app.use(async(ctx, next) => {
 
 // api params is correct
 app.use(async(ctx, next) => {
-	const params = ctx.method == 'GET' ? ctx.req.query : ctx.req.body
-	ctx.params = params
-	const header = ctx.header
+	if (ctx.request.is('multipart/*')) {
+		const {
+			files,
+			fields
+		} = await asyncBusboy(ctx.req)
+		ctx.params = fields
+		ctx.files = files.reduce((pre, cur) => {
+			pre[cur.fieldname] = cur.path
+			return pre
+		}, {})
+	} else {
+		ctx.params = ctx.method == 'GET' ? ctx.req.query : ctx.req.body
+
+	}
 	let bPass = true
 	const headers = httpStatus[ctx.service][ctx.fun].headers
 	for (let header in headers) {
 		if (header == 'token') continue
-		if (!headers[header][0] || headers[header][1] == 'Binary') continue
 		let bflag = ctx.headers[header]
 		if (!bflag) {
 			bPass = false
@@ -96,11 +108,11 @@ app.use(async(ctx, next) => {
 			router: ctx.url
 		}
 	}
-	const _params = httpStatus[ctx.service][ctx.fun].params
-	for (let param in _params) {
+	const params = httpStatus[ctx.service][ctx.fun].params
+	for (let param in params) {
 		if (param == 'token') continue
-		if (!_params[param][0] || _params[param][1] == 'Binary') continue
-		let bflag = params[param]
+		let bflag = ctx.params[param]
+		params[param][1] == 'Binary' ? bflag = ctx.files[param] : ''
 		if (!bflag) {
 			bPass = false
 			break

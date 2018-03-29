@@ -9,18 +9,18 @@ module.exports = {
         res: '/res'
     },
     redis: {
-        host: "10.25.155.219",
+        host: "192.168.8.107",
         port: "3008",
-        password: "pw#p@Ictur3"
+        password: "pIctur3"
     },
     cacheExpire: {
         smsvcode: 90
     },
     mongodb: {
-        url: 'mongodb://10.26.143.51:1008,10.26.143.74:1008,10.26.142.237:1008/pictureAir?replicaSet=pictureWorks',
+        url: 'mongodb://192.168.8.107:1008/pictureAir',
         opt: {
-            user: 'pw',
-            pass: 'pw#Mongo@3456',
+            user: '',
+            pass: '',
             autoIndex: false, // Don't build indexes
             reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
             reconnectInterval: 500, // Reconnect every 500ms
@@ -31,7 +31,7 @@ module.exports = {
     },
     mq: {
         connOpt: {
-            host: '172.18.0.20',
+            host: '192.168.8.107',
             port: 5672,
             login: 'guest',
             password: 'guest',
