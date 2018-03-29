@@ -75,10 +75,8 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 	console.timeEnd('SearchFeature: ')
 	fse.unlink(ctx.files.file)
 
-	if (!faceAry[0]) {
-		ctx.body = []
-		return
-	}
+	ctx.body = []
+	if (!faceAry[0]) return
 
 	console.time('SearchDB: ')
 	const faces = await model.face.find({
@@ -86,6 +84,7 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 	})
 	const ary = faces.map(face => face._id.toString())
 	if (!ary[0]) return
+
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
 	const photos = await model.photo.find({
 			faces: ary,
@@ -115,16 +114,15 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 })
 
 router.post('searchCardsByImage', async(ctx, next) => {
-	
+
 	console.time('SearchFeature: ')
 	let faceAry = await faceai.searchSameFace(ctx.files.file)
 	console.timeEnd('SearchFeature: ')
 	fse.unlink(ctx.files.file)
 
-	if (!faceAry[0]) {
-		ctx.body = []
-		return
-	}
+	ctx.body = []
+	if (!faceAry[0]) return
+		
 	console.time('SearchDB: ')
 	const faces = await model.face.find({
 		name: faceAry
