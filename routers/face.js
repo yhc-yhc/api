@@ -2,7 +2,17 @@ const Router = require('koa-router')
 const router = new Router()
 const asyncBusboy = require('async-busboy')
 
-const faceai = require('../faceai.js')
+const childM = require('../tools/childM.js')
+function SearchFeatureFromChlid(path) {
+	return new Promise((resolve, reject) => {
+		childM({
+			flag: `searchSameFace_::_${nanoid(10)}`,
+			data: path
+		}, (err, data) => {
+			resolve(data)
+		})
+	})
+}
 
 router.post('getFacesOfCard', async(ctx, next) => {
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
@@ -71,7 +81,8 @@ router.post('bindFaceToCode', async(ctx, next) => {
 
 router.post('searchPhotosByImage', async(ctx, next) => {
 	console.time('SearchFeature: ')
-	let faceAry = await faceai.searchSameFace(ctx.files.file)
+		// let faceAry = await faceai.searchSameFace(ctx.files.file)
+	let faceAry = await SearchFeatureFromChlid(ctx.files.file)
 	console.timeEnd('SearchFeature: ')
 	fse.unlink(ctx.files.file)
 
@@ -116,13 +127,13 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 router.post('searchCardsByImage', async(ctx, next) => {
 
 	console.time('SearchFeature: ')
-	let faceAry = await faceai.searchSameFace(ctx.files.file)
+	let faceAry = await SearchFeatureFromChlid(ctx.files.file)
 	console.timeEnd('SearchFeature: ')
 	fse.unlink(ctx.files.file)
 
 	ctx.body = []
 	if (!faceAry[0]) return
-		
+
 	console.time('SearchDB: ')
 	const faces = await model.face.find({
 		name: faceAry

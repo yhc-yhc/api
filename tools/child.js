@@ -1,27 +1,35 @@
-require('./global.js')
-const faceai = require('./faceai.js')
+require('../global.js')
+const faceai = require('../faceai.js')
+
+process.on('message', async function(m) {
+	const mem = process.memoryUsage()
+	log(`pid_${process.pid}: `, (mem.rss / 1024 / 1024).toFixed(2), (mem.heapTotal / 1024 / 1024).toFixed(2), (mem.heapUsed / 1024 / 1024).toFixed(2))
+	var flag = m.flag
+	if (flag.split('_::_')[0] != 'searchSameFace') return
+	let faceAry = await faceai.searchSameFace(m.data)
+	process.send({
+		flag: m.flag,
+		data: faceAry
+	})
+})
+
+
 
 async function loadFace() {
-	const faces = await model.face.find({disabled: false}, {
+	const faces = await model.face.find({
+		disabled: false
+	}, {
 		name: 1,
 		feature: 1
 	})
-	log(`will load ${faces.length} faces from db ...`)
+	log(`pid_${process.pid}:  will load ${faces.length} faces from db ...`)
 	for (const face of faces) {
 		await faceai.loadFaceToMap(face.name, face.feature)
 	}
 }
 
-async function main() {
-	await loadFace()
-	await engine()
-}
-
 async function engine() {
-	let photoCount = await model.photo.count()
-	log(`total has ${photoCount} photos`)
-	let oneDayAgo = moment().add(-15, 'days').format('YYYY/MM/DD')
-
+	let oneDayAgo = moment().add(-14, 'days').format('YYYY/MM/DD')
 	const photos = await model.photo
 		.find({
 			shootOn: {
@@ -32,16 +40,15 @@ async function engine() {
 			},
 			presetName: 'thumbnail'
 		}, {
-			originalInfo: 1,
-			rawFileName: 1
+			'originalInfo.path': 1,
+			rawFileName: 1,
+			shootOn: 1
 		})
 		.limit(4).sort({
 			_id: -1
 		}).exec()
-	log('will process: ', photos.length)
 	for (const photo of photos) {
 		const face_map = await faceai.process(photo.originalInfo.path)
-		// log(21, face_map)
 		if (!Object.keys(face_map).length) {
 			await model.photo.update({
 				rawFileName: photo.rawFileName
@@ -60,6 +67,7 @@ async function engine() {
 					let str = '/faces/' + faceId + '.jpg'
 					let url = 'media/' + endeurl.enurl(str)
 					face.url = url
+					face.active = photo.shootOn
 					face.disabled = false
 					face.feature = faceai.featureMap[faceId]
 					const rs = await face.save()
@@ -91,6 +99,15 @@ async function engine() {
 					const face = await model.face.findOne({
 						name: face_map[faceId]
 					}).exec()
+					await model.face.update({
+						_id: face._id
+					}, {
+						$set: {
+							active: photo.shootOn
+						}
+					}, {
+						upsert: true
+					})
 					await model.photo.update({
 						rawFileName: photo.rawFileName,
 						'faceIds.0': {
@@ -119,9 +136,12 @@ async function engine() {
 			}
 		}
 	}
-	log('====================================')
 	await Promise.delay(400)
 	await engine()
 }
 
+async function main() {
+	await loadFace()
+	await engine()
+}
 main()

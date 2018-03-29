@@ -1,5 +1,6 @@
 global.Promise = require('bluebird')
 global.log = console.log
+global.nanoid = require('nanoid')
 global.loaddir = require('./tools/loaddir.js')
 global.config = require('./config.js')
 global.path = require('path')
