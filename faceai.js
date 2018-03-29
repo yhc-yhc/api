@@ -164,7 +164,12 @@ async function searchSameFace(src) {
 		}
 		const feature = await getFaceFeature(asvl, faces.info[0])
 		if (!feature) return 0
-		return searchFeature(feature)
+			
+		var faceFeature = new AFR_FSDK_FACEMODEL()
+		var buffer = new Buffer(feature, 'base64')
+		faceFeature.lFeatureSize = buffer.length
+		faceFeature.pbFeature = buffer
+		return searchFeature(faceFeature)
 	} catch (e) {
 		console.log('searchSameFace', src, e)
 		return 0
