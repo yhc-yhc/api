@@ -3,6 +3,7 @@ const router = new Router()
 const asyncBusboy = require('async-busboy')
 
 const childM = require('../tools/childM.js')
+
 function SearchFeatureFromChlid(path) {
 	return new Promise((resolve, reject) => {
 		childM({
@@ -91,14 +92,18 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 
 	console.time('SearchDB: ')
 	const faces = await model.face.find({
-		name: faceAry
+		name: {
+			$in: faceAry
+		}
 	})
 	const ary = faces.map(face => face._id.toString())
 	if (!ary[0]) return
 
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
 	const photos = await model.photo.find({
-			faces: ary,
+			faces: {
+				$in: ary
+			},
 			siteId: ctx.params.siteId,
 			'customerIds.code': ctx.params.code,
 			shootOn: {
@@ -136,12 +141,16 @@ router.post('searchCardsByImage', async(ctx, next) => {
 
 	console.time('SearchDB: ')
 	const faces = await model.face.find({
-		name: faceAry
+		name: {
+			$in: faceAry
+		}
 	})
 	const ary = faces.map(face => face._id.toString())
 	if (!ary[0]) return
 	const photos = await model.photo.find({
-		faces: ary,
+		faces: {
+			$in: ary
+		},
 	}, {
 		_id: 0,
 		thumbnail: 1,
