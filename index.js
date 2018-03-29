@@ -1,5 +1,5 @@
 require('./global.js')
-// require('./main.js')
+	// require('./main.js')
 const Koa = require('koa')
 const logger = require('koa-logger')
 const router = require('./router.js')
@@ -78,46 +78,18 @@ app.use(async(ctx, next) => {
 	const params = ctx.method == 'GET' ? ctx.req.query : ctx.req.body
 	ctx.params = params
 	const header = ctx.header
-	let b = true
+	let bPass = true
 	const headers = httpStatus[ctx.service][ctx.fun].headers
 	for (let header in headers) {
+		if (header == 'token') continue
 		if (!headers[header][0] || headers[header][1] == 'Binary') continue
 		let bflag = ctx.headers[header]
 		if (!bflag) {
-			b = false
+			bPass = false
 			break
 		}
-		if (header == 'token') {
-			const token = ctx.headers[header]
-			if (!certs.public) {
-				await loadCert()
-			}
-			let tokenObj = {}
-			try {
-				tokenObj = jwt.verify(token, certs.public, {
-					algorithm: 'RS512'
-				})
-			} catch (err) {
-				throw {
-					status: 10005,
-					message: httpStatus.common.system['10005'][ctx.LG],
-					router: ctx.url
-				}
-			}
-			let userStr = await cache.getAsync('access_token:' + tokenObj.audience)
-			if (!userStr) {
-				throw {
-					status: 10005,
-					message: httpStatus.common.system['10005'][ctx.LG],
-					router: ctx.url
-				}
-			} else {
-				log(userStr)
-				ctx.user = JSON.parse(userStr)
-			}
-		}
 	}
-	if (!b) {
+	if (!bPass) {
 		throw {
 			status: 10006,
 			message: httpStatus.common.system['10006'][ctx.LG],
@@ -126,18 +98,61 @@ app.use(async(ctx, next) => {
 	}
 	const _params = httpStatus[ctx.service][ctx.fun].params
 	for (let param in _params) {
+		if (param == 'token') continue
 		if (!_params[param][0] || _params[param][1] == 'Binary') continue
 		let bflag = params[param]
 		if (!bflag) {
-			b = false
+			bPass = false
 			break
 		}
 	}
-	if (!b) {
+	if (!bPass) {
 		throw {
 			status: 10006,
 			message: httpStatus.common.system['10006'][ctx.LG],
 			router: ctx.url
+		}
+	}
+	await next()
+})
+
+// api token is correct
+app.use(async(ctx, next) => {
+	if (global.httpStatus[ctx.service][ctx.fun].headers.token ||
+		global.httpStatus[ctx.service][ctx.fun].params.token) {
+		let token = ctx.headers.token || ctx.paras.token
+		if (!token) {
+			throw {
+				status: 10006,
+				message: httpStatus.common.system['10006'][ctx.LG],
+				router: ctx.url
+			}
+		}
+		if (!certs.public) {
+			await loadCert()
+		}
+		let tokenObj = {}
+		try {
+			tokenObj = jwt.verify(token, certs.public, {
+				algorithm: 'RS512'
+			})
+		} catch (err) {
+			throw {
+				status: 10005,
+				message: httpStatus.common.system['10005'][ctx.LG],
+				router: ctx.url
+			}
+		}
+		let userStr = await cache.getAsync('access_token:' + tokenObj.audience)
+		if (!userStr) {
+			throw {
+				status: 10005,
+				message: httpStatus.common.system['10005'][ctx.LG],
+				router: ctx.url
+			}
+		} else {
+			log(userStr)
+			ctx.user = JSON.parse(userStr)
 		}
 	}
 	await next()
