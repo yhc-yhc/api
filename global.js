@@ -17,7 +17,7 @@ global.mongoose = require('mongoose')
 global.model = require('./mongodb/model.js')
 
 global.redis = require('redis')
-global.services = loaddir('./services')
+// global.services = loaddir('./services')
 global.cache = redis.createClient(config.redis)
 Promise.promisifyAll(redis.RedisClient.prototype)
 Promise.promisifyAll(redis.Multi.prototype)
@@ -67,7 +67,11 @@ async function getSiteInfo() {
 	global.siteInfo = parks.reduce((pre, cur) => {
 		pre[cur.siteId] = {
 			parkName: cur.name,
-			cardImage: cur.bgUrl
+			cardImage: cur.bgUrl,
+			pageUrl: cur.pageUrl || 'http://sky100.com.hk/',
+			ocrCard: cur.ocrCard,
+			faceCard: cur.faceCard,
+			shareCard: cur.shareCard
 		}
 		return pre
 	}, {})

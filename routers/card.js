@@ -1,5 +1,6 @@
 const Router = require('koa-router')
 const router = new Router()
+const services = loaddir('./services')
 
 router.get('listCards', async(ctx, next) => {
 	const user = await model.user.findOne({

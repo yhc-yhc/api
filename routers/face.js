@@ -1,19 +1,6 @@
 const Router = require('koa-router')
 const router = new Router()
-const asyncBusboy = require('async-busboy')
-
-const childM = require('../tools/childM.js')
-
-function SearchFeatureFromChlid(path) {
-	return new Promise((resolve, reject) => {
-		childM({
-			flag: `searchSameFace_::_${nanoid(10)}`,
-			data: path
-		}, (err, data) => {
-			resolve(data)
-		})
-	})
-}
+const services = loaddir('./services')
 
 router.post('getFacesOfCard', async(ctx, next) => {
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
@@ -69,21 +56,24 @@ router.post('getFacesOfCard', async(ctx, next) => {
 })
 
 router.post('bindFaceToCode', async(ctx, next) => {
-	let cardInfo = ctx.params.siteId + '_' + ctx.params.date + '_' + ctx.params.code
-	const rs = await model.face.update({
-		_id: ctx.params.faceId,
+	const rs = await model.faceBindCard.update({
+		faceId: ctx.params.faceId,
 		disabled: false
 	}, {
-		$addToSet: {
-			bindInfo: cardInfo
+		$set: {
+			bindDate: new Date(ctx.params.date),
+			bindCode: ctx.params.code,
+			bindSiteId: ctx.params.siteId
 		}
+	}, {
+		upsert: true
 	})
 })
 
 router.post('searchPhotosByImage', async(ctx, next) => {
 	console.time('SearchFeature: ')
 		// let faceAry = await faceai.searchSameFace(ctx.files.file)
-	let faceAry = await SearchFeatureFromChlid(ctx.files.file)
+	let faceAry = await services.face.searchFeatureFromChlid(ctx.files.file)
 	console.timeEnd('SearchFeature: ')
 	fse.unlink(ctx.files.file)
 
@@ -101,39 +91,30 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
 	const photos = await model.photo.find({
-			faceIds: {
-				$in: ary
-			},
-			siteId: ctx.params.siteId,
-			'customerIds.code': ctx.params.code,
-			shootOn: {
-				$gte: new Date(ctx.params.date),
-				$lt: new Date(dateEnd)
-			}
-		}, {
-			_id: 0,
-			thumbnail: 1,
-			originalInfo: 1,
-			orderHistory: 1
-		})
-		// log(photos.length)
-	ctx.body = photos.map(photo => {
-		let pay = orderHistory[0] ? true : false
-		return {
-			_id: photo._id,
-			x512: photo.thumbnail.x512.url,
-			x1024: photo.thumbnail.x1024.url,
-			url: pay ? photo.originalInfo.url : '',
-			pay: pay
+		faceIds: {
+			$in: ary
+		},
+		siteId: ctx.params.siteId,
+		'customerIds.code': ctx.params.code,
+		shootOn: {
+			$gte: new Date(ctx.params.date),
+			$lt: new Date(dateEnd)
 		}
+	}, {
+		_id: 0,
+		thumbnail: 1,
+		originalInfo: 1,
+		orderHistory: 1
 	})
 	console.timeEnd('SearchDB: ')
+	const resPhotos = await service.photo.formatPhotos(ctx.params.siteId, photos)
+	ctx.body = resPhotos
 })
 
-router.post('searchCardsByImage', async(ctx, next) => {
+router.post('bindCardsByImage', async(ctx, next) => {
 
 	console.time('SearchFeature: ')
-	let faceAry = await SearchFeatureFromChlid(ctx.files.file)
+	let faceAry = await services.face.searchFeatureFromChlid(ctx.files.file)
 	console.timeEnd('SearchFeature: ')
 	fse.unlink(ctx.files.file)
 
@@ -153,7 +134,7 @@ router.post('searchCardsByImage', async(ctx, next) => {
 			$in: ary
 		},
 	}, {
-		_id: 0,
+		_id: 1,
 		thumbnail: 1,
 		original: 1,
 		orderHistory: 1,
@@ -163,8 +144,16 @@ router.post('searchCardsByImage', async(ctx, next) => {
 	})
 	console.timeEnd('SearchDB: ')
 
-	const cards = await services.photo.photosToCards(photos)
-	ctx.body = cards
+	const cardCodes = await services.face.addFaceCards(photos)
+	await model.user.update({
+		_id: user.user._id
+	}, {
+		$addToSet: {
+			customerIds: {
+				$each: cardCodes
+			}
+		}
+	})
 })
 
 module.exports = router

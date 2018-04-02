@@ -1,18 +1,14 @@
-exports.photosToCards = async (photos, codes) => {
+exports.photosToCards = async(photos, codes) => {
 	const codePhotos = []
 	photos.forEach(photo => {
 		const cusCode = photo.customerIds.map(obj => obj.code)
 		let _codes = []
-		if (codes) {
-			for (let code of cusCode) {
-				if (codes.indexOf(code) == -1) {
-					_codes.push(code)
-				}
+		for (let code of cusCode) {
+			if (codes.indexOf(code) == -1) {
+				_codes.push(code)
 			}
-		} else {
-			_codes = cusCode
 		}
-		
+
 		for (let code of _codes) {
 			codePhotos.push({
 				code: code,
@@ -50,6 +46,11 @@ exports.photosToCards = async (photos, codes) => {
 			date: _cards[card].date,
 			siteId: _cards[card].siteId,
 			parkName: global.siteInfo[_cards[card].siteId].parkName,
+			ocrCard: global.siteInfo[_cards[card].siteId].ocrCard || false,
+			faceCard: global.siteInfo[_cards[card].siteId].faceCard || false,
+			shareCard: global.siteInfo[_cards[card].siteId].shareCard || false,
+			pageUrl: global.siteInfo[_cards[card].siteId].pageUrl,
+			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${_cards[card].code}`,
 			cardImage: global.siteInfo[_cards[card].siteId].cardImage,
 			photoCount: _cards[card]._photos.length,
 			pay: pay,
@@ -58,4 +59,63 @@ exports.photosToCards = async (photos, codes) => {
 		})
 	}
 	return cards
+}
+
+exports.formatPhotos = async(siteId, photos) => {
+	photos.map(photo => {
+		const pay = orderHistory[0] ? true : false
+		let wMP4 = null
+		let originalInfo = null
+		let thumbnail = null
+
+		if (photo.mimeType == 'mp4') {
+			thumbnail = {
+				x512: {
+					width: photo.thumbnail.x512.width,
+					height: photo.thumbnail.x512.height,
+					url: photo.thumbnail.x512.url
+				},
+				x1024: {}
+			}
+			originalInfo = {}
+			wMP4 = {
+				url: pay ? photo.originalInfo.url : photo.thumbnail.x1024.url
+			}
+		}
+		if (photo.mimeType == 'jpg') {
+			let selectType = pay ? 'x1024' : 'w1024'
+			thumbnail = {
+				x512: {
+					width: photo.thumbnail.x512.width,
+					height: photo.thumbnail.x512.height,
+					url: photo.thumbnail.x512.url
+				},
+				x1024: {
+					width: photo.thumbnail[selectType].width,
+					height: photo.thumbnail[selectType].height,
+					url: photo.thumbnail[selectType].url
+				}
+			}
+			originalInfo = pay ? {
+				url: photo.originalInfo.url,
+				width: photo.originalInfo.width,
+				height: photo.originalInfo.height,
+				originalName: photo.originalInfo.originalName
+			} : {}
+			wMP4 = {}
+		}
+		return {
+			_id: photo._id,
+			siteId: siteId,
+			locationId: photo.locationId,
+			shootOn: photo.shootOn,
+			isFree: photo.isFree,
+			isPaid: pay,
+			parkName: global.siteInfo[_cards[card].siteId].parkName,
+			mimeType: photo.mimeType,
+			wMP4: wMP4,
+			thumbnail: thumbnail
+			originalInfo: originalInfo,
+		}
+	})
 }
