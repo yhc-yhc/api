@@ -114,7 +114,7 @@ exports.formatPhotos = async(siteId, photos) => {
 			parkName: global.siteInfo[_cards[card].siteId].parkName,
 			mimeType: photo.mimeType,
 			wMP4: wMP4,
-			thumbnail: thumbnail
+			thumbnail: thumbnail,
 			originalInfo: originalInfo,
 		}
 	})
