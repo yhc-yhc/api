@@ -43,17 +43,17 @@ exports.photosToCards = async(photos, codes) => {
 		}
 		cards.push({
 			code: _cards[card].code,
-			date: _cards[card].date,
+			bindOn: _cards[card].date,
 			siteId: _cards[card].siteId,
 			parkName: global.siteInfo[_cards[card].siteId].parkName,
 			ocrCard: global.siteInfo[_cards[card].siteId].ocrCard || false,
 			faceCard: global.siteInfo[_cards[card].siteId].faceCard || false,
-			shareCard: global.siteInfo[_cards[card].siteId].shareCard || false,
+			type: global.siteInfo[_cards[card].siteId].type || 0,
 			pageUrl: global.siteInfo[_cards[card].siteId].pageUrl,
 			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${_cards[card].code}`,
-			cardImage: global.siteInfo[_cards[card].siteId].cardImage,
+			bgUrl: global.siteInfo[_cards[card].siteId].bgUrl,
 			photoCount: _cards[card]._photos.length,
-			pay: pay,
+			allowPay: !pay,
 			payCount: payCount,
 			photos: _cards[card]._photos.length == 1 ? ary.fill(photos[0]) : photos.slice(0, 2)
 		})

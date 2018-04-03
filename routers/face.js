@@ -30,24 +30,35 @@ router.post('getFacesOfCard', async(ctx, next) => {
 		}
 	}, {
 		_id: 1,
-		url: 1,
-		bindInfo: 1
+		url: 1
 	})
-	let cardInfo = ctx.params.siteId + '_' + ctx.params.date + '_' + ctx.params.code
-	const faceMap = faces.reduce((pre, cur) => {
-		const bind = cur.bindInfo.indexOf(cardInfo) < 0 ? false : true
+	const faceUrlMap = faces.reduce((pre, cur) => {
 		pre[cur._id] = {
 			url: cur.url,
-			bind: bind
 		}
+		return pre
+	}, {})
+	const faceBindInfo = await model.faceBindCard.find({
+		faceId: {
+			$in: Object.keys(faceObj)
+		},
+		bindDate: new Date(ctx.params.date),
+		bindSiteId: ctx.params.siteId,
+		bindCode: ctx.params.code,
+		disabled: false
+	}, {
+		faceId: 1
+	})
+	const faceBindMap = faceBindInfo.reduce((pre, cur) => {
+		pre[cur.faceId] = 1
 		return pre
 	}, {})
 	let ary = []
 	for (let key in faceObj) {
 		const obj = {}
 		obj._id = key
-		obj.url = faceMap[key].url
-		obj.bind = faceMap[key].bind
+		obj.url = faceUrlMap[key].url
+		obj.bind = faceBindMap[key] ? true : false
 		obj.num = faceObj[key]
 		ary.push(obj)
 	}

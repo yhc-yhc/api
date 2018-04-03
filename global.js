@@ -66,12 +66,12 @@ async function getSiteInfo() {
 	})
 	global.siteInfo = parks.reduce((pre, cur) => {
 		pre[cur.siteId] = {
-			parkName: cur.name,
-			cardImage: cur.bgUrl,
-			pageUrl: cur.pageUrl || 'http://sky100.com.hk/',
-			ocrCard: cur.ocrCard,
-			faceCard: cur.faceCard,
-			shareCard: cur.shareCard
+			parkName: cur.name || '-',
+			bgUrl: cur.bgUrl || '-',
+			pageUrl: cur.pageUrl || '-',
+			ocrCard: cur.ocrCard || false,
+			faceCard: cur.faceCard || false,
+			type: cur.type || 0
 		}
 		return pre
 	}, {})
