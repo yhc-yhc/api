@@ -118,7 +118,7 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 		orderHistory: 1
 	})
 	console.timeEnd('SearchDB: ')
-	const resPhotos = await service.photo.formatPhotos(ctx.params.siteId, photos)
+	const resPhotos = await services.photo.formatPhotos(ctx.params.siteId, photos)
 	ctx.body = resPhotos
 })
 
