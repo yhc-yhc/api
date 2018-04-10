@@ -25,8 +25,8 @@ router.post('sendsms', async (ctx, next) => {
 router.post('wxlogin', async (ctx, next) => {
 
 
-	const questString = 'access_token=' + ctx.request.access_token + '&' + 'openid=' + ctx.request.openid
-	log('请求来了：' + questString)
+	const questString = 'access_token=' + ctx.request.body.access_token + '&' + 'openid=' + ctx.request.body.openid
+	log('请求来了：'+questString)
 	const validateLogin = await request.getAsync({
 		url: 'https://api.weixin.qq.com/sns/auth?' + questString
 	})
@@ -40,11 +40,11 @@ router.post('wxlogin', async (ctx, next) => {
 		})
 		log('获取微信返回的用户信息：' + userinfo)
 
-		const addressArr = []
-		addressArr[0] = ''
-		addressArr[1] = userinfo.province
-		addressArr[2] = userinfo.city
-		addressArr[3] = userinfo.country
+		 const addressArr = []
+         addressArr[0]=''
+         addressArr[1]=userinfo.province
+         addressArr[2]=userinfo.city
+         addressArr[3]=userinfo.country
 
 		const userdoc = await model.user.update({
 			userName: userinfo.nickname
@@ -58,18 +58,20 @@ router.post('wxlogin', async (ctx, next) => {
 				addresses: addressArr,
 				coverHeaderImage: userinfo.headimgurl,
 				unionid: userinfo.unionid, //用户的unionid是唯一的。换句话说，同一用户，对同一个微信开放平台下的不同应用，unionid是相同的
-				registerTerminal: ctx.request.type //终端类型ios,adriod
+				registerTerminal: ctx.request.body.type //终端类型ios,adriod
 
 			}
 		}, {
 			upsert: true
 		})
-		cache.set('user', userdoc)
+		cache.set('user',userdoc)
 		ctx.body = userdoc
 	} else {
 		ctx.body = 'err,无效的oppen_id／auth_token'
 	}
 
 })
+
+
 
 module.exports = router
