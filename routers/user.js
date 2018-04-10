@@ -27,7 +27,7 @@ router.post('wxlogin', async (ctx, next) => {
 	const validateLogin = await request.getAsync({
 		url: 'https://api.weixin.qq.com/sns/auth?' + questString
 	})
-	if (validateLogin.errcoide != 0 && userInfo.validateLogin != 'ok') {
+	if (validateLogin.errcoide != 0 && validateLogin.errmsg != 'ok') {
 		throw {
 			status: 10003,
 			message: httpStatus.common.system['10003'][ctx.LG],
