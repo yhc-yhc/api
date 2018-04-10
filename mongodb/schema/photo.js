@@ -3,6 +3,7 @@
  */
 const mongoose = require('mongoose')
 module.exports = {
+    oss: {type: Boolean}, // use oss storage
     siteId: {type: String}, //  index: true},
     photoId: {type: String, index: true},
     photoCode: {type: String, index: true},
