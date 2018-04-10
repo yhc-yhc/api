@@ -71,7 +71,7 @@ app.use(async(ctx, next) => {
 		httpStatus[service][fun].method.toUpperCase() == ctx.method.toUpperCase()
 	if (!b) {
 		throw {
-			status: 1007,
+			status: 10007,
 			message: httpStatus.common.system['10007'][ctx.LG],
 			router: ctx.url
 		}

@@ -15,8 +15,6 @@ module.exports = {
 		params: {
 			access_token: [1, 'String', "微信登录认证的token"],
 			openid: [1, 'String', "app认证的openid，授权用户唯一标识"]
-
-			
 		}
     }
 }
