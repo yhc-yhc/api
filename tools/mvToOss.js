@@ -11,12 +11,7 @@ global.config = require('../config.js')
 global.mongoose = require('mongoose')
 global.model = require('../mongodb/model.js')
 
-const saveToOss = async (bucketName, name, path) => {
-	const result = await store.listBuckets({prefix: bucketName})
-	console.log('buckets: ', result)
-	if (!result.buckets) {
-		await store.putBucket(bucketName)
-	}
+const saveToOss = async(bucketName, name, path) => {
 	store.useBucket(bucketName)
 	const rs = await store.put(name, buffer)
 	return rs.name
@@ -25,4 +20,10 @@ const saveToOss = async (bucketName, name, path) => {
 main()
 async function main() {
 	log('main')
+	const photos = await model.photo.find({
+		oss: {
+			$exists: false
+		}
+	}).limit(10)
+	log(photos.length)
 }

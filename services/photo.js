@@ -129,10 +129,6 @@ exports.formatPhotos = async(siteId, photos) => {
 }
 
 exports.saveToOSS = async (bucketName, name, buffer) => {
-	const result = await store.listBuckets({prefix: bucketName})
-	if (!result.buckets) {
-		await store.putBucket(bucketName)
-	}
 	store.useBucket(bucketName)
 	const rs = await store.put(name, buffer)
 	return rs.name
