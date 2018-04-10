@@ -30,6 +30,8 @@ const objToXml = function(obj) {
     xml += '</xml>'
     return xml
 }
+
+
 //后端发起支付请求，再转给app进行支付
 router.post('wxpayFromApp', async (ctx, next) => {
     const order = {
@@ -58,8 +60,8 @@ router.post('wxpayFromApp', async (ctx, next) => {
 
     const paysign2 = {
         appid: result.xml.appid,
-        partnerid: result.xml.partnerid,
-        prepayid: result.xml.prepayid,
+        partnerid: result.xml.mch_id,
+        prepayid: result.xml.prepay_id,
         package: 'Sign=WXPay',
         noncestr: (uuid.v4()).replace(/-/g, ''),
         timestamp: new Date().getTime()
