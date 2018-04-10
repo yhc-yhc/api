@@ -13,7 +13,7 @@ router.post('syncToCloud', async(ctx, next) => {
 		},
 		active: true,
 		expiredOn: {
-			$gte: new Date(ctx.photo.shootOn)
+			$gte: new Date(ctx.params.photo.shootOn)
 		}
 	})
 	const newOrderHistory = cards.map(card => {
@@ -32,16 +32,17 @@ router.post('syncToCloud', async(ctx, next) => {
 	const name = idGenerate(alphabet, 6) + idGenerate(alphabet, 6) + '.jpg'
 	const prefix = `${siteId}/${dayStr}`
 	const promises = [
-		services.photo.saveToOSS('paphotos', `${prefix}/tn/${name}`, new Buffer(ctx.params.L, 'base64')),
-		services.photo.saveToOSS('paphotos', `${prefix}/hd/${name}`, new Buffer(ctx.params.O, 'base64')),
-		services.photo.saveToOSS('paphotos', `${prefix}/wk/${name}`, new Buffer(ctx.params.W1024, 'base64'))
+		services.photo.saveToOSS(`pa${process.env.RUN == 'product' ? '': 'test'}photos`, `${prefix}/tn/${name}`, new Buffer(ctx.params.L, 'base64')),
+		services.photo.saveToOSS(`pa${process.env.RUN == 'product' ? '': 'test'}photos`, `${prefix}/hd/${name}`, new Buffer(ctx.params.O, 'base64')),
+		services.photo.saveToOSS(`pa${process.env.RUN == 'product' ? '': 'test'}photos`, `${prefix}/wk/${name}`, new Buffer(ctx.params.W1024, 'base64'))
 	]
 	const [x1024, url, w1024] = await Promise.all(promises)
 	ctx.params.photo.thumbnail.x1024.url = x1024
 	ctx.params.photo.originalInfo.url = url
 	ctx.params.photo.thumbnail.w1024.url = w1024
 		// update the doc of photo
-	await services.photo.update({
+	delete ctx.params.photo.__v
+	await model.photo.update({
 		_id: ctx.params.photo._id
 	}, {
 		$set: ctx.params.photo
@@ -96,6 +97,7 @@ router.post('syncOrder', async(ctx, next) => {
 		}
 	}
 	ctx.params.order.orderProducts = obj
+	delete ctx.params.order.__v
 	await model.order.update({
 		orderCode: ctx.params.order.orderCode
 	}, {
@@ -113,6 +115,7 @@ router.post('syncScanPPHistory', async(ctx, next) => {
 			router: ctx.url
 		}
 	}
+	delete ctx.params.syncScanPPHistory.__v
 	await model.scanPPHistory.update({
 		PPCode: ctx.params.syncScanPPHistory.PPCode
 	}, {
