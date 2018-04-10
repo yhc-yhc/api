@@ -9,7 +9,11 @@ const asyncBusboy = require('async-busboy')
 
 const app = new Koa()
 app.use(logger())
-app.use(bodyParser())
+app.use(bodyParser({
+	"formLimit": "10mb",
+	"jsonLimit": "10mb",
+	"textLimit": "10mb"
+}))
 
 app.use(async(ctx, next) => {
 	const start = new Date()

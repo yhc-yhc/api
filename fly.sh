@@ -11,7 +11,6 @@ docker run -itd \
 -p 7777:7777 \
 -p 8888:8888 \
 -w /src \
--e fly=product \
 --name faceai \
 node:8.9.4 \
 /bin/bash -c "RUN=$1 npm start"

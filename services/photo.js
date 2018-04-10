@@ -128,9 +128,8 @@ exports.formatPhotos = async(siteId, photos) => {
 	})
 }
 
-exports.saveBase64Data = async (bucketName, name, buffer) => {
+exports.saveToOSS = async (bucketName, name, buffer) => {
 	const result = await store.listBuckets({prefix: bucketName})
-	console.log('buckets: ', result)
 	if (!result.buckets) {
 		await store.putBucket(bucketName)
 	}
