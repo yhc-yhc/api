@@ -18,44 +18,6 @@ app.use(bodyParser({
 app.use(async(ctx, next) => {
 	const start = new Date()
 	ctx.method == 'GET' ? ctx.req.query = ctx.request.query : ctx.req.body = ctx.request.body
-	let ms
-	try {
-		await next()
-		ms = new Date() - start
-		logUtil.logResponse(ctx, ms)
-	} catch (err) {
-		ms = new Date() - start
-		logUtil.logError(ctx, err, ms)
-	}
-})
-
-// format api response result
-app.use(async(ctx, next) => {
-	try {
-		await next()
-	} catch (err) {
-		ctx.body = {
-			status: err.status || 10001,
-			message: err.message,
-			result: {
-				router: err.router,
-				stack: err.stack
-			}
-		}
-		throw err
-	}
-
-	if (ctx.body) {
-		const obj = Object.assign({}, httpStatus.common.success)
-		obj.result = ctx.body
-		ctx.body = obj
-	} else {
-		ctx.body = httpStatus.common.success
-	}
-})
-
-// api is exists
-app.use(async(ctx, next) => {
 	ctx.LG = 'en-US'
 	let url = ctx.url
 	if (ctx.method == 'GET') {
@@ -67,8 +29,45 @@ app.use(async(ctx, next) => {
 	ctx._url = url
 	ctx.service = service
 	ctx.fun = fun
-	let b = httpStatus[service] && httpStatus[service][fun] &&
-		httpStatus[service][fun].method.toUpperCase() == ctx.method.toUpperCase()
+
+	try {
+		await next()
+		if (ctx.service != 'sync') {
+			let ms = new Date() - start
+			logUtil.logResponse(ctx, ms)
+		}
+	} catch (err) {
+		ctx.body = {
+			status: err.status || 10001,
+			message: err.message || httpStatus.common.system['10001'][ctx.LG],
+			result: {
+				router: err.router,
+				stack: err.stack
+			}
+		}
+		if (ctx.service != 'sync') {
+			let ms = new Date() - start
+			logUtil.logError(ctx, err, ms)
+		}
+	}
+})
+
+// format api response result
+app.use(async(ctx, next) => {
+	await next()
+	if (ctx.body) {
+		const obj = Object.assign({}, httpStatus.common.success)
+		obj.result = ctx.body
+		ctx.body = obj
+	} else {
+		ctx.body = httpStatus.common.success
+	}
+})
+
+// api is exists
+app.use(async(ctx, next) => {
+	let b = httpStatus[ctx.service] && httpStatus[ctx.service][ctx.fun] &&
+		httpStatus[ctx.service][ctx.fun].method.toUpperCase() == ctx.method.toUpperCase()
 	if (!b) {
 		throw {
 			status: 1007,
@@ -93,7 +92,6 @@ app.use(async(ctx, next) => {
 		}, {})
 	} else {
 		ctx.params = ctx.method == 'GET' ? ctx.req.query : ctx.req.body
-
 	}
 	let bPass = true
 	const headers = httpStatus[ctx.service][ctx.fun].headers
