@@ -1,8 +1,6 @@
 const Router = require('koa-router')
 const router = new Router()
 const services = loaddir('./services')
-const idGenerate = require('nanoid/generate')
-const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 
 router.post('syncToCloud', async(ctx, next) => {
 	const customerCodes = ctx.params.photo.customerIds.map(obj => obj.code)
@@ -29,12 +27,11 @@ router.post('syncToCloud', async(ctx, next) => {
 	const siteId = ctx.params.photo.siteId
 	const shootOn = new Date(ctx.params.photo.shootOn)
 	const dayStr = moment(shootOn.getTime()).format('YYYYMMDD')
-	const name = idGenerate(alphabet, 6) + idGenerate(alphabet, 6) + '.jpg'
 	const prefix = `${siteId}/${dayStr}`
 	const promises = [
-		services.photo.saveToOSS(`pa${process.env.RUN == 'product' ? '': 'test'}photos`, `${prefix}/tn/${name}`, new Buffer(ctx.params.L, 'base64')),
-		services.photo.saveToOSS(`pa${process.env.RUN == 'product' ? '': 'test'}photos`, `${prefix}/hd/${name}`, new Buffer(ctx.params.O, 'base64')),
-		services.photo.saveToOSS(`pa${process.env.RUN == 'product' ? '': 'test'}photos`, `${prefix}/wk/${name}`, new Buffer(ctx.params.W1024, 'base64'))
+		services.photo.saveToOSS(`pa${process.env.RUN == 'product' ? '': 'test'}photos`, `${prefix}/tn/tn_${ctx.params.photo._id}`, new Buffer(ctx.params.L, 'base64')),
+		services.photo.saveToOSS(`pa${process.env.RUN == 'product' ? '': 'test'}photos`, `${prefix}/hd/hd_${ctx.params.photo._id}`, new Buffer(ctx.params.O, 'base64')),
+		services.photo.saveToOSS(`pa${process.env.RUN == 'product' ? '': 'test'}photos`, `${prefix}/wk/wk_${ctx.params.photo._id}`, new Buffer(ctx.params.W1024, 'base64'))
 	]
 	const [x1024, url, w1024] = await Promise.all(promises)
 	ctx.params.photo.thumbnail.x1024.url = x1024
