@@ -19,11 +19,13 @@ const saveToOss = async(bucketName, name, path) => {
 
 main()
 async function main() {
-	log('main')
 	const photos = await model.photo.find({
 		oss: {
 			$exists: false
 		}
 	}).limit(10)
 	log(photos.length)
+	for (let photo of photos) {
+		
+	}
 }
