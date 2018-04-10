@@ -48,12 +48,16 @@ module.exports = {
 		10007: {
 			'en-US': 'Request api not found',
 			'zh-CN': '接口不存在'
+		},
+		10008: {
+			'en-US': 'parameter error',
+			'zh-CN': '接口参数错误'
 		}
 	},
 	service: {
 		20001: {
-			'en-US': 'can not find face',
-			'zh-CN': '检测不到人脸'
+			'en-US': 'siteId not exists',
+			'zh-CN': 'siteId 不存在'
 		},
 		20002: {
 			'en-US': 'load the image error',

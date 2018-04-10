@@ -68,6 +68,7 @@ async function getSiteInfo() {
 		pre[cur.siteId] = {
 			parkName: cur.name || '-',
 			bgUrl: cur.bgUrl || '-',
+			barUrl: cur.barUrl || '-',
 			pageUrl: cur.pageUrl || '-',
 			ocrCard: cur.ocrCard || false,
 			faceCard: cur.faceCard || false,

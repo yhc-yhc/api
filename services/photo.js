@@ -1,3 +1,10 @@
+const oss = require('ali-oss').Wrapper
+const store = oss({
+	accessKeyId: 'LTAIamKqehuCllfX',
+	accessKeySecret: '6sr2fdtUJHQK1GaKJdjY1JDNg94YrM',
+	region: 'oss-cn-hongkong',
+
+})
 exports.photosToCards = async(photos, codes) => {
 	const codePhotos = []
 	photos.forEach(photo => {
@@ -52,6 +59,7 @@ exports.photosToCards = async(photos, codes) => {
 			pageUrl: global.siteInfo[_cards[card].siteId].pageUrl,
 			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${_cards[card].code}`,
 			bgUrl: global.siteInfo[_cards[card].siteId].bgUrl,
+			barUrl: global.siteInfo[_cards[card].siteId].barUrl,
 			photoCount: _cards[card]._photos.length,
 			allowPay: !pay,
 			payCount: payCount,
@@ -118,4 +126,15 @@ exports.formatPhotos = async(siteId, photos) => {
 			originalInfo: originalInfo,
 		}
 	})
+}
+
+exports.saveBase64Data = async (bucketName, name, buffer) => {
+	const result = await store.listBuckets({prefix: bucketName})
+	console.log('buckets: ', result)
+	if (!result.buckets) {
+		await store.putBucket(bucketName)
+	}
+	store.useBucket(bucketName)
+	const rs = await store.put(name, buffer)
+	return rs.name
 }
