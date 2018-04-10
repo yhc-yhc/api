@@ -23,53 +23,50 @@ router.post('sendsms', async (ctx, next) => {
  微信登录,获取用户信息
 */
 router.post('wxlogin', async (ctx, next) => {
-
-
-	const questString = 'access_token=' + ctx.request.body.access_token + '&' + 'openid=' + ctx.request.body.openid
-	log('请求来了：'+questString)
+	const questString = 'access_token=' + ctx.params.access_token + '&' + 'openid=' + ctx.params.openid
 	const validateLogin = await request.getAsync({
 		url: 'https://api.weixin.qq.com/sns/auth?' + questString
 	})
-	console.log('validateLogin: ' + validateLogin)
-	if (validateLogin.errcoide == 0 && userInfo.validateLogin == 'ok') {
-		/*
-	      1.获取到微信返回的用户信息
-	   	*/
-		const userinfo = await request.getAsync({
-			url: 'https://api.weixin.qq.com/sns/userinfo?' + questString
-		})
-		log('获取微信返回的用户信息：' + userinfo)
-
-		 const addressArr = []
-         addressArr[0]=''
-         addressArr[1]=userinfo.province
-         addressArr[2]=userinfo.city
-         addressArr[3]=userinfo.country
-
-		const userdoc = await model.user.update({
-			userName: userinfo.nickname
-		}, {
-			$set: {
-				userName: userinfo.nickname,
-				name: userinfo.nickname,
-				openIds: userinfo.openIds,
-				gender: userinfo.sex,
-				country: userinfo.country,
-				addresses: addressArr,
-				coverHeaderImage: userinfo.headimgurl,
-				unionid: userinfo.unionid, //用户的unionid是唯一的。换句话说，同一用户，对同一个微信开放平台下的不同应用，unionid是相同的
-				registerTerminal: ctx.request.body.type //终端类型ios,adriod
-
-			}
-		}, {
-			upsert: true
-		})
-		cache.set('user',userdoc)
-		ctx.body = userdoc
-	} else {
-		ctx.body = 'err,无效的oppen_id／auth_token'
+	if (validateLogin.errcoide != 0 && validateLogin.errmsg != 'ok') {
+		throw {
+			status: 10003,
+			message: httpStatus.common.system['10003'][ctx.LG],
+			router: ctx.url
+		}
 	}
+	
+	const userinfo = await request.getAsync({
+		url: 'https://api.weixin.qq.com/sns/userinfo?' + questString
+	})
+	log('获取微信返回的用户信息：' + userinfo)
 
+	const addressArr = []
+	addressArr[0] = ''
+	addressArr[1] = userinfo.province
+	addressArr[2] = userinfo.city
+	addressArr[3] = userinfo.country
+
+	const userdoc = await model.user.update({
+		userName: userinfo.nickname
+	}, {
+		$set: {
+			userName: userinfo.nickname,
+			name: userinfo.nickname,
+			openIds: userinfo.openIds,
+			gender: userinfo.sex,
+			country: userinfo.country,
+			addresses: addressArr,
+			coverHeaderImage: userinfo.headimgurl,
+			unionid: userinfo.unionid, //用户的unionid是唯一的。换句话说，同一用户，对同一个微信开放平台下的不同应用，unionid是相同的
+			registerTerminal: ctx.params.type, //终端类型ios,adriod
+			creDatetime:moment().format('YYYY/MM/DD HH:mm:ss'),
+			updDatetime:moment().format('YYYY/MM/DD HH:mm:ss'),
+		    userPP:"PWUP" + model.user._id.toString().substr(12, 12).toUpperCase()
+		}
+	}, {
+		upsert: true
+	})
+	cache.set('user', userdoc)
 })
 
 

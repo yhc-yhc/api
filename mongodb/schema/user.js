@@ -3,7 +3,7 @@
  */
 const mongoose = require('mongoose');
 module.exports = {
-    userId: {type: String, unique: true, index: true, required: true},
+    //userId: {type: String, unique: true, index: true, required: true},
     userName: {type: String, required: true},
     password: {type: String},
     userGroup: {type: String},
@@ -25,9 +25,9 @@ module.exports = {
     cameraPrefixes: {type: String},
     disabled: {type: Boolean},
     creDatetime: {type: Date, required: true},
-    creUser: {type: String, required: true},
+   
     updDatetime: {type: Date, required: true},
-    updUser: {type: String, required: true},//下面是onlinesuer
+   
 
     email: {type: String, index: true}, //Email
     userPP: {type: String, index: true},    //注册后根据用户生成的PP号
@@ -247,8 +247,6 @@ module.exports = {
         QQ: {type: String}, //
         facebook: {type: String}, //
         instagram: {type: String} //
-   
-
     },
     favoriteLocationIds: {
         type: [ //收藏的地点信息
