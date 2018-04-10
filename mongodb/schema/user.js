@@ -247,6 +247,7 @@ module.exports = {
         QQ: {type: String}, //
         facebook: {type: String}, //
         instagram: {type: String} //
+   
 
     },
     favoriteLocationIds: {
