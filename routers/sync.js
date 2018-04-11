@@ -24,7 +24,7 @@ router.post('syncToCloud', async(ctx, next) => {
 	ctx.params.photo.orderHistory ? '' : ctx.params.photo.orderHistory = []
 	ctx.params.photo.orderHistory = ctx.params.photo.orderHistory.concat(newOrderHistory)
 		//update file url
-	const bucketName = `pa${process.env.RUN == 'product' ? '': 'test'}oss`
+	const bucketName = `pa${process.env.RUN == 'product' ? '': 'testenv'}oss`
 	const siteId = ctx.params.photo.siteId
 	const shootOn = new Date(ctx.params.photo.shootOn)
 	const dayStr = moment(shootOn.getTime()).format('YYYYMMDD')
