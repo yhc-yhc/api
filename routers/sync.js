@@ -28,9 +28,9 @@ router.post('syncToCloud', async(ctx, next) => {
 	const siteId = ctx.params.photo.siteId
 	const shootOn = new Date(ctx.params.photo.shootOn)
 	const dayStr = moment(shootOn.getTime()).format('YYYYMMDD')
-	const _x1024 = endeUrl.md5(`tn${ctx.params.photo._id}.jpg`)
-	const _url = endeUrl.md5(`hd${ctx.params.photo._id}.jpg`)
-	const _w1024 = endeUrl.md5(`wm${ctx.params.photo._id}.jpg`)
+	const _x1024 = endeurl.md5(`tn${ctx.params.photo._id}.jpg`)
+	const _url = endeurl.md5(`hd${ctx.params.photo._id}.jpg`)
+	const _w1024 = endeurl.md5(`wm${ctx.params.photo._id}.jpg`)
 	const promises = [
 		services.photo.saveToOSS(bucketName, `oss/${siteId}/${dayStr}/photos/tn/${_x1024}`, new Buffer(ctx.params.L, 'base64')),
 		services.photo.saveToOSS(bucketName, `oss/${siteId}/${dayStr}/photos/hd/${_url}`, new Buffer(ctx.params.O, 'base64')),
