@@ -2,7 +2,7 @@ const oss = require('ali-oss').Wrapper
 const store = oss({
 	accessKeyId: 'LTAIamKqehuCllfX',
 	accessKeySecret: '6sr2fdtUJHQK1GaKJdjY1JDNg94YrM',
-	region: 'oss-cn-hongkong',
+	region: process.env.RUN == 'product' ? 'oss-cn-hongkong': 'oss-cn-shanghai',
 	timeout: 120000
 
 })
