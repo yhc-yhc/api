@@ -28,10 +28,13 @@ router.post('syncToCloud', async(ctx, next) => {
 	const siteId = ctx.params.photo.siteId
 	const shootOn = new Date(ctx.params.photo.shootOn)
 	const dayStr = moment(shootOn.getTime()).format('YYYYMMDD')
+	const _x1024 = endeUrl.md5(`tn${ctx.params.photo._id}.jpg`)
+	const _url = endeUrl.md5(`hd${ctx.params.photo._id}.jpg`)
+	const _w1024 = endeUrl.md5(`wm${ctx.params.photo._id}.jpg`)
 	const promises = [
-		services.photo.saveToOSS(bucketName, `photos/${siteId}/${dayStr}/tn/tn${ctx.params.photo._id}.jpg`, new Buffer(ctx.params.L, 'base64')),
-		services.photo.saveToOSS(bucketName, `photos/${siteId}/${dayStr}/hd/hd${ctx.params.photo._id}.jpg`, new Buffer(ctx.params.O, 'base64')),
-		services.photo.saveToOSS(bucketName, `photos/${siteId}/${dayStr}/wm/wm${ctx.params.photo._id}.jpg`, new Buffer(ctx.params.W1024, 'base64'))
+		services.photo.saveToOSS(bucketName, `oss/${siteId}/${dayStr}/photos/tn/${_x1024}`, new Buffer(ctx.params.L, 'base64')),
+		services.photo.saveToOSS(bucketName, `oss/${siteId}/${dayStr}/photos/hd/${_url}`, new Buffer(ctx.params.O, 'base64')),
+		services.photo.saveToOSS(bucketName, `oss/${siteId}/${dayStr}/photos/wm/${_w1024}`, new Buffer(ctx.params.W1024, 'base64'))
 	]
 	const [x1024, url, w1024] = await Promise.all(promises)
 	ctx.params.photo.thumbnail.x1024.url = x1024
@@ -41,7 +44,6 @@ router.post('syncToCloud', async(ctx, next) => {
 	ctx.params.photo.thumbnail.x512.url = x1024
 	ctx.params.photo.thumbnail.x128.url = x1024
 
-	ctx.params.photo.oss = true
 	delete ctx.params.photo.__v
 	await model.photo.update({
 		_id: ctx.params.photo._id

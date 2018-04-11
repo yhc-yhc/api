@@ -3,6 +3,7 @@ const store = oss({
 	accessKeyId: 'LTAIamKqehuCllfX',
 	accessKeySecret: '6sr2fdtUJHQK1GaKJdjY1JDNg94YrM',
 	region: 'oss-cn-hongkong',
+	timeout: 120000
 
 })
 exports.photosToCards = async(photos, codes) => {
@@ -130,6 +131,8 @@ exports.formatPhotos = async(siteId, photos) => {
 
 exports.saveToOSS = async (bucketName, name, buffer) => {
 	store.useBucket(bucketName)
-	const rs = await store.put(name, buffer)
+	const rs = await store.put(name, buffer, {
+		timeout: 120000
+	})
 	return rs.name
 }

@@ -16,6 +16,13 @@ function deurl(enurlstr) {
 	return decoded;
 }
 
+const md5 = str => {
+	const MD5 = crypto.createHash('md5')
+	MD5.update(str)
+	str = MD5.digest('hex')
+	return str
+}
+
 // let urlstr = 'photos/20170524/bu1/enPreview/BU1_bu1-9990-88888888-103927-03664303_BuzzRideGreenMan6r.jpg';
 // console.log(enurl(urlstr))
 
@@ -25,5 +32,6 @@ function deurl(enurlstr) {
 
 module.exports = {
 	enurl,
-	deurl
+	deurl,
+	md5
 }
