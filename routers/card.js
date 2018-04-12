@@ -6,21 +6,18 @@ router.get('listCards', async(ctx, next) => {
 	const user = await model.user.findOne({
 		_id: ctx.user.userid
 	})
-	const codes = user.customerIds.map(obj => obj.code)
-	const photos = await model.photo.find({
-		'customerIds.code': {
-			$in: codes
-		}
-	}, {
-		_id: 0,
-		thumbnail: 1,
-		original: 1,
-		orderHistory: 1,
-		siteId: 1,
-		'customerIds.code': 1,
-		shootOn: 1
+	let codes = user.customerIds.map(obj => obj.code)
+	codes = codes.concat(user.pppCodes.map(obj => obj.PPPCode))
+
+	const cards = []
+	for (let code of codes) {
+		const promise = groupPhotos(code)
+		cards.push(promise)
+	}
+	await Promise.all(cards)
+	cards.sort((p, c) => {
+		return new Date(p.bindOn) - new Date(c.bindOn)
 	})
-	const cards = await services.photo.photosToCards(photos, codes)
 	ctx.body = cards
 })
 
