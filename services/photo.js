@@ -72,7 +72,8 @@ exports.photosToCards = async(photos, codes) => {
 	return cards
 }
 
-exports.groupPhotos = async code => {
+exports.groupPhotos = async (code, bindOn) => {
+	const cards = []
 	const groups = await model.photo.aggregate([{
 		$match: {
 			'customerIds.code': code
@@ -93,10 +94,29 @@ exports.groupPhotos = async code => {
 			}
 		}
 	}])
+	if (!global.siteInfo) {
+		await global.getSiteInfo()
+	}
+	if (!groups.length) {
+		return [{
+			code: code,
+			bindOn: moment(new Date(bindOn)).format('YYYY.MM.DD'),
+			siteId: 'none',
+			parkName: 'unKnow',
+			ocrCard: false,
+			faceCard: false,
+			type: 0,
+			pageUrl: 'none',
+			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
+			bgUrl: 'none',
+			barUrl: 'none',
+			photoCount: 0,
+			card.allowPay: false
+			card.payCount: 0
+			card.photos: ['', '']
+		}]
+	}
 	for (let group of groups) {
-		if (!global.siteInfo) {
-			await global.getSiteInfo()
-		}
 		const card = {
 			code: code,
 			bindOn: moment(group._id.shootOn).format('YYYY.MM.DD'),
@@ -133,9 +153,11 @@ exports.groupPhotos = async code => {
 		} else {
 			card.allowPay = false
 			card.payCount = 0
-			card.photos = []
+			card.photos = ['', '']
 		}
+		cards.push(card)
 	}
+	return cards
 }
 
 exports.formatPhotos = async(siteId, photos) => {
