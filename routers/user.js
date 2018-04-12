@@ -1,5 +1,6 @@
 const Router = require('koa-router')
 const router = new Router()
+const services = loaddir('./services')
 
 router.post('sendsms', async (ctx, next) => {
 	const body = ctx.req.body
@@ -22,51 +23,31 @@ router.post('sendsms', async (ctx, next) => {
 /*
  微信登录,获取用户信息
 */
-router.post('wxlogin', async (ctx, next) => {
-	const questString = 'access_token=' + ctx.params.access_token + '&' + 'openid=' + ctx.params.openid
-	const validateLogin = await request.getAsync({
-		url: 'https://api.weixin.qq.com/sns/auth?' + questString
-	})
-	if (validateLogin.errcoide != 0 && validateLogin.errmsg != 'ok') {
-		throw {
-			status: 10003,
-			message: httpStatus.common.system['10003'][ctx.LG],
-			router: ctx.url
-		}
-	}
-	
-	const userinfo = await request.getAsync({
-		url: 'https://api.weixin.qq.com/sns/userinfo?' + questString
-	})
-	log('获取微信返回的用户信息：' + userinfo)
-
-	const addressArr = []
-	addressArr[0] = ''
-	addressArr[1] = userinfo.province
-	addressArr[2] = userinfo.city
-	addressArr[3] = userinfo.country
-
-	const userdoc = await model.user.update({
-		userName: userinfo.nickname
+router.post('thirdLogin', async (ctx, next) => {
+	let user = await services.user.thirdLogin(ctx)
+	log(28, user)
+	await model.user.update({
+		userName: user.userName
 	}, {
-		$set: {
-			userName: userinfo.nickname,
-			name: userinfo.nickname,
-			openIds: userinfo.openIds,
-			gender: userinfo.sex,
-			country: userinfo.country,
-			addresses: addressArr,
-			coverHeaderImage: userinfo.headimgurl,
-			unionid: userinfo.unionid, //用户的unionid是唯一的。换句话说，同一用户，对同一个微信开放平台下的不同应用，unionid是相同的
-			registerTerminal: ctx.params.type, //终端类型ios,adriod
-			creDatetime:moment().format('YYYY/MM/DD HH:mm:ss'),
-			updDatetime:moment().format('YYYY/MM/DD HH:mm:ss'),
-		    userPP:"PWUP" + model.user._id.toString().substr(12, 12).toUpperCase()
-		}
+		$set: user
 	}, {
 		upsert: true
 	})
-	cache.set('user', userdoc)
+	const _user = await model.user.findOne({
+		userName: user.userName
+	}, {
+		_id: 1
+	})
+	const userid = _user._id.toString()
+	const access_token = await services.user.createToken(user, ctx)
+	const key = 'access_token:' + crypto.createHash('md5').update(user.userName).digest('hex')
+	cache.set(key, JSON.stringify({
+		userid,
+		user
+	}), 'EX', 604800) // 7*24*60*60
+	ctx.body = {
+		token: access_token
+	}
 })
 
 
