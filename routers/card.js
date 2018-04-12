@@ -2,10 +2,15 @@ const Router = require('koa-router')
 const router = new Router()
 const services = loaddir('./services')
 
-router.get('listCards', async(ctx, next) => {
+router.get('listCards', async (ctx, next) => {
 	const user = await model.user.findOne({
 		_id: ctx.user.userid
 	})
+	if (!user) {
+		throw {
+			message: 'user not exists'
+		}
+	}
 	let codes = user.customerIds.map(obj => obj.code)
 	codes = codes.concat(user.pppCodes.map(obj => obj.PPPCode))
 

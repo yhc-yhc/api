@@ -1,3 +1,7 @@
 *.dat
 idea/
 mongodb/schema/user.js
+routers/sync.js
+services/photo.js
+test/crptoTest.js
+tools/endeurl.js

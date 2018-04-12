@@ -134,7 +134,7 @@ app.use(async(ctx, next) => {
 app.use(async(ctx, next) => {
 	if (global.httpStatus[ctx.service][ctx.fun].headers.token ||
 		global.httpStatus[ctx.service][ctx.fun].params.token) {
-		let token = ctx.headers.token || ctx.paras.token
+		let token = ctx.headers.token || ctx.params.token
 		if (!token) {
 			throw {
 				status: 10006,
@@ -151,11 +151,7 @@ app.use(async(ctx, next) => {
 				algorithm: 'RS512'
 			})
 		} catch (err) {
-			throw {
-				status: 10005,
-				message: httpStatus.common.system['10005'][ctx.LG],
-				router: ctx.url
-			}
+			throw err
 		}
 		let userStr = await cache.getAsync('access_token:' + tokenObj.audience)
 		if (!userStr) {
