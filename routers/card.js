@@ -11,27 +11,30 @@ router.get('listCards', async(ctx, next) => {
 			message: 'user not exists'
 		}
 	}
-
-	let codes = user.customerIds.map(obj => obj.code)
-	codes = codes.concat(user.pppCodes.map(obj => obj.PPPCode))
-
 	const codeBindMap = user.customerIds.reduce((pre, cur) => {
+		if (cur.code.slice(0, 2) == 'PW') return pre
 		pre[cur.code] = cur.bindOn
 		return pre
 	}, {})
 
-	user.pppCodes.reduce((pre, cur) => {
-		pre[cur.PPPCode] = cur.bindOn
+	user.pppCodes.filter(obj => obj.PPCode).reduce((pre, cur) => {
+		if (cur.PPCode.slice(0, 2) == 'PW') return pre
+		pre[cur.PPCode] = cur.bindOn
 		return pre
 	}, codeBindMap)
 
+	let groupPromises = []
+	for (let code in codeBindMap) {
+		const promise = services.photo.groupPhotos(code, codeBindMap[code])
+		groupPromises.push(promise)
+	}
+	await Promise.all(groupPromises)
 	let cards = []
-	for (let code of codes) {
-		const _cards = services.photo.groupPhotos(code, codeBindMap[code])
-		cards = cards.concat(_cards)
+	for (ary of groupPromises) {
+		cards = cards.concat(await ary)
 	}
 	cards.sort((p, c) => {
-		return new Date(p.bindOn) - new Date(c.bindOn)
+		return new Date(c.bindOn) - new Date(p.bindOn)
 	})
 	ctx.body = cards
 })

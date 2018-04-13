@@ -72,7 +72,7 @@ exports.photosToCards = async(photos, codes) => {
 	return cards
 }
 
-exports.groupPhotos = async (code, bindOn) => {
+exports.groupPhotos = async(code, bindOn) => {
 	const cards = []
 	const groups = await model.photo.aggregate([{
 		$match: {
@@ -101,63 +101,75 @@ exports.groupPhotos = async (code, bindOn) => {
 		return [{
 			code: code,
 			bindOn: moment(new Date(bindOn)).format('YYYY.MM.DD'),
-			siteId: 'none',
-			parkName: 'unKnow',
+			siteId: 'pictureair',
+			parkName: 'PictureAir',
 			ocrCard: false,
 			faceCard: false,
 			type: 0,
-			pageUrl: 'none',
+			pageUrl: '',
 			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
-			bgUrl: 'none',
-			barUrl: 'none',
+			bgUrl: '',
+			barUrl: '',
 			photoCount: 0,
 			allowPay: false,
 			payCount: 0,
-			photos: ['', '']
+			photos: []
 		}]
 	}
 	for (let group of groups) {
-		const card = {
-			code: code,
-			bindOn: moment(group._id.shootOn).format('YYYY.MM.DD'),
-			siteId: group._id.siteId,
-			parkName: global.siteInfo[group._id.siteId].parkName,
-			ocrCard: global.siteInfo[group._id.siteId].ocrCard || false,
-			faceCard: global.siteInfo[group._id.siteId].faceCard || false,
-			type: global.siteInfo[group._id.siteId].type || 0,
-			pageUrl: global.siteInfo[group._id.siteId].pageUrl,
-			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
-			bgUrl: global.siteInfo[group._id.siteId].bgUrl,
-			barUrl: global.siteInfo[group._id.siteId].barUrl,
-			photoCount: group.photoCount,
-			// allowPay: !pay,
-			// payCount: payCount,
-			// photos: group._id._photos.length == 1 ? ary.fill(photos[0]) : photos.slice(0, 2)
-		}
+		cards.push(this.getGroupInfo(group, code))
+	}
+	await Promise.all(cards)
+	return cards.map(card => await card)
+}
 
-		if (group.photoCount) {
-			const photos = await model.photo.find({
-				_id: {
-					$in: group.ids
+exports.getGroupInfo = async(group, code) => {
+	const card = {
+		code: code,
+		bindOn: moment(group._id.shootOn).format('YYYY.MM.DD'),
+		siteId: group._id.siteId,
+		parkName: global.siteInfo[group._id.siteId].parkName,
+		ocrCard: global.siteInfo[group._id.siteId].ocrCard || false,
+		faceCard: global.siteInfo[group._id.siteId].faceCard || false,
+		type: global.siteInfo[group._id.siteId].type || 0,
+		pageUrl: global.siteInfo[group._id.siteId].pageUrl,
+		shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
+		bgUrl: global.siteInfo[group._id.siteId].bgUrl,
+		barUrl: global.siteInfo[group._id.siteId].barUrl,
+		photoCount: group.photoCount,
+	}
+
+	if (group.photoCount) {
+		const photosPromise = model.photo.find({
+			_id: {
+				$in: group.ids
+			}
+		}, {
+			orderHistory: 1,
+			isFree: 1,
+			'thumbnail.x512.url': 1
+		}).sort({
+			shootOn: -1
+		}).limit(2)
+		const payPhotosPromise = model.count({
+			$or: [{
+				'orderHistory.0': {
+					$exists: true
 				}
 			}, {
-				orderHistory: 1,
-				isFree: 1,
-				'thumbnail.x512.url': 1
-			}).sort({
-				shootOn: -1
-			})
-			card.allowPay = !photos.every(obj => obj.orderHistory.length > 0 || obj.isFree == true)
-			card.payCount = photos.map(obj => obj.orderHistory.length > 0 || obj.isFree == true).length
-			card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x512.url).slice(0, 2) : [photos[0].thumbnail.x512.url, photos[0].thumbnail.x512.url]
-		} else {
-			card.allowPay = false
-			card.payCount = 0
-			card.photos = ['', '']
-		}
-		cards.push(card)
+				isFree: true
+			}]
+		})
+		const [photos, payPhotos] = await Promise.all([photosPromise, payPhotosPromise])
+		card.payCount = payPhotos.length
+		card.allowPay = payPhotos.length == group.photoCount ? true : false
+		card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x512.url) : [photos[0].thumbnail.x512.url, photos[0].thumbnail.x512.url]
+	} else {
+		card.allowPay = false
+		card.payCount = 0
+		card.photos = []
 	}
-	return cards
+	return card
 }
 
 exports.formatPhotos = async(siteId, photos) => {
