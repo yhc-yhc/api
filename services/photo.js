@@ -111,9 +111,9 @@ exports.groupPhotos = async (code, bindOn) => {
 			bgUrl: 'none',
 			barUrl: 'none',
 			photoCount: 0,
-			card.allowPay: false
-			card.payCount: 0
-			card.photos: ['', '']
+			allowPay: false,
+			payCount: 0,
+			photos: ['', '']
 		}]
 	}
 	for (let group of groups) {
@@ -143,7 +143,7 @@ exports.groupPhotos = async (code, bindOn) => {
 			}, {
 				orderHistory: 1,
 				isFree: 1,
-				thumbnail.x512.url: 1
+				'thumbnail.x512.url': 1
 			}).sort({
 				shootOn: -1
 			})
