@@ -88,9 +88,6 @@ exports.groupPhotos = async(code, bindOn) => {
 			},
 			photoCount: {
 				$sum: 1
-			},
-			ids: {
-				$addToSet: '$_id'
 			}
 		}
 	}])
@@ -120,7 +117,10 @@ exports.groupPhotos = async(code, bindOn) => {
 		cards.push(this.getGroupInfo(group, code))
 	}
 	await Promise.all(cards)
-	return cards.map(card => await card)
+	for (let i in cards) {
+		cards[i] = await cards[i]
+	}
+	return cards
 }
 
 exports.getGroupInfo = async(group, code) => {
@@ -141,9 +141,12 @@ exports.getGroupInfo = async(group, code) => {
 
 	if (group.photoCount) {
 		const photosPromise = model.photo.find({
-			_id: {
-				$in: group.ids
-			}
+			shootOn: {
+				$gte: new Date(group._id.shootOn),
+				$lt: new Date(new Date(group._id.shootOn) + 86400000)
+			},
+			'customerIds.code': code,
+			siteId: group._id.siteId
 		}, {
 			orderHistory: 1,
 			isFree: 1,
@@ -151,7 +154,13 @@ exports.getGroupInfo = async(group, code) => {
 		}).sort({
 			shootOn: -1
 		}).limit(2)
-		const payPhotosPromise = model.count({
+		const payPhotosPromise = model.photo.count({
+			shootOn: {
+				$gte: new Date(group._id.shootOn),
+				$lt: new Date(new Date(group._id.shootOn) + 86400000)
+			},
+			'customerIds.code': code,
+			siteId: group._id.siteId,
 			$or: [{
 				'orderHistory.0': {
 					$exists: true
