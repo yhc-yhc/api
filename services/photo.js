@@ -170,7 +170,7 @@ exports.getGroupInfo = async(group, code) => {
 		})
 		let [photos, payPhotos] = await Promise.all([photosPromise, payPhotosPromise])
 		card.payCount = payPhotos.length || 0
-		card.allowPay = payPhotos.length == group.photoCount ? true : false
+		card.allowPay = payPhotos.length == group.photoCount ? false : true
 		card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x512.url) : [photos[0].thumbnail.x512.url, photos[0].thumbnail.x512.url]
 	} else {
 		card.allowPay = false
