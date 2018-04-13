@@ -153,7 +153,7 @@ exports.getGroupInfo = async(group, code) => {
 		}).sort({
 			shootOn: -1
 		}).limit(2)
-		const payPhotosPromise = model.photo.count({
+		const payCountPromise = model.photo.count({
 			shootOn: {
 				$gte: new Date(group._id.shootOn),
 				$lt: new Date(new Date(group._id.shootOn).getTime() + 86400000)
@@ -168,9 +168,9 @@ exports.getGroupInfo = async(group, code) => {
 				isFree: true
 			}]
 		})
-		let [photos, payPhotos] = await Promise.all([photosPromise, payPhotosPromise])
-		card.payCount = payPhotos.length || 0
-		card.allowPay = payPhotos.length == group.photoCount ? false : true
+		let [photos, payCount] = await Promise.all([photosPromise, payCountPromise])
+		card.payCount = payCount
+		card.allowPay = payCount == group.photoCount ? false : true
 		card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x512.url) : [photos[0].thumbnail.x512.url, photos[0].thumbnail.x512.url]
 	} else {
 		card.allowPay = false
