@@ -25,15 +25,10 @@ router.get('listCards', async(ctx, next) => {
 		return pre
 	}, codeBindMap)
 
-	let cardPromises = []
-	for (let code of codes) {
-		const promises = services.photo.groupPhotos(code, codeBindMap[code])
-		cardPromises = cardPromises.concat(promises)
-	}
-	await Promise.all(cardPromises)
 	let cards = []
-	for (ary of cardPromises) {
-		cards = cards.concat(ary)
+	for (let code of codes) {
+		const _cards = services.photo.groupPhotos(code, codeBindMap[code])
+		cards = cards.concat(_cards)
 	}
 	cards.sort((p, c) => {
 		return new Date(p.bindOn) - new Date(c.bindOn)
