@@ -21,7 +21,7 @@ exports.createToken = async (user, ctx) => {
 	})
 }
 
-exports.thirdLogin = async ctx => {
+exports.wxLogin = async ctx => {
 	const questString = `access_token=${ctx.params.access_token}&openid=${ctx.params.openid}`
 	const loginUrl = `https://api.weixin.qq.com/sns/auth?${questString}`
 	const infoUrl = 'https://api.weixin.qq.com/sns/userinfo?' + questString
@@ -63,6 +63,55 @@ exports.thirdLogin = async ctx => {
 		// addresses: addressArr,
 		coverHeaderImage: userInfo.headimgurl,
 		unionid: userInfo.unionid, //用户的unionid是唯一的。换句话说，同一用户，对同一个微信开放平台下的不同应用，unionid是相同的
+		registerTerminal: ctx.params.terminal, //终端类型ios,adriod
+		creDatetime: new Date(),
+		updDatetime: new Date(),
+		userPP: PPCode,
+		customerIds: [{
+			code: PPCode
+		}]
+	}
+	return user
+}
+
+exports.fbLogin = async ctx=>{
+	const redirect_uri  = 'https://web.pictureair.com/api/g/user/login'
+    const state =(uuid.v4()).replace(/-/g, '') 
+    const client_id='client_id=367593140286059'
+    const client_secret='877e313798a473a6b474a9b7df60fa02'
+    log('facebook来了：'+redirect_uri)
+    //1.获取code
+	const login_query =`client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}`
+    const login_url = `https://www.facebook.com/v2.12/dialog/oauth?${login_query}`
+    
+
+
+    const fb_code = await request.getAsync({url:login_url})
+    log('获取返回的code:'+fb_code)
+
+    //2.通过code获取access_token
+    const token_query = `client_id=${client_id}&redirect_uri=${redirect_uri}&client_secret=${client_secret}&code=${fb_code.code}`
+   	const fb_token_url = `https://graph.facebook.com/v2.12/oauth/access_token?${token_query}`
+    const fb_token = await request.getAsync({url:fb_token_url})
+
+    //3.利用token获取用户基本信息
+
+    const user_res = await request.getAsync({url:`https://graph.facebook.com/me?${fb_token.access_token}`})
+    if( !fb_code || !user_res || !fb_token){
+    	throw {
+			status: 10003,
+			message: httpStatus.common.system['10003'][ctx.LG],
+			router: ctx.url
+		}
+    }
+    const user_info = JSON.parse(user_res)
+    const PPCode = "PWUP" + mongoose.Types.ObjectId().toString().substr(12, 12).toUpperCase()
+	const user = {
+		userName: user_info.name,
+		name: user_info.name,
+		openIds: {fb:'facebook'},
+		gender: user_info.gender,
+        country:user_info.locale,
 		registerTerminal: ctx.params.terminal, //终端类型ios,adriod
 		creDatetime: new Date(),
 		updDatetime: new Date(),

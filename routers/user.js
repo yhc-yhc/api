@@ -24,7 +24,18 @@ router.post('sendsms', async (ctx, next) => {
  微信登录,获取用户信息
 */
 router.post('thirdLogin', async (ctx, next) => {
-	let user = await services.user.thirdLogin(ctx)
+	var user
+	//判断接收的是wx/fb	
+	const login_type =ctx.params.type
+	switch(login_type){
+        case 'wx':
+                user = await services.user.wxLogin(ctx)
+        		break;
+        case 'fb':
+        		user = await services.user.fbLogin(ctx)
+        		break;
+
+	}
 	log(28, user)
 	await model.user.update({
 		userName: user.userName
@@ -40,7 +51,7 @@ router.post('thirdLogin', async (ctx, next) => {
 	})
 	const userid = _user._id.toString()
 	const access_token = await services.user.createToken(user, ctx)
-	const key = 'access_token:' + crypto.createHash('md5').update(user.userName).digest('hex')
+	const key = 'access_token:' + endeurl.md5(user.userName)
 	cache.set(key, JSON.stringify({
 		userid,
 		user

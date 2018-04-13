@@ -17,6 +17,9 @@ module.exports = {
 			openid: [1, 'String', "app认证的openid，授权用户唯一标识"],
 			type:[1, 'String', "wx/fb"],
 			terminal:[1, 'String', "ios/adriod"]
+		},
+		resDesc:{
+			'token': ['String', '认证标志'],
 		}
     }
 }
