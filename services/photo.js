@@ -143,13 +143,12 @@ exports.getGroupInfo = async(group, code) => {
 		const photosPromise = model.photo.find({
 			shootOn: {
 				$gte: new Date(group._id.shootOn),
-				$lt: new Date(new Date(group._id.shootOn) + 86400000)
+				$lt: new Date(new Date(group._id.shootOn).getTime() + 86400000)
 			},
 			'customerIds.code': code,
 			siteId: group._id.siteId
 		}, {
-			orderHistory: 1,
-			isFree: 1,
+			_id: 0,
 			'thumbnail.x512.url': 1
 		}).sort({
 			shootOn: -1
@@ -157,7 +156,7 @@ exports.getGroupInfo = async(group, code) => {
 		const payPhotosPromise = model.photo.count({
 			shootOn: {
 				$gte: new Date(group._id.shootOn),
-				$lt: new Date(new Date(group._id.shootOn) + 86400000)
+				$lt: new Date(new Date(group._id.shootOn).getTime() + 86400000)
 			},
 			'customerIds.code': code,
 			siteId: group._id.siteId,
@@ -169,8 +168,8 @@ exports.getGroupInfo = async(group, code) => {
 				isFree: true
 			}]
 		})
-		const [photos, payPhotos] = await Promise.all([photosPromise, payPhotosPromise])
-		card.payCount = payPhotos.length
+		let [photos, payPhotos] = await Promise.all([photosPromise, payPhotosPromise])
+		card.payCount = payPhotos.length || 0
 		card.allowPay = payPhotos.length == group.photoCount ? true : false
 		card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x512.url) : [photos[0].thumbnail.x512.url, photos[0].thumbnail.x512.url]
 	} else {
