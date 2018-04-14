@@ -2,8 +2,8 @@ require('./thirdModules.js')
 
 global.log = console.log
 global.loaddir = require('../tools/loaddir.js')
-global.config = loaddir('../config')[process.env.RUN || 'dev']
-global.httpStatus = loaddir('../httpStatus')
+global.config = loaddir('config')[process.env.RUN || 'dev']
+global.httpStatus = loaddir('httpStatus')
 global.logUtil = require('../tools/log_util.js')
 global.model = require('../mongodb/model.js')
 global.cache = redis.createClient(config.redis)
@@ -20,7 +20,7 @@ Promise.promisifyAll(jwt)
 
 const router = new Router()
 global.router = app => {
-	const routers = loaddir('../routers')
+	const routers = loaddir('routers')
 	for (const r in routers) {
 		router.use(`/${r}/`, routers[r].routes(), routers[r].allowedMethods())
 		app.use(routers[r].routes()).use(routers[r].allowedMethods())
