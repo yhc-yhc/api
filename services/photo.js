@@ -73,7 +73,7 @@ exports.photosToCards = async(photos, codes) => {
 }
 
 exports.groupPhotos = async(code, bindOn) => {
-	const cards = []
+	let cards = []
 	const groups = await model.photo.aggregate([{
 		$match: {
 			'customerIds.code': code
@@ -116,10 +116,7 @@ exports.groupPhotos = async(code, bindOn) => {
 	for (let group of groups) {
 		cards.push(this.getGroupInfo(group, code))
 	}
-	await Promise.all(cards)
-	for (let i in cards) {
-		cards[i] = await cards[i]
-	}
+	cards = await Promise.all(cards)
 	return cards
 }
 
