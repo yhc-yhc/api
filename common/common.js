@@ -40,8 +40,8 @@ global.certs = {
 }
 global.loadCert = async _ => {
 	try {
-		const p1 = fse.readFile(path.join('../cert', 'public.pem'))
-		const p2 = fse.readFile(path.join('../cert', 'private.key'))
+		const p1 = fse.readFile(path.join('cert', 'public.pem'))
+		const p2 = fse.readFile(path.join('cert', 'private.key'))
 		const [public, private] = await Promise.all([p1, p2])
 		certs.public = public
 		certs.private = private
@@ -61,10 +61,10 @@ async function getSiteInfo() {
 	})
 	global.siteInfo = parks.reduce((pre, cur) => {
 		pre[cur.siteId] = {
-			parkName: cur.name || '-',
-			bgUrl: cur.bgUrl || '-',
-			barUrl: cur.barUrl || '-',
-			pageUrl: cur.pageUrl || '-',
+			parkName: cur.name || 'PictureAir',
+			bgUrl: cur.bgUrl || '/sites/common/background.png',
+			barUrl: cur.barUrl || '/sites/common/background.png',
+			pageUrl: cur.pageUrl || 'http://web.pictureair.com/',
 			ocrCard: cur.ocrCard || false,
 			faceCard: cur.faceCard || false,
 			type: cur.type || 0
