@@ -1,4 +1,4 @@
-require('../global.js')
+require('../common/global.js')
 const faceai = require('../faceai.js')
 
 process.on('message', async function(m) {
