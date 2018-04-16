@@ -1,7 +1,3 @@
 *.dat
 idea/
 test/
-mongodb/schema/user.js
-routers/sync.js
-services/photo.js
-tools/endeurl.js

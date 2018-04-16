@@ -128,14 +128,6 @@ async function getFaceFeature(asvl, face) {
 
 async function searchFeature(feature) {
 	const ary = []
-	console.time('search')
-		// for (let fk in face2m) {
-		// 	let score = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
-		// 	if (score > scoreLine) {
-		// 		key = fk
-		// 		break
-		// 	}
-		// }
 	const obj = {}
 	for (let fk in face2m) {
 		obj[fk] = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
@@ -146,8 +138,6 @@ async function searchFeature(feature) {
 			ary.push(k)
 		}
 	}
-	// console.log(ary, ary.length)
-	console.timeEnd('search')
 	return ary
 }
 
