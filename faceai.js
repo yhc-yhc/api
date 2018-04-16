@@ -93,7 +93,7 @@ function doFaceDetection(img, faces_callback, width, height, format) {
 }
 
 const compareBufID = async(faceFeature, id) => {
-	const face = await model.face.find({
+	const face = await model.face.findOne({
 		_id: id
 	}, {
 		feature: 1
