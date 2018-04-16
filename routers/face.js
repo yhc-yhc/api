@@ -1,6 +1,7 @@
 const Router = require('koa-router')
 const router = new Router()
 const services = loaddir('services')
+let sourceLine = 0.667
 
 router.post('getFacesOfCard', async(ctx, next) => {
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
@@ -48,10 +49,10 @@ router.post('getFacesOfCard', async(ctx, next) => {
 })
 
 router.post('bindFaceToCode', async(ctx, next) => {
-	let source = await services.face.matchFileFromChlid(ctx.files.file, ctx.params.faceId)
+	let source = await services.face.matchFile(ctx.files.file, ctx.params.faceId)
 	fse.unlink(ctx.files.file)
 
-	if (source < 0.77) {
+	if (source < sourceLine) {
 		throw {
 			status: 30101,
 			message: httpStatus.common.tip['30101'][ctx.LG],
@@ -73,7 +74,7 @@ router.post('bindFaceToCode', async(ctx, next) => {
 })
 
 router.post('searchPhotosByImage', async(ctx, next) => {
-	let featureStr = await services.face.getFeatureStrFromChlid(ctx.files.file)
+	let featureBuf = await services.face.getFeatureBuf(ctx.files.file)
 	fse.unlink(ctx.files.file)
 
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
@@ -101,13 +102,9 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 		}
 	}])
 
-	const promises = []
-	for (let face of faces) {
-		const promise = services.face.matchFeature(featureStr, face)
-		promises.push(promise)
-	}
-	faces = await Promise.all(promises)
-	faces = faces.filter(face => face.source > 0.77).map(face => face.faceIds)
+	const ids = faces.map(face => face.faceIds)
+	faces = await services.face.matchFeatureBuf(featureBuf, ids)
+	faces = faces.filter(face => face.source > sourceLine).map(face => face.id)
 
 	ctx.body = []
 	if (!faces[0]) return
@@ -133,7 +130,7 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 })
 
 router.post('bindCardsByImage', async(ctx, next) => {
-	let featureStr = await services.face.getFeatureStrFromChlid(ctx.files.file)
+	let featureBuf = await services.face.getFeatureBuf(ctx.files.file)
 	fse.unlink(ctx.files.file)
 
 	const dateStr = moment().add(-5, 'days').format('YYYY/MM/DD')
@@ -145,17 +142,9 @@ router.post('bindCardsByImage', async(ctx, next) => {
 	}, {
 		_id: 1
 	})
-	faces = faces.map(face => ({
-		faceId: face._id.toString()
-	}))
-
-	const promises = []
-	for (let faceObj of faces) {
-		const promise = services.face.matchFeature(featureStr, faceObj)
-		promises.push(promise)
-	}
-	faces = await Promise.all(promises)
-	faces = faces.filter(face => face.source > 0.77).map(face => face.faceId)
+	const ids = faces.map(face => face._id.toString())
+	faces = await services.face.matchFeatureBuf(featureBuf, ids)
+	faces = faces.filter(face => face.source > sourceLine).map(face => face.id)
 
 	if (!faces[0]) return
 	const groups = await model.photo.aggregate([{

@@ -1,6 +1,6 @@
-const childM = require('../tools/childM.js')
 const idGenerate = require('nanoid/generate')
 const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
+const faceai = require('../faceai.js')
 
 exports.getFaceInfo = async(faceObj, date, siteId, code) => {
 
@@ -27,60 +27,16 @@ exports.getFaceInfo = async(faceObj, date, siteId, code) => {
 	return faceObj
 }
 
-exports.matchFileFromChlid = (path, faceId) => {
-	return new Promise((resolve, reject) => {
-		childM({
-			flag: `matchFile_::_${nanoid(10)}`,
-			data: {
-				path,
-				faceId
-			}
-		}, (err, data) => {
-			resolve(data)
-		})
-	})
+exports.matchFile = async(path, faceId) => {
+	return await faceai.matchFile(path, faceId)
 }
 
-exports.getFeatureStrFromChlid = path => {
-	return new Promise((resolve, reject) => {
-		childM({
-			flag: `getFeatureStr_::_${nanoid(10)}`,
-			data: path
-		}, (err, data) => {
-			resolve(data)
-		})
-	})
+exports.getFeatureBuf = async(path) => {
+	return await faceai.getFeatureBuf(path)
 }
 
-exports.matchFeatureFromChlid = (featureStr, featureId) => {
-	return new Promise((resolve, reject) => {
-		childM({
-			flag: `matchFeature_::_${nanoid(10)}`,
-			data: {
-				featureStr,
-				featureId
-			}
-		}, (err, data) => {
-			resolve(data)
-		})
-	})
-}
-
-exports.matchFeature = async (featureStr, faceObj) => {
-	const source = await this.matchFeatureFromChlid(featureStr, faceObj.faceIds)
-	faceObj.source = source
-	return faceObj
-}
-
-exports.searchFeatureFromChlid = path => {
-	return new Promise((resolve, reject) => {
-		childM({
-			flag: `searchSameFace_::_${nanoid(10)}`,
-			data: path
-		}, (err, data) => {
-			resolve(data)
-		})
-	})
+exports.matchFeatureBuf = async (featureBuf, ids) => {
+	return await faceai.matchFeatureBuf(featureBuf, ids)
 }
 
 exports.addFaceCards = async (groups, faces) => {
