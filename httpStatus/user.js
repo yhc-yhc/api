@@ -18,9 +18,8 @@ module.exports = {
 			terminal: [1, 'String', "ios/adriod"]
 		},
 		response: {
-			token: '2bd415d0c0e3a096d64e26f'
-		}，
-
+			token:'2bd415d0c0e3a096d64e26f'
+		},
 		resDesc: {
 			'token': ['String', '认证标志'],
 		}
