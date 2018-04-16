@@ -107,7 +107,7 @@ app.use(async(ctx, next) => {
 	for (let param in params) {
 		if (param == 'token') continue
 		let bflag = ctx.params[param]
-		params[param][1] == 'Binary' ? bflag = ctx.files[param] : ''
+		params[param][1] == 'Binary' ? bflag = ctx.files && ctx.files[param] : ''
 		if (!bflag) {
 			bPass = false
 			break

@@ -7,7 +7,7 @@ router.post('getFacesOfCard', async(ctx, next) => {
 	let faces = await model.photo.aggregate([{
 		$match: {
 			siteId: ctx.params.siteId,
-			'customerIds.coe': ctx.params.code,
+			'customerIds.code': ctx.params.code,
 			shootOn: {
 				$gte: new Date(ctx.params.date),
 				$lt: new Date(dateEnd)
