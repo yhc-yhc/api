@@ -72,7 +72,7 @@ module.exports = {
 			'zh-CN': '用户不存在'
 		}
 	},
-	tips: {
+	tip: {
 		30101: {
 			'en-US': 'sorry, face maybe not match',
 			'zh-CN': '对不起, 脸不匹配'

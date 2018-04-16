@@ -49,10 +49,12 @@ router.post('getFacesOfCard', async(ctx, next) => {
 
 router.post('bindFaceToCode', async(ctx, next) => {
 	let source = await services.face.matchFeatureFromChlid(ctx.files.file, ctx.params.faceId)
+	fse.unlink(ctx.files.file)
+
 	if (source < 0.77) {
 		throw {
 			status: 30101,
-			message: httpStatus.common.system['30101'][ctx.LG],
+			message: httpStatus.common.tip['30101'][ctx.LG],
 			router: ctx.url
 		}
 	}
