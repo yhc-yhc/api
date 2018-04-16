@@ -66,7 +66,7 @@ exports.matchFeatureFromChlid = (featureStr, featureId) => {
 	})
 }
 
-exports.matchFeature = (featureStr, faceObj) => {
+exports.matchFeature = async (featureStr, faceObj) => {
 	const source = await this.matchFeatureFromChlid(featureStr, faceObj.faceIds)
 	faceObj.source = source
 	return faceObj
