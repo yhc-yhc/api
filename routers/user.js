@@ -26,14 +26,14 @@ router.post('sendsms', async (ctx, next) => {
 router.post('thirdLogin', async (ctx, next) => {
 	var user
 	//判断接收的是wx/fb	
-	const login_type =ctx.params.type
-	switch(login_type){
-        case 'wx':
-                user = await services.user.wxLogin(ctx)
-        		break;
-        case 'fb':
-        		user = await services.user.fbLogin(ctx)
-        		break;
+	const login_type = ctx.params.type
+	switch (login_type) {
+		case 'wx':
+			user = await services.user.wxLogin(ctx)
+			break;
+		case 'fb':
+			user = await services.user.fbLogin(ctx)
+			break;
 
 	}
 	log(28, user)
@@ -50,7 +50,8 @@ router.post('thirdLogin', async (ctx, next) => {
 		_id: 1
 	})
 	const userid = _user._id.toString()
-	const access_token = await services.user.createToken(user, ctx)
+	const ctx_ip = ctx.request.ip.replace(/::ffff:/g, '')
+	const access_token = await services.user.createToken(user, ctx.header.uuid, ctx_ip)
 	const key = 'access_token:' + endeurl.md5(user.userName)
 	cache.set(key, JSON.stringify({
 		userid,
