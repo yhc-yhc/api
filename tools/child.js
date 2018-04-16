@@ -7,7 +7,7 @@ process.on('message', async function({flag, data}) {
 	if (flag.split('_::_')[0] == 'matchFace') {
 		let source = await faceai.matchFace(data)
 		process.send({
-			flag: m.flag,
+			flag: flag,
 			data: source
 		})
 	}
@@ -15,7 +15,7 @@ process.on('message', async function({flag, data}) {
 	if (flag.split('_::_')[0] == 'searchSameFace') {
 		let faceAry = await faceai.searchSameFace(data)
 		process.send({
-			flag: m.flag,
+			flag: flag,
 			data: faceAry
 		})
 	}
