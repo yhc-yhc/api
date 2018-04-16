@@ -126,6 +126,7 @@ async function getFaceFeature(asvl, face) {
 	return ArcSoftFR.extractFeature(hFREngine, asvl, face)
 }
 
+
 async function searchFeature(feature) {
 	const ary = []
 	const obj = {}
@@ -141,6 +142,43 @@ async function searchFeature(feature) {
 	return ary
 }
 
+async function matchFace(param) {
+	const {
+		path,
+		faceId
+	} = param
+	try {
+		const imgMat = await Jimp.read(path)
+		const {
+			asvl,
+			faces
+		} = await getFaces(imgMat)
+		if (!faces.nFace) {
+			log('cant find face: ', src)
+			return 0
+		}
+
+		const feature = await getFaceFeature(asvl, faces.info[0])
+		if (!feature) return 0
+
+		const faceFeature = new AFR_FSDK_FACEMODEL()
+		const buffer = new Buffer(feature, 'base64')
+		faceFeature.lFeatureSize = buffer.length
+		faceFeature.pbFeature = buffer
+
+		const faceM = await model.face.findOne({_id: faceId}, {feature: 1})
+		const featureM = faceM.feature
+		const faceFeatureM = new AFR_FSDK_FACEMODEL()
+		const bufferM = new Buffer(featureM, 'base64')
+		faceFeatureM.lFeatureSize = bufferM.length
+		faceFeatureM.pbFeature = bufferM
+		const source = await ArcSoftFR.compareFaceSimilarity(hFREngine, faceFeature, faceFeatureM)
+		return source
+	} catch (e) {
+		return 0
+	}
+}
+
 async function searchSameFace(src) {
 	try {
 		const imgMat = await Jimp.read(src)
@@ -154,14 +192,13 @@ async function searchSameFace(src) {
 		}
 		const feature = await getFaceFeature(asvl, faces.info[0])
 		if (!feature) return 0
-			
+
 		var faceFeature = new AFR_FSDK_FACEMODEL()
 		var buffer = new Buffer(feature, 'base64')
 		faceFeature.lFeatureSize = buffer.length
 		faceFeature.pbFeature = buffer
 		return searchFeature(faceFeature)
 	} catch (e) {
-		console.log('searchSameFace', src, e)
 		return 0
 	}
 

@@ -38,7 +38,8 @@ module.exports = {
 			siteId: [1, 'String', "siteId的值"],
 			code: [1, 'String', "乐拍通卡号"],
 			date: [1, 'String', "时间的字符串格式，YYYY/MM/DD"],
-			faceId: [1, 'String', "人脸唯一Id"]
+			faceId: [1, 'String', "人脸唯一Id"],
+			file: [1, 'Binary', "上传文件的二进制数据"]
 		}
 	},
 	searchPhotosByImage: {

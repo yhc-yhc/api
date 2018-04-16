@@ -5,12 +5,22 @@ process.on('message', async function(m) {
 	const mem = process.memoryUsage()
 	log(`pid_${process.pid}: `, (mem.rss / 1024 / 1024).toFixed(2), (mem.heapTotal / 1024 / 1024).toFixed(2), (mem.heapUsed / 1024 / 1024).toFixed(2))
 	var flag = m.flag
-	if (flag.split('_::_')[0] != 'searchSameFace') return
-	let faceAry = await faceai.searchSameFace(m.data)
-	process.send({
-		flag: m.flag,
-		data: faceAry
-	})
+	if (flag.split('_::_')[0] != 'matchFace') {
+		let source = await faceai.matchFace(m.data)
+		process.send({
+			flag: m.flag,
+			data: source
+		})
+	}
+
+	if (flag.split('_::_')[0] != 'searchSameFace') {
+		let faceAry = await faceai.searchSameFace(m.data)
+		process.send({
+			flag: m.flag,
+			data: faceAry
+		})
+	}
+
 })
 
 

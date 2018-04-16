@@ -54,7 +54,7 @@ module.exports = {
 			'zh-CN': '接口参数错误'
 		}
 	},
-	service: {
+	service: {//00 sync, 01 face
 		20001: {
 			'en-US': 'siteId not exists',
 			'zh-CN': 'siteId 不存在'
@@ -73,9 +73,9 @@ module.exports = {
 		}
 	},
 	tips: {
-		30001: {
-			'en-US': 'sorry, please try again',
-			'zh-CN': '对不起，请重试'
+		30101: {
+			'en-US': 'sorry, face maybe not match',
+			'zh-CN': '对不起, 脸不匹配'
 		}
 	}
 }
