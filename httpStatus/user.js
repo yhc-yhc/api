@@ -16,10 +16,9 @@ module.exports = {
 			type: [1, 'String', "wx/fb"],
 			terminal: [1, 'String', "ios/adriod"]
 		},
-		response: [{
+		response: {
 			token: '2bd415d0c0e3a096d64e26f'
-
-		}],
+		}，
 
 		resDesc: {
 			'token': ['String', '认证标志'],
