@@ -2,7 +2,7 @@ const oss = require('ali-oss').Wrapper
 const store = oss({
 	accessKeyId: 'LTAIamKqehuCllfX',
 	accessKeySecret: '6sr2fdtUJHQK1GaKJdjY1JDNg94YrM',
-	region: process.env.RUN == 'product' ? 'oss-cn-hongkong': 'oss-cn-shanghai',
+	region: process.env.RUN == 'product' ? 'oss-cn-hongkong' : 'oss-cn-shanghai',
 	timeout: 120000
 
 })
@@ -12,18 +12,20 @@ exports.photosToCards = async(photos, codes) => {
 		const cusCode = photo.customerIds.map(obj => obj.code)
 		let _codes = []
 		for (let code of cusCode) {
-			if (codes.indexOf(code) == -1) {
+			if (codes.indexOf(code) != -1) {
 				_codes.push(code)
 			}
 		}
 
+		const date = moment(new Date(photo.shootOn)).format('YYYY.MM.DD')
+		const pay = photo.orderHistory[0] ? true : false
 		for (let code of _codes) {
 			codePhotos.push({
 				code: code,
-				date: moment(new Date(photo.shootOn)).format('YYYY.MM.DD'),
+				date: date,
 				siteId: photo.siteId,
 				url: photo.thumbnail.x512.url,
-				pay: photo.orderHistory[0] ? true : false
+				pay: pay
 			})
 		}
 	})
@@ -68,6 +70,115 @@ exports.photosToCards = async(photos, codes) => {
 		})
 	}
 	return cards
+}
+
+exports.groupPhotos = async(code, bindOn) => {
+	const cards = []
+	const groups = await model.photo.aggregate([{
+		$match: {
+			'customerIds.code': code
+		}
+	}, {
+		$group: {
+			_id: {
+				siteId: "$siteId",
+				shootOn: {
+					$substr: ["$shootOn", 0, 10]
+				}
+			},
+			photoCount: {
+				$sum: 1
+			}
+		}
+	}])
+	if (!global.siteInfo) {
+		await global.getSiteInfo()
+	}
+	if (!groups.length) {
+		return [{
+			code: code,
+			bindOn: moment(new Date(bindOn)).format('YYYY.MM.DD'),
+			siteId: 'pictureair',
+			parkName: 'PictureAir',
+			ocrCard: false,
+			faceCard: false,
+			type: 0,
+			pageUrl: '',
+			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
+			bgUrl: '',
+			barUrl: '',
+			photoCount: 0,
+			allowPay: false,
+			payCount: 0,
+			photos: []
+		}]
+	}
+	for (let group of groups) {
+		cards.push(this.getGroupInfo(group, code))
+	}
+	await Promise.all(cards)
+	for (let i in cards) {
+		cards[i] = await cards[i]
+	}
+	return cards
+}
+
+exports.getGroupInfo = async(group, code) => {
+	const card = {
+		code: code,
+		bindOn: moment(group._id.shootOn).format('YYYY.MM.DD'),
+		siteId: group._id.siteId,
+		parkName: global.siteInfo[group._id.siteId].parkName,
+		ocrCard: global.siteInfo[group._id.siteId].ocrCard || false,
+		faceCard: global.siteInfo[group._id.siteId].faceCard || false,
+		type: global.siteInfo[group._id.siteId].type || 0,
+		pageUrl: global.siteInfo[group._id.siteId].pageUrl,
+		shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
+		bgUrl: global.siteInfo[group._id.siteId].bgUrl,
+		barUrl: global.siteInfo[group._id.siteId].barUrl,
+		photoCount: group.photoCount,
+	}
+
+	if (group.photoCount) {
+		const photosPromise = model.photo.find({
+			shootOn: {
+				$gte: new Date(group._id.shootOn),
+				$lt: new Date(new Date(group._id.shootOn) + 86400000)
+			},
+			'customerIds.code': code,
+			siteId: group._id.siteId
+		}, {
+			orderHistory: 1,
+			isFree: 1,
+			'thumbnail.x512.url': 1
+		}).sort({
+			shootOn: -1
+		}).limit(2)
+		const payPhotosPromise = model.photo.count({
+			shootOn: {
+				$gte: new Date(group._id.shootOn),
+				$lt: new Date(new Date(group._id.shootOn) + 86400000)
+			},
+			'customerIds.code': code,
+			siteId: group._id.siteId,
+			$or: [{
+				'orderHistory.0': {
+					$exists: true
+				}
+			}, {
+				isFree: true
+			}]
+		})
+		const [photos, payPhotos] = await Promise.all([photosPromise, payPhotosPromise])
+		card.payCount = payPhotos.length
+		card.allowPay = payPhotos.length == group.photoCount ? true : false
+		card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x512.url) : [photos[0].thumbnail.x512.url, photos[0].thumbnail.x512.url]
+	} else {
+		card.allowPay = false
+		card.payCount = 0
+		card.photos = []
+	}
+	return card
 }
 
 exports.formatPhotos = async(siteId, photos) => {
@@ -129,7 +240,7 @@ exports.formatPhotos = async(siteId, photos) => {
 	})
 }
 
-exports.saveToOSS = async (bucketName, name, buffer) => {
+exports.saveToOSS = async(bucketName, name, buffer) => {
 	store.useBucket(bucketName)
 	const rs = await store.put(name, buffer, {
 		timeout: 120000

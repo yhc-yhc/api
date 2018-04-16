@@ -9,7 +9,7 @@ exports.createToken = async (user, ctx) => {
 		iat: Math.floor(Date.now() / 1000),
 		exp: Math.floor(Date.now() / 1000) + 604800,
 		iss: 'pictureAir',
-		uuid: uuid.v1().trim().replace(/-/g, ''),
+		uuid: ctx.header.uuid,
 		visitIP: ctx.request.ip,
 		audience: endeurl.md5(user.userName), //md5(user)
 		t: 0, //web photo
@@ -75,7 +75,7 @@ exports.wxLogin = async ctx => {
 }
 
 exports.fbLogin = async ctx=>{
-	const redirect_uri  = 'https://web.pictureair.com/api/g/user/login'
+	const redirect_uri  = 'https://dev.pictureair.com/ai/card/listCards'
     const state =(uuid.v4()).replace(/-/g, '') 
     const client_id='client_id=367593140286059'
     const client_secret='877e313798a473a6b474a9b7df60fa02'
@@ -83,11 +83,8 @@ exports.fbLogin = async ctx=>{
     //1.获取code
 	const login_query =`client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}`
     const login_url = `https://www.facebook.com/v2.12/dialog/oauth?${login_query}`
-    
-
-
     const fb_code = await request.getAsync({url:login_url})
-    log('获取返回的code:'+fb_code)
+    log('获取返回的code:'+JSON.stringify(fb_code))
 
     //2.通过code获取access_token
     const token_query = `client_id=${client_id}&redirect_uri=${redirect_uri}&client_secret=${client_secret}&code=${fb_code.code}`
@@ -109,7 +106,7 @@ exports.fbLogin = async ctx=>{
 	const user = {
 		userName: user_info.name,
 		name: user_info.name,
-		openIds: {fb:'facebook'},
+		openIds: {fb:user_info.id},
 		gender: user_info.gender,
         country:user_info.locale,
 		registerTerminal: ctx.params.terminal, //终端类型ios,adriod
