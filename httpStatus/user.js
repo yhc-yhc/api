@@ -15,7 +15,8 @@ module.exports = {
 			openid: [0, 'String', "app认证的openid，授权用户唯一标识"],
 			uuid: [1, 'String', "设备的uuid"],
 			type: [1, 'String', "wx/fb"],
-			terminal: [1, 'String', "ios/adriod"]
+			terminal: [1, 'String', "ios/adriod"],
+			lg:[1,'String','en/us']
 		},
 		response: {
 			token:'2bd415d0c0e3a096d64e26f'

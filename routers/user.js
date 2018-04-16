@@ -50,8 +50,8 @@ router.post('thirdLogin', async (ctx, next) => {
 		_id: 1
 	})
 	const userid = _user._id.toString()
-	const ctx_ip = ctx.request.ip.replace(/::ffff:/g, '')
-	const access_token = await services.user.createToken(user, ctx.header.uuid, ctx_ip)
+	
+	const access_token = await services.user.createToken(user,ctx)
 	const key = 'access_token:' + endeurl.md5(user.userName)
 	cache.set(key, JSON.stringify({
 		userid,

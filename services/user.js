@@ -1,20 +1,21 @@
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const uuid = require('uuid')
 
-exports.createToken = async (user, ctx_uuid, ctx_ip) => {
+exports.createToken = async (user, ctx) => {
 	if (!certs.private) {
 		await loadCert()
 	}
+	log('获取到的ip: '+ctx.request.ip.replace(/::ffff:/g, ''))
 	var token = {
 		iat: Math.floor(Date.now() / 1000),
 		exp: Math.floor(Date.now() / 1000) + 604800,
 		iss: 'pictureAir',
-		uuid: ctx_uuid,
-		visitIP: ctx_ip,
+		uuid: ctx.params.uuid,
+		visitIP: ctx.request.ip.replace(/::ffff:/g, ''),
 		audience: endeurl.md5(user.userName), //md5(user)
-		t: 0, //web photo
+		t: ctx.params.terminal, //web photo
 		appid: '',
-		lg: 'en-US'
+		lg: ctx.params.lg
 	}
 	return jwt.sign(token, certs.private, {
 		algorithm: 'RS512'
@@ -75,32 +76,13 @@ exports.wxLogin = async ctx => {
 }
 
 exports.fbLogin = async ctx => {
-	const redirect_uri = 'https://dev.pictureair.com/ai/card/listCards'
-	const state = (uuid.v4()).replace(/-/g, '')
-	const client_id = 'client_id=367593140286059'
-	const client_secret = '877e313798a473a6b474a9b7df60fa02'
-	log('facebook来了：' + redirect_uri)
-	//1.获取code
-	const login_query = `client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}`
-	const login_url = `https://www.facebook.com/v2.12/dialog/oauth?${login_query}`
-	const fb_code = await request.getAsync({
-		url: login_url
-	})
-	log('获取返回的code:' + JSON.stringify(fb_code))
-
-	//2.通过code获取access_token
-	const token_query = `client_id=${client_id}&redirect_uri=${redirect_uri}&client_secret=${client_secret}&code=${fb_code.code}`
-	const fb_token_url = `https://graph.facebook.com/v2.12/oauth/access_token?${token_query}`
-	const fb_token = await request.getAsync({
-		url: fb_token_url
-	})
-
-	//3.利用token获取用户基本信息
-
+	
+	//.利用token获取用户基本信息
+    const fb_token = ctx.params.access_token
 	const user_res = await request.getAsync({
-		url: `https://graph.facebook.com/me?${fb_token.access_token}`
+		url: `https://graph.facebook.com/me?${fb_token}`
 	})
-	if (!fb_code || !user_res || !fb_token) {
+	if (!user_res ) {
 		throw {
 			status: 10003,
 			message: httpStatus.common.system['10003'][ctx.LG],
