@@ -79,17 +79,18 @@ exports.fbLogin = async ctx => {
 	
 	//.利用token获取用户基本信息
     const fb_token = ctx.params.access_token
+    const fb_query='fields=link,id,name,picture,first_name,gender&'
 	const user_res = await request.getAsync({
-		url: `https://graph.facebook.com/me?access_token=${fb_token}`
+		url: `https://graph.facebook.com/me?${fb_query}access_token=${fb_token}`
 	})
-	if (!user_res ) {
+	if (user_res.statusCode!=200 && !user_res.body) {
 		throw {
 			status: 10003,
 			message: httpStatus.common.system['10003'][ctx.LG],
 			router: ctx.url
 		}
 	}
-	const user_info = JSON.parse(user_res)
+	const user_info = JSON.parse(user_res.body)
 	const PPCode = "PWUP" + mongoose.Types.ObjectId().toString().substr(12, 12).toUpperCase()
 	const user = {
 		userName: user_info.name,
@@ -97,6 +98,7 @@ exports.fbLogin = async ctx => {
 		openIds: {
 			fb: user_info.id
 		},
+		coverHeaderImage: userInfo.picture.data.url,
 		gender: user_info.gender,
 		country: user_info.locale,
 		registerTerminal: ctx.params.terminal, //终端类型ios,adriod
