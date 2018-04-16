@@ -73,7 +73,7 @@ exports.photosToCards = async(photos, codes) => {
 }
 
 exports.groupPhotos = async(code, bindOn) => {
-	const cards = []
+	let cards = []
 	const groups = await model.photo.aggregate([{
 		$match: {
 			'customerIds.code': code
@@ -103,10 +103,10 @@ exports.groupPhotos = async(code, bindOn) => {
 			ocrCard: false,
 			faceCard: false,
 			type: 0,
-			pageUrl: '',
+			pageUrl: 'http://web.pictureair.com/',
 			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
-			bgUrl: '',
-			barUrl: '',
+			bgUrl: '/sites/common/background.png',
+			barUrl: '/sites/common/background.png',
 			photoCount: 0,
 			allowPay: false,
 			payCount: 0,
@@ -116,10 +116,7 @@ exports.groupPhotos = async(code, bindOn) => {
 	for (let group of groups) {
 		cards.push(this.getGroupInfo(group, code))
 	}
-	await Promise.all(cards)
-	for (let i in cards) {
-		cards[i] = await cards[i]
-	}
+	cards = await Promise.all(cards)
 	return cards
 }
 
@@ -143,21 +140,20 @@ exports.getGroupInfo = async(group, code) => {
 		const photosPromise = model.photo.find({
 			shootOn: {
 				$gte: new Date(group._id.shootOn),
-				$lt: new Date(new Date(group._id.shootOn) + 86400000)
+				$lt: new Date(new Date(group._id.shootOn).getTime() + 86400000)
 			},
 			'customerIds.code': code,
 			siteId: group._id.siteId
 		}, {
-			orderHistory: 1,
-			isFree: 1,
+			_id: 0,
 			'thumbnail.x512.url': 1
 		}).sort({
 			shootOn: -1
 		}).limit(2)
-		const payPhotosPromise = model.photo.count({
+		const payCountPromise = model.photo.count({
 			shootOn: {
 				$gte: new Date(group._id.shootOn),
-				$lt: new Date(new Date(group._id.shootOn) + 86400000)
+				$lt: new Date(new Date(group._id.shootOn).getTime() + 86400000)
 			},
 			'customerIds.code': code,
 			siteId: group._id.siteId,
@@ -169,9 +165,9 @@ exports.getGroupInfo = async(group, code) => {
 				isFree: true
 			}]
 		})
-		const [photos, payPhotos] = await Promise.all([photosPromise, payPhotosPromise])
-		card.payCount = payPhotos.length
-		card.allowPay = payPhotos.length == group.photoCount ? true : false
+		let [photos, payCount] = await Promise.all([photosPromise, payCountPromise])
+		card.payCount = payCount
+		card.allowPay = payCount == group.photoCount ? false : true
 		card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x512.url) : [photos[0].thumbnail.x512.url, photos[0].thumbnail.x512.url]
 	} else {
 		card.allowPay = false

@@ -1,11 +1,4 @@
-require('./global.js')
-	// require('./main.js')
-const Koa = require('koa')
-const logger = require('koa-logger')
-const router = require('./router.js')
-const bodyParser = require('koa-bodyparser')
-const asyncBusboy = require('async-busboy')
-
+require('./common/global.js')
 
 const app = new Koa()
 app.use(logger())
@@ -163,6 +156,13 @@ app.use(async(ctx, next) => {
 		} else {
 			log(userStr)
 			ctx.user = JSON.parse(userStr)
+			if (ctx.user.user.uuid != tokenObj.uuid) {
+				throw {
+					status: 448,
+					message: httpStatus.common.system['10005'][ctx.LG],
+					router: ctx.url
+				}
+			}
 		}
 	}
 	await next()
