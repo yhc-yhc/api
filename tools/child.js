@@ -20,10 +20,7 @@ process.on('message', async function(m) {
 			data: faceAry
 		})
 	}
-
 })
-
-
 
 async function loadFace() {
 	const faces = await model.face.find({
@@ -152,6 +149,6 @@ async function engine() {
 
 async function main() {
 	await loadFace()
-	await engine()
+	// await engine()
 }
 main()

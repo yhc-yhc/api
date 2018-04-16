@@ -148,6 +148,7 @@ async function matchFace(param) {
 		faceId
 	} = param
 	try {
+		log(path)
 		const imgMat = await Jimp.read(path)
 		const {
 			asvl,
