@@ -2,6 +2,42 @@ const childM = require('../tools/childM.js')
 const idGenerate = require('nanoid/generate')
 const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 
+exports.getFaceInfo = async(faceObj, date, siteId, code) => {
+
+	const face = await model.face.findOne({
+		_id: faceObj._id
+	}, {
+		_id: 0,
+		url: 1
+	})
+	faceObj.url = face.url
+
+	const count = await model.faceBindCard.count({
+		faceId: faceObj._id,
+		bindDate: new Date(date),
+		bindSiteId: siteId,
+		bindCode: code,
+		disabled: false
+	})
+	if (count > 0) {
+		faceObj.bind = true
+	} else {
+		faceObj.bind = false
+	}
+	return faceObj
+}
+
+exports.matchFeatureFromChlid = (path, faceId) => {
+	return new Promise((resolve, reject) => {
+		childM({
+			flag: `matchFace_::_${nanoid(10)}`,
+			data: {path, faceId}
+		}, (err, data) => {
+			resolve(data)
+		})
+	})
+}
+
 exports.searchFeatureFromChlid = path => {
 	return new Promise((resolve, reject) => {
 		childM({

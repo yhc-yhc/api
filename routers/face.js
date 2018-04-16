@@ -1,72 +1,61 @@
 const Router = require('koa-router')
 const router = new Router()
-const services = loaddir('./services')
+const services = loaddir('services')
 
 router.post('getFacesOfCard', async(ctx, next) => {
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
-	const photos = await model.photo.find({
-		'customerIds.code': ctx.params.code,
-		siteId: ctx.params.siteId,
-		shootOn: {
-			$gte: new Date(ctx.params.date),
-			$lt: new Date(dateEnd)
-		}
-	}, {
-		faceIds: 1
-	})
-	const faceObj = photos.reduce((pre, cur) => {
-		cur.faceIds.reduce((ppre, ccur) => {
-			if (ccur != 'noface') {
-				ppre[ccur] = ppre[ccur] || 0
-				ppre[ccur]++
+	let faces = await model.photo.aggregate([{
+		$match: {
+			siteId: ctx.params.siteId,
+			'customerIds.coe': ctx.params.code,
+			shootOn: {
+				$gte: new Date(ctx.params.date),
+				$lt: new Date(dateEnd)
 			}
-			return ppre
-		}, pre)
-		return pre
-	}, {})
-	const faces = await model.face.find({
-		_id: {
-			$in: Object.keys(faceObj)
 		}
 	}, {
-		_id: 1,
-		url: 1
-	})
-	const faceUrlMap = faces.reduce((pre, cur) => {
-		pre[cur._id] = {
-			url: cur.url,
+		$project: {
+			faceIds: 1
 		}
-		return pre
-	}, {})
-	const faceBindInfo = await model.faceBindCard.find({
-		faceId: {
-			$in: Object.keys(faceObj)
-		},
-		bindDate: new Date(ctx.params.date),
-		bindSiteId: ctx.params.siteId,
-		bindCode: ctx.params.code,
-		disabled: false
 	}, {
-		faceId: 1
-	})
-	const faceBindMap = faceBindInfo.reduce((pre, cur) => {
-		pre[cur.faceId] = 1
-		return pre
-	}, {})
-	let ary = []
-	for (let key in faceObj) {
-		const obj = {}
-		obj._id = key
-		obj.url = faceUrlMap[key].url
-		obj.bind = faceBindMap[key] ? true : false
-		obj.num = faceObj[key]
-		ary.push(obj)
+		$unwind: '$faceIds'
+	}, {
+		$group: {
+			_id: '$faceIds',
+			num: {
+				$sum: 1
+			}
+		}
+	}, {
+		$match: {
+			_id: {
+				$ne: 'noface'
+			}
+		}
+	}, {
+		$sort: {
+			num: -1
+		}
+	}])
+
+	const promises = []
+	for (let face of faces) {
+		let promise = services.face.getFaceInfo(face, ctx.params.date, ctx.params.siteId, ctx.params.code)
+		promises.push(promise)
 	}
-	ary = ary.sort((pre, cur) => cur.num - pre.num)
-	ctx.body = ary
+	faces = await Promise.all(promises)
+	ctx.body = faces
 })
 
 router.post('bindFaceToCode', async(ctx, next) => {
+	let source = await services.face.matchFeatureFromChlid(ctx.files.file, ctx.params.faceId)
+	if (source < 0.77) {
+		throw {
+			status: 30101,
+			message: httpStatus.common.system['30101'][ctx.LG],
+			router: ctx.url
+		}
+	}
 	const rs = await model.faceBindCard.update({
 		faceId: ctx.params.faceId,
 		disabled: false
@@ -83,7 +72,6 @@ router.post('bindFaceToCode', async(ctx, next) => {
 
 router.post('searchPhotosByImage', async(ctx, next) => {
 	console.time('SearchFeature: ')
-		// let faceAry = await faceai.searchSameFace(ctx.files.file)
 	let faceAry = await services.face.searchFeatureFromChlid(ctx.files.file)
 	console.timeEnd('SearchFeature: ')
 	fse.unlink(ctx.files.file)
