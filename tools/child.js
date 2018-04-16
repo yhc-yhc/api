@@ -1,17 +1,33 @@
 require('../common/global.js')
 const faceai = require('../faceai.js')
 
-process.on('message', async function({flag, data}) {
+process.on('message', async function({
+	flag,
+	data
+}) {
 	const mem = process.memoryUsage()
 	log(`pid_${process.pid}: `, (mem.rss / 1024 / 1024).toFixed(2), (mem.heapTotal / 1024 / 1024).toFixed(2), (mem.heapUsed / 1024 / 1024).toFixed(2))
-	if (flag.split('_::_')[0] == 'matchFace') {
-		let source = await faceai.matchFace(data)
+	if (flag.split('_::_')[0] == 'matchFile') {
+		let source = await faceai.matchFile(data)
 		process.send({
 			flag: flag,
 			data: source
 		})
 	}
-
+	if (flag.split('_::_')[0] == 'getFeatureStr') {
+		let source = await faceai.getFeatureStr(data)
+		process.send({
+			flag: flag,
+			data: source
+		})
+	}
+	if (flag.split('_::_')[0] == 'matchFeature') {
+		let source = await faceai.matchFeature(data)
+		process.send({
+			flag: flag,
+			data: source
+		})
+	}
 	if (flag.split('_::_')[0] == 'searchSameFace') {
 		let faceAry = await faceai.searchSameFace(data)
 		process.send({
@@ -148,6 +164,6 @@ async function engine() {
 
 async function main() {
 	await loadFace()
-	// await engine()
+		// await engine()
 }
 main()

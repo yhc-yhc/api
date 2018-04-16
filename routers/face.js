@@ -48,7 +48,7 @@ router.post('getFacesOfCard', async(ctx, next) => {
 })
 
 router.post('bindFaceToCode', async(ctx, next) => {
-	let source = await services.face.matchFeatureFromChlid(ctx.files.file, ctx.params.faceId)
+	let source = await services.face.matchFileFromChlid(ctx.files.file, ctx.params.faceId)
 	fse.unlink(ctx.files.file)
 
 	if (source < 0.77) {
@@ -73,27 +73,48 @@ router.post('bindFaceToCode', async(ctx, next) => {
 })
 
 router.post('searchPhotosByImage', async(ctx, next) => {
-	console.time('SearchFeature: ')
-	let faceAry = await services.face.searchFeatureFromChlid(ctx.files.file)
-	console.timeEnd('SearchFeature: ')
+	let featureStr = await services.face.getFeatureStrFromChlid(ctx.files.file)
 	fse.unlink(ctx.files.file)
 
-	ctx.body = []
-	if (!faceAry[0]) return
-
-	console.time('SearchDB: ')
-	const faces = await model.face.find({
-		name: {
-			$in: faceAry
-		}
-	})
-	const ary = faces.map(face => face._id.toString())
-	if (!ary[0]) return
-
 	const dateEnd = moment(new Date(ctx.params.date)).add(1, 'days').format('YYYY/MM/DD')
+	let faces = await model.photo.aggregate([{
+		$match: {
+			siteId: ctx.params.siteId,
+			'customerIds.code': ctx.params.code,
+			shootOn: {
+				$gte: new Date(ctx.params.date),
+				$lt: new Date(dateEnd)
+			}
+		}
+	}, {
+		$project: {
+			_id: 0,
+			faceIds: 1
+		}
+	}, {
+		$unwind: '$faceIds'
+	}, {
+		$match: {
+			_id: {
+				$ne: 'noface'
+			}
+		}
+	}])
+
+	const promises = []
+	for (let face of faces) {
+		const promise = services.face.matchFeature(featureStr, face)
+		promises.push(promise)
+	}
+	faces = await Promise.all(promises)
+	faces = faces.filter(face => face.source > 0.77).map(face => face.faceIds)
+
+	ctx.body = []
+	if (!faces[0]) return
+
 	const photos = await model.photo.find({
 		faceIds: {
-			$in: ary
+			$in: faces
 		},
 		siteId: ctx.params.siteId,
 		'customerIds.code': ctx.params.code,
@@ -107,45 +128,61 @@ router.post('searchPhotosByImage', async(ctx, next) => {
 		originalInfo: 1,
 		orderHistory: 1
 	})
-	console.timeEnd('SearchDB: ')
 	const resPhotos = await services.photo.formatPhotos(ctx.params.siteId, photos)
 	ctx.body = resPhotos
 })
 
 router.post('bindCardsByImage', async(ctx, next) => {
-
-	console.time('SearchFeature: ')
-	let faceAry = await services.face.searchFeatureFromChlid(ctx.files.file)
-	console.timeEnd('SearchFeature: ')
+	let featureStr = await services.face.getFeatureStrFromChlid(ctx.files.file)
 	fse.unlink(ctx.files.file)
 
-	ctx.body = []
-	if (!faceAry[0]) return
-
-	console.time('SearchDB: ')
-	const faces = await model.face.find({
-		name: {
-			$in: faceAry
+	const dateStr = moment().add(-5, 'days').format('YYYY/MM/DD')
+	let faces = await model.face.find({
+		active: {
+			$gte: new Date(dateStr),
+			$lt: new Date()
 		}
-	})
-	const ary = faces.map(face => face._id.toString())
-	if (!ary[0]) return
-	const photos = await model.photo.find({
-		faceIds: {
-			$in: ary
-		},
 	}, {
-		_id: 1,
-		thumbnail: 1,
-		original: 1,
-		orderHistory: 1,
-		siteId: 1,
-		'customerIds.code': 1,
-		shootOn: 1
+		_id: 1
 	})
-	console.timeEnd('SearchDB: ')
+	faces = faces.map(face => ({
+		faceId: face._id.toString()
+	}))
 
-	const cardCodes = await services.face.addFaceCards(photos)
+	const promises = []
+	for (let faceObj of faces) {
+		const promise = services.face.matchFeature(featureStr, faceObj)
+		promises.push(promise)
+	}
+	faces = await Promise.all(promises)
+	faces = faces.filter(face => face.source > 0.77).map(face => face.faceId)
+
+	if (!faces[0]) return
+	const groups = await model.photo.aggregate([{
+		$match: {
+			faceIds: {
+				$in: faces
+			},
+			shootOn: {
+				$gte: new Date(dateStr),
+				$lt: new Date()
+			}
+		}
+	}, {
+		$group: {
+			_id: {
+				siteId: "$siteId",
+				shootOn: {
+					$substr: ["$shootOn", 0, 10]
+				}
+			},
+			_ids: {
+				$addToSet: '$_id'
+			}
+		}
+	}])
+
+	const cardCodes = await services.face.addFaceCards(groups, faces)
 	await model.user.update({
 		_id: user.user._id
 	}, {

@@ -27,10 +27,10 @@ exports.getFaceInfo = async(faceObj, date, siteId, code) => {
 	return faceObj
 }
 
-exports.matchFeatureFromChlid = (path, faceId) => {
+exports.matchFileFromChlid = (path, faceId) => {
 	return new Promise((resolve, reject) => {
 		childM({
-			flag: `matchFace_::_${nanoid(10)}`,
+			flag: `matchFile_::_${nanoid(10)}`,
 			data: {
 				path,
 				faceId
@@ -39,6 +39,37 @@ exports.matchFeatureFromChlid = (path, faceId) => {
 			resolve(data)
 		})
 	})
+}
+
+exports.getFeatureStrFromChlid = path => {
+	return new Promise((resolve, reject) => {
+		childM({
+			flag: `getFeatureStr_::_${nanoid(10)}`,
+			data: path
+		}, (err, data) => {
+			resolve(data)
+		})
+	})
+}
+
+exports.matchFeatureFromChlid = (featureStr, featureId) => {
+	return new Promise((resolve, reject) => {
+		childM({
+			flag: `matchFeature_::_${nanoid(10)}`,
+			data: {
+				featureStr,
+				featureId
+			}
+		}, (err, data) => {
+			resolve(data)
+		})
+	})
+}
+
+exports.matchFeature = (featureStr, faceObj) => {
+	const source = await this.matchFeatureFromChlid(featureStr, faceObj.faceIds)
+	faceObj.source = source
+	return faceObj
 }
 
 exports.searchFeatureFromChlid = path => {
@@ -52,34 +83,30 @@ exports.searchFeatureFromChlid = path => {
 	})
 }
 
-exports.addFaceCards = async photos => {
-	const _cards = photos.reduce((pre, cur) => {
-		let dayStr = moment(new Date(cur.shootOn)).format('YYYYMMDD')
-		let id = `${cur.siteId}__${dayStr}`
-		pre[id] = pre[id] || {}
-		let cardNo = `${cur.siteId}FC`
+exports.addFaceCards = async (groups, faces) => {
+	const cardCodes = []
+	const promises = []
+	for (let group of groups) {
+		let cardNo = `${group._id.siteId}FC`
 		cardNo += idGenerate(alphabet, 5)
 		let len = 16 - cardNo.length
 		cardNo += idGenerate(alphabet, len)
-		pre[id].cardNo = cardNo
-		pre[id]._ids = pre[id]._ids || []
-		pre[id]._ids.push(cur._id)
-		return pre
-	}, {})
-	const cardCodes = []
-	const promises = []
-	for (card in _cards) {
 		cardCodes.push({
-			code: _cards[card].cardNo
+			code: cardNo
 		})
 		const promise = model.photo.update({
-			_id: {
-				$in: _cards[card]._ids
-			}
+			faceIds: {
+				$in: faces
+			},
+			shootOn: {
+				$gte: new Date(group._id.shootOn),
+				$lt: new Date(new Date(group._id.shootOn).getTime() + 86400000)
+			},
+			siteId: group._id.siteId
 		}, {
 			$addToSet: {
 				customerIds: {
-					code: _cards[card].cardNo,
+					code: cardNo,
 				}
 			}
 		}, {
