@@ -31,7 +31,10 @@ exports.matchFeatureFromChlid = (path, faceId) => {
 	return new Promise((resolve, reject) => {
 		childM({
 			flag: `matchFace_::_${nanoid(10)}`,
-			data: {path, faceId}
+			data: {
+				path,
+				faceId
+			}
 		}, (err, data) => {
 			resolve(data)
 		})
