@@ -146,7 +146,7 @@ async function engine() {
 			}
 		}
 	}
-	await Promise.delay(400)
+	await Promise.delay(5000)
 	await engine()
 }
 
