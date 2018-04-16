@@ -226,5 +226,6 @@ module.exports = {
 	process,
 	featureMap,
 	loadFaceToMap,
-	searchSameFace
+	searchSameFace,
+	matchFace
 }
