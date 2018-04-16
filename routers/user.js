@@ -33,6 +33,7 @@ router.post('thirdLogin', async (ctx, next) => {
 			break;
 		case 'fb':
 			user = await services.user.fbLogin(ctx)
+			log('facebook获取的user:',user)
 			break;
 
 	}

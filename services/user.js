@@ -58,7 +58,7 @@ exports.wxLogin = async ctx => {
 	const user = {
 		userName: userInfo.nickname,
 		name: userInfo.nickname,
-		openIds: userInfo.openid,
+		openIds: {wx:userInfo.openid},
 		gender: userInfo.sex,
 		country: userInfo.country,
 		// addresses: addressArr,
@@ -80,7 +80,7 @@ exports.fbLogin = async ctx => {
 	//.利用token获取用户基本信息
     const fb_token = ctx.params.access_token
 	const user_res = await request.getAsync({
-		url: `https://graph.facebook.com/me?${fb_token}`
+		url: `https://graph.facebook.com/me?access_token=${fb_token}`
 	})
 	if (!user_res ) {
 		throw {
