@@ -133,7 +133,7 @@ router.post('bindCardsByImage', async(ctx, next) => {
 	let featureBuf = await services.face.getFeatureBuf(ctx.files.file)
 	fse.unlink(ctx.files.file)
 
-	const dateStr = moment().add(-5, 'days').format('YYYY/MM/DD')
+	const dateStr = moment().add(-3, 'days').format('YYYY/MM/DD')
 	let faces = await model.face.find({
 		active: {
 			$gte: new Date(dateStr),
