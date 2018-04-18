@@ -30,6 +30,10 @@ exports.groupPhotos = async (code, bindOn) => {
 		await global.getSiteInfo()
 	}
 	if (!groups.length) {
+		let type = 0
+		for (let siteId in siteInfo) {
+			if (siteInfo[siteId].parkCardCode == code)	type = 1
+		}
 		return [{
 			code: code,
 			bindOn: moment(new Date(bindOn)).format('YYYY.MM.DD'),
@@ -37,7 +41,7 @@ exports.groupPhotos = async (code, bindOn) => {
 			parkName: 'PictureAir',
 			ocrCard: false,
 			faceCard: false,
-			type: siteInfo[group._id.siteId].parkCardCode == code ? 1 : 0,
+			type: type,
 			pageUrl: 'http://web.pictureair.com/',
 			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
 			bgUrl: '/sites/common/background.png',
