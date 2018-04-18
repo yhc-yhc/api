@@ -16,7 +16,7 @@ module.exports = {
             useLimit: [0, 'boolean', '是否使用分页']
 
         },
-        result: {
+        response: {
             "photos": [{
                 "_id": "59709dc01ee822140e00030e",
                 "siteId": "SIHK",

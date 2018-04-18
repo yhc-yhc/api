@@ -75,25 +75,27 @@ exports.wxLogin = async loginparams => {
 exports.fbLogin = async loginparams => {
 
 	//.利用token获取用户基本信息
-	const fb_token = loginparams.token
-	const fb_query = 'fields=link,id,name,picture,first_name,gender&'
-	const user_res = await request.getAsync({
-		url: `https://graph.facebook.com/me?${fb_query}access_token=${fb_token}`
-	})
-	if (user_res.statusCode != 200) {
-		throw {
-			status: 10003,
-			message: httpStatus.common.system['10003'][loginparams.LG],
-			router: loginparams._url
-		}
-	}
-	const user_info = JSON.parse(user_res.body)
+	// const fb_token = loginparams.token
+	// const fb_query = 'fields=link,id,name,picture,first_name,gender&'
+	// const user_res = await request.getAsync({
+	// 	url: `https://graph.facebook.com/me?${fb_query}access_token=${fb_token}`
+	// })
+	// if (user_res.statusCode != 200) {
+	// 	throw {
+	// 		status: 10003,
+	// 		message: httpStatus.common.system['10003'][loginparams.LG],
+	// 		router: loginparams._url
+	// 	}
+	// }
+	// const user_info = JSON.parse(user_res.body)
+	const id = loginparams.fbId
+	const fbUserName = loginparams.fbName
 	const PPCode = "PWUP" + mongoose.Types.ObjectId().toString().substr(12, 12).toUpperCase()
 	const user = {
-		userName: user_info.name,
-		name: user_info.name,
+		userName: fbUserName,
+		name: fbUserName,
 		openIds: {
-			fb: user_info.id
+			fb: id
 		},
 		coverHeaderImage: userInfo.picture.data.url,
 		gender: user_info.gender,
