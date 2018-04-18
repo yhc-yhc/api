@@ -7,7 +7,7 @@ const store = oss({
 
 })
 
-exports.groupPhotos = async(code, bindOn) => {
+exports.groupPhotos = async (code, bindOn) => {
 	let cards = []
 	const groups = await model.photo.aggregate([{
 		$match: {
@@ -55,7 +55,7 @@ exports.groupPhotos = async(code, bindOn) => {
 	return cards
 }
 
-exports.getGroupInfo = async(group, code) => {
+exports.getGroupInfo = async (group, code) => {
 	const card = {
 		code: code,
 		bindOn: moment(group._id.shootOn).format('YYYY.MM.DD'),
@@ -112,10 +112,12 @@ exports.getGroupInfo = async(group, code) => {
 	return card
 }
 
-exports.formatPhotos = async(siteId, photos) => {
+exports.formatPhotos = async (siteId, photos) => {
 	const ary = []
 	for (let photo of photos) {
-		const pay = photo.orderHistory[0] || photo.isFree ? true : false
+		let pay = false
+		if (photo.orderHistory[0]) pay = true
+		if (photo.isFree) pay = true
 		let wMP4 = null
 		let originalInfo = null
 		let thumbnail = null
@@ -127,7 +129,11 @@ exports.formatPhotos = async(siteId, photos) => {
 					height: photo.thumbnail.x512.height,
 					url: photo.thumbnail.x512.url
 				},
-				x1024: {}
+				x1024: {
+					width: photo.thumbnail.x512.width,
+					height: photo.thumbnail.x512.height,
+					url: photo.thumbnail.x512.url
+				}
 			}
 			originalInfo = {}
 			wMP4 = {
@@ -176,7 +182,7 @@ exports.formatPhotos = async(siteId, photos) => {
 	return ary
 }
 
-exports.saveToOSS = async(bucketName, name, buffer) => {
+exports.saveToOSS = async (bucketName, name, buffer) => {
 	store.useBucket(bucketName)
 	const rs = await store.put(name, buffer, {
 		timeout: 120000
