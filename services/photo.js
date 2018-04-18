@@ -6,71 +6,6 @@ const store = oss({
 	timeout: 120000
 
 })
-exports.photosToCards = async(photos, codes) => {
-	const codePhotos = []
-	photos.forEach(photo => {
-		const cusCode = photo.customerIds.map(obj => obj.code)
-		let _codes = []
-		for (let code of cusCode) {
-			if (codes.indexOf(code) != -1) {
-				_codes.push(code)
-			}
-		}
-
-		const date = moment(new Date(photo.shootOn)).format('YYYY.MM.DD')
-		const pay = photo.orderHistory[0] ? true : false
-		for (let code of _codes) {
-			codePhotos.push({
-				code: code,
-				date: date,
-				siteId: photo.siteId,
-				url: photo.thumbnail.x512.url,
-				pay: pay
-			})
-		}
-	})
-	const _cards = codePhotos.reduce((pre, cur) => {
-		let id = `${cur.code}__${cur.siteId}__${cur.date}`
-		pre[id] = pre[id] || {}
-		pre[id].code = cur.code
-		pre[id].siteId = cur.siteId
-		pre[id].date = cur.date
-		pre[id]._photos = pre[id]._photos || []
-		pre[id]._photos.push({
-			url: cur.url,
-			pay: cur.pay
-		})
-		return pre
-	}, {})
-	const cards = []
-	for (card in _cards) {
-		const ary = new Array(2)
-		const photos = _cards[card]._photos.map(obj => obj.url)
-		const pay = _cards[card]._photos.every(obj => obj.pay)
-		const payCount = _cards[card]._photos.map(obj => obj.pay).length
-		if (!global.siteInfo) {
-			await global.getSiteInfo()
-		}
-		cards.push({
-			code: _cards[card].code,
-			bindOn: _cards[card].date,
-			siteId: _cards[card].siteId,
-			parkName: global.siteInfo[_cards[card].siteId].parkName,
-			ocrCard: global.siteInfo[_cards[card].siteId].ocrCard || false,
-			faceCard: global.siteInfo[_cards[card].siteId].faceCard || false,
-			type: global.siteInfo[_cards[card].siteId].type || 0,
-			pageUrl: global.siteInfo[_cards[card].siteId].pageUrl,
-			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${_cards[card].code}`,
-			bgUrl: global.siteInfo[_cards[card].siteId].bgUrl,
-			barUrl: global.siteInfo[_cards[card].siteId].barUrl,
-			photoCount: _cards[card]._photos.length,
-			allowPay: !pay,
-			payCount: payCount,
-			photos: _cards[card]._photos.length == 1 ? ary.fill(photos[0]) : photos.slice(0, 2)
-		})
-	}
-	return cards
-}
 
 exports.groupPhotos = async(code, bindOn) => {
 	let cards = []
@@ -146,7 +81,7 @@ exports.getGroupInfo = async(group, code) => {
 			siteId: group._id.siteId
 		}, {
 			_id: 0,
-			'thumbnail.x512.url': 1
+			'thumbnail.x1024.url': 1
 		}).sort({
 			shootOn: -1
 		}).limit(2)
@@ -168,7 +103,7 @@ exports.getGroupInfo = async(group, code) => {
 		let [photos, payCount] = await Promise.all([photosPromise, payCountPromise])
 		card.payCount = payCount
 		card.allowPay = payCount == group.photoCount ? false : true
-		card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x512.url) : [photos[0].thumbnail.x512.url, photos[0].thumbnail.x512.url]
+		card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x1024.url || '') : [photos[0].thumbnail.x1024.url || '', photos[0].thumbnail.x1024.url || '']
 	} else {
 		card.allowPay = false
 		card.payCount = 0
@@ -178,12 +113,13 @@ exports.getGroupInfo = async(group, code) => {
 }
 
 exports.formatPhotos = async(siteId, photos) => {
-	photos.map(photo => {
-		const pay = orderHistory[0] ? true : false
+	const ary = []
+	for (let photo of photos) {
+		const pay = photo.orderHistory[0] || photo.isFree ? true : false
 		let wMP4 = null
 		let originalInfo = null
 		let thumbnail = null
-
+		photo.mimeType = photo.mimeType || 'jpg'
 		if (photo.mimeType == 'mp4') {
 			thumbnail = {
 				x512: {
@@ -220,20 +156,24 @@ exports.formatPhotos = async(siteId, photos) => {
 			} : {}
 			wMP4 = {}
 		}
-		return {
+		if (!siteInfo) {
+			await getSiteInfo()
+		}
+		ary.push({
 			_id: photo._id,
 			siteId: siteId,
 			locationId: photo.locationId,
 			shootOn: photo.shootOn,
 			isFree: photo.isFree,
 			isPaid: pay,
-			parkName: global.siteInfo[_cards[card].siteId].parkName,
+			parkName: siteInfo[siteId].parkName,
 			mimeType: photo.mimeType,
 			wMP4: wMP4,
 			thumbnail: thumbnail,
 			originalInfo: originalInfo,
-		}
-	})
+		})
+	}
+	return ary
 }
 
 exports.saveToOSS = async(bucketName, name, buffer) => {

@@ -89,7 +89,7 @@ app.use(async(ctx, next) => {
 	let bPass = true
 	const headers = httpStatus[ctx.service][ctx.fun].headers
 	for (let header in headers) {
-		if (header == 'token') continue
+		if (header == 'token' || !headers[header][0]) continue
 		let bflag = ctx.headers[header]
 		if (!bflag) {
 			bPass = false
@@ -105,9 +105,9 @@ app.use(async(ctx, next) => {
 	}
 	const params = httpStatus[ctx.service][ctx.fun].params
 	for (let param in params) {
-		if (param == 'token') continue
+		if (param == 'token' || !params[param][0]) continue
 		let bflag = ctx.params[param]
-		params[param][1] == 'Binary' ? bflag = ctx.files[param] : ''
+		params[param][1] == 'Binary' ? bflag = ctx.files && ctx.files[param] : ''
 		if (!bflag) {
 			bPass = false
 			break

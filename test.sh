@@ -6,7 +6,7 @@ docker run -itd \
 --net pictureair --ip 172.18.0.18 \
 -v ~/logs:/root/logs \
 -v `pwd`:/src \
--p 7777:7777 \
+-p 12333:12333 \
 -p 8888:8888 \
 -w /src \
 -e fly=product \

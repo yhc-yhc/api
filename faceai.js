@@ -61,52 +61,6 @@ console.log(versionFR.Version)
 console.log(versionFR.BuildDate)
 console.log(versionFR.CopyRight)
 
-const face2m = {}
-const featureMap = {}
-let scoreLine = 0.667
-
-async function process(src) {
-	const obj = {}
-	try {
-		const imgMat = await Jimp.read(src)
-		const {
-			asvl,
-			faces
-		} = await getFaces(imgMat)
-
-		for (let i = 0; i < faces.nFace; i++) {
-			const img = await imgMat.clone()
-			const feature = await getFaceFeature(asvl, faces.info[i])
-			if (!feature) continue
-			let key = `${src.replace(/\//g, '-')}_${i}`
-			var faceFeature = new AFR_FSDK_FACEMODEL()
-			var buffer = new Buffer(feature, 'base64')
-			faceFeature.lFeatureSize = buffer.length
-			faceFeature.pbFeature = buffer
-			let keyAry = await searchFeature(faceFeature)
-			if (!keyAry[0]) {
-				face2m[key] = faceFeature
-				featureMap[key] = feature
-				await fse.ensureDir(`/data/website/faces/`)
-				await img.crop(faces.info[i].left, faces.info[i].top, faces.info[i].right - faces.info[i].left, faces.info[i].bottom - faces.info[i].top)
-					.write(`/data/website/faces/${key}.jpg`)
-			}
-			obj[key] = keyAry[0]
-		}
-	} catch (e) {
-		console.log(e)
-	}
-	return obj
-}
-
-async function loadFaceToMap(name, feature) {
-	var faceFeature = new AFR_FSDK_FACEMODEL()
-	var buffer = new Buffer(feature, 'base64')
-	faceFeature.lFeatureSize = buffer.length
-	faceFeature.pbFeature = buffer
-	face2m[name] = faceFeature
-}
-
 async function getFaces(imgMat) {
 	return new Promise(async(resolve, reject) => {
 		doFaceDetection(imgMat, async function(err, asvl, faces) {
@@ -122,31 +76,42 @@ async function getFaces(imgMat) {
 	})
 }
 
-async function getFaceFeature(asvl, face) {
-	return ArcSoftFR.extractFeature(hFREngine, asvl, face)
+function doFaceDetection(img, faces_callback, width, height, format) {
+	if (arguments.length === 2) {
+		ArcSoftBase.loadImage(img, function(err, inputImage) {
+			if (err) throw err
+			ArcSoftFD.process(hFDEngine, inputImage, faces_callback)
+		})
+	} else if (arguments.length === 5) {
+		ArcSoftBase.loadYUVImage(img, width, height, format, (err, inputImage) => {
+			if (err) throw err
+			ArcSoftFD.process(hFDEngine, inputImage, faces_callback)
+		})
+	} else {
+		throw new Error('wrong number of arguments')
+	}
 }
 
-
-async function searchFeature(feature) {
-	const ary = []
-	const obj = {}
-	for (let fk in face2m) {
-		obj[fk] = ArcSoftFR.compareFaceSimilarity(hFREngine, feature, face2m[fk])
+const compareBufID = async(faceFeature, id) => {
+	const face = await model.face.findOne({
+		_id: id
+	}, {
+		feature: 1
+	})
+	if (!face) return 0
+	const featureM = face.feature
+	const faceFeatureM = new AFR_FSDK_FACEMODEL()
+	const bufferM = new Buffer(featureM, 'base64')
+	faceFeatureM.lFeatureSize = bufferM.length
+	faceFeatureM.pbFeature = bufferM
+	const source = await ArcSoftFR.compareFaceSimilarity(hFREngine, faceFeature, faceFeatureM)
+	return {
+		id,
+		source
 	}
-	const rs = await Promise.props(obj)
-	for (let k in rs) {
-		if (rs[k] > scoreLine) {
-			ary.push(k)
-		}
-	}
-	return ary
 }
 
-async function matchFace(param) {
-	const {
-		path,
-		faceId
-	} = param
+exports.matchFile = async(path, faceId) => {
 	try {
 		const imgMat = await Jimp.read(path)
 		const {
@@ -154,20 +119,22 @@ async function matchFace(param) {
 			faces
 		} = await getFaces(imgMat)
 		if (!faces.nFace) {
-			log('cant find face: ', src)
+			log('cant find face: ', path)
 			return 0
 		}
-
-		const feature = await getFaceFeature(asvl, faces.info[0])
-		if (!feature) return 0
-
+		const featureP = ArcSoftFR.extractFeature(hFREngine, asvl, faces.info[0])
+		const faceP = model.face.findOne({
+			_id: faceId
+		}, {
+			feature: 1
+		})
+		const [featureBuf, face] = await Promise.all([featureP, faceP])
+		if (!featureBuf.lenth || !face) return 0
 		const faceFeature = new AFR_FSDK_FACEMODEL()
-		const buffer = new Buffer(feature, 'base64')
-		faceFeature.lFeatureSize = buffer.length
-		faceFeature.pbFeature = buffer
+		faceFeature.lFeatureSize = featureBuf.length
+		faceFeature.pbFeature = featureBuf
 
-		const faceM = await model.face.findOne({_id: faceId}, {feature: 1})
-		const featureM = faceM.feature
+		const featureM = face.feature
 		const faceFeatureM = new AFR_FSDK_FACEMODEL()
 		const bufferM = new Buffer(featureM, 'base64')
 		faceFeatureM.lFeatureSize = bufferM.length
@@ -179,51 +146,31 @@ async function matchFace(param) {
 	}
 }
 
-async function searchSameFace(src) {
+exports.getFeatureBuf = async(path) => {
 	try {
-		const imgMat = await Jimp.read(src)
+		const imgMat = await Jimp.read(path)
 		const {
 			asvl,
 			faces
 		} = await getFaces(imgMat)
 		if (!faces.nFace) {
-			log('cant find face: ', src)
-			return 0
+			log('cant find face: ', path)
+			return null
 		}
-		const feature = await getFaceFeature(asvl, faces.info[0])
-		if (!feature) return 0
-
-		var faceFeature = new AFR_FSDK_FACEMODEL()
-		var buffer = new Buffer(feature, 'base64')
-		faceFeature.lFeatureSize = buffer.length
-		faceFeature.pbFeature = buffer
-		return searchFeature(faceFeature)
+		return await ArcSoftFR.extractFeature(hFREngine, asvl, faces.info[0])
 	} catch (e) {
-		return 0
-	}
-
-}
-
-function doFaceDetection(img, faces_callback, width, height, format) {
-
-	if (arguments.length === 2) {
-		ArcSoftBase.loadImage(img, function(err, inputImage) {
-			if (err) throw err
-			ArcSoftFD.process(hFDEngine, inputImage, faces_callback)
-		})
-	} else if (arguments.length === 5) {
-		ArcSoftBase.loadYUVImage(img, width, height, format, (err, inputImage) => {
-			if (err) throw err
-			ArcSoftFD.process(hFDEngine, inputImage, faces_callback)
-		})
-
-	} else {
-		throw new Error('wrong number of arguments')
+		return null
 	}
 }
-module.exports = {
-	process,
-	featureMap,
-	loadFaceToMap,
-	searchSameFace
+
+exports.matchFeatureBuf = async(featureBuf, ids) => {
+	const faceFeature = new AFR_FSDK_FACEMODEL()
+	faceFeature.lFeatureSize = featureBuf.length
+	faceFeature.pbFeature = featureBuf
+	const promises = []
+	for (let id of ids) {
+		const promise = compareBufID(faceFeature, id)
+		promises.push(promise)
+	}
+	return await Promise.all(promises)
 }

@@ -8,7 +8,7 @@ docker run -itd \
 -v ~/logs:/root/logs \
 -v /data:/data \
 -v `pwd`:/src \
--p 7777:7777 \
+-p 12333:12333 \
 -p 8888:8888 \
 -w /src \
 --name faceai \

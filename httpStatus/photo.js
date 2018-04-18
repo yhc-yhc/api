@@ -11,7 +11,7 @@ module.exports = {
             shootDate: [0, 'String', '时间的字符串格式，YYYY/MM/DD。如果传了，code必传'],
             isPaid: [0, 'String', '-1: 全部, 0: 未购买, 1: 已购买, 默认-1'],
             limit: [0, 'Number', '显示条数,默认50'],
-            lteId: [0, 'String', '上拉加载图片最后一个id，默认空'],
+            gteId: [0, 'String', '上拉加载图片最后一个id，默认空'],
             useLimit: [0, 'boolean', '是否使用分页,默认true']
         },
         response: {

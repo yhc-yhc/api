@@ -16,13 +16,11 @@ for (let i = 0; i < process_num; i++) {
 	works.push(work)
 }
 
-module.exports = function(opt, fn) {
-	var data = opt.data
-	var flag = opt.flag 
+module.exports = function({flag, data}, fn) {
 
 	if (!flag_obj[flag]) {
 		flag_obj[flag] = 1
-		works[0].send({flag: flag, data: data})
+		works[0].send({flag, data})
 	}
 	ev.once(flag, function(err, data) {
 		fn(err, data)

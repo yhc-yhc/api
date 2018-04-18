@@ -1,5 +1,6 @@
 require('./thirdModules.js')
 
+easyMonitor('api')
 global.log = console.log
 global.loaddir = require('../tools/loaddir.js')
 global.config = loaddir('config')[process.env.RUN || 'dev']

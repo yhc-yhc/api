@@ -1,6 +1,6 @@
-const childM = require('../tools/childM.js')
 const idGenerate = require('nanoid/generate')
 const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
+const faceai = require('../faceai.js')
 
 exports.getFaceInfo = async(faceObj, date, siteId, code) => {
 
@@ -27,56 +27,42 @@ exports.getFaceInfo = async(faceObj, date, siteId, code) => {
 	return faceObj
 }
 
-exports.matchFeatureFromChlid = (path, faceId) => {
-	return new Promise((resolve, reject) => {
-		childM({
-			flag: `matchFace_::_${nanoid(10)}`,
-			data: {path, faceId}
-		}, (err, data) => {
-			resolve(data)
-		})
-	})
+exports.matchFile = async(path, faceId) => {
+	return await faceai.matchFile(path, faceId)
 }
 
-exports.searchFeatureFromChlid = path => {
-	return new Promise((resolve, reject) => {
-		childM({
-			flag: `searchSameFace_::_${nanoid(10)}`,
-			data: path
-		}, (err, data) => {
-			resolve(data)
-		})
-	})
+exports.getFeatureBuf = async(path) => {
+	return await faceai.getFeatureBuf(path)
 }
 
-exports.addFaceCards = async photos => {
-	const _cards = photos.reduce((pre, cur) => {
-		let dayStr = moment(new Date(cur.shootOn)).format('YYYYMMDD')
-		let id = `${cur.siteId}__${dayStr}`
-		pre[id] = pre[id] || {}
-		let cardNo = `${cur.siteId}FC`
+exports.matchFeatureBuf = async (featureBuf, ids) => {
+	return await faceai.matchFeatureBuf(featureBuf, ids)
+}
+
+exports.addFaceCards = async (groups, faces) => {
+	const cardCodes = []
+	const promises = []
+	for (let group of groups) {
+		let cardNo = `${group._id.siteId}FC`
 		cardNo += idGenerate(alphabet, 5)
 		let len = 16 - cardNo.length
 		cardNo += idGenerate(alphabet, len)
-		pre[id].cardNo = cardNo
-		pre[id]._ids = pre[id]._ids || []
-		pre[id]._ids.push(cur._id)
-		return pre
-	}, {})
-	const cardCodes = []
-	const promises = []
-	for (card in _cards) {
 		cardCodes.push({
-			code: _cards[card].cardNo
+			code: cardNo
 		})
 		const promise = model.photo.update({
-			_id: {
-				$in: _cards[card]._ids
-			}
+			faceIds: {
+				$in: faces
+			},
+			shootOn: {
+				$gte: new Date(group._id.shootOn),
+				$lt: new Date(new Date(group._id.shootOn).getTime() + 86400000)
+			},
+			siteId: group._id.siteId
 		}, {
 			$addToSet: {
 				customerIds: {
-					code: _cards[card].cardNo,
+					code: cardNo,
 				}
 			}
 		}, {

@@ -1,3 +1,4 @@
+global.easyMonitor = require('easy-monitor');
 global.Promise = require('bluebird')
 global.nanoid = require('nanoid')
 global.path = require('path')

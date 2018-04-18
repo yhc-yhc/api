@@ -14,6 +14,7 @@ module.exports = {
     bgUrl: String, // 乐园对就卡的背景图
     name: {type: String},   //乐园名称
     description: {type: String},   //描述
+    parkCardCode: {type: String},  //共享照片存放的卡号
     servers: [  //服务器信息
         {
             serverId: String,//服务器Id
