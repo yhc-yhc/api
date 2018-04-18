@@ -20,39 +20,52 @@ router.post('sendsms', async (ctx, next) => {
 	}
 })
 
-/*
- 微信登录,获取用户信息
-*/
 router.post('thirdLogin', async (ctx, next) => {
-	var user
+	let user
+	const loginParam = {
+		token: ctx.params.access_token,
+		openid: ctx.params.openid,
+		LG: ctx.params.lg,
+		_url: ctx._url,
+		terminal: ctx.params.terminal
+	}
+
 	//判断接收的是wx/fb	
 	const login_type = ctx.params.type
 	switch (login_type) {
 		case 'wx':
-			user = await services.user.wxLogin(ctx)
+			user = await services.user.wxLogin(loginParam)
 			break;
 		case 'fb':
-			user = await services.user.fbLogin(ctx)
+			user = await services.user.fbLogin(loginParam)
+			log('facebook获取的user:', user)
 			break;
 
 	}
 	log(28, user)
+	const user_name = user.userName
 	await model.user.update({
-		userName: user.userName
+		userName: user_name
 	}, {
 		$set: user
 	}, {
 		upsert: true
 	})
 	const _user = await model.user.findOne({
-		userName: user.userName
+		userName: user_name
 	}, {
 		_id: 1
 	})
 	const userid = _user._id.toString()
-	const ctx_ip = ctx.request.ip.replace(/::ffff:/g, '')
-	const access_token = await services.user.createToken(user, ctx.header.uuid, ctx_ip)
-	const key = 'access_token:' + endeurl.md5(user.userName)
+
+	const tokenParams = {
+		lg: ctx.params.lg,
+		t: ctx.params.terminal,
+		visitIP: ctx.request.ip.replace(/::ffff:/g, ''),
+		uuid: ctx.params.uuid
+	}
+	const access_token = await services.user.createToken(user_name, tokenParams)
+	const key = 'access_token:' + endeurl.md5(user_name)
 	cache.set(key, JSON.stringify({
 		userid,
 		user
