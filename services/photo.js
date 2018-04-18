@@ -81,7 +81,7 @@ exports.getGroupInfo = async(group, code) => {
 			siteId: group._id.siteId
 		}, {
 			_id: 0,
-			'thumbnail.x512.url': 1
+			'thumbnail.x1024.url': 1
 		}).sort({
 			shootOn: -1
 		}).limit(2)
@@ -103,7 +103,7 @@ exports.getGroupInfo = async(group, code) => {
 		let [photos, payCount] = await Promise.all([photosPromise, payCountPromise])
 		card.payCount = payCount
 		card.allowPay = payCount == group.photoCount ? false : true
-		card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x512.url) : [photos[0].thumbnail.x512.url, photos[0].thumbnail.x512.url]
+		card.photos = photos.length > 1 ? photos.map(obj => obj.thumbnail.x1024.url || '') : [photos[0].thumbnail.x1024.url || '', photos[0].thumbnail.x1024.url || '']
 	} else {
 		card.allowPay = false
 		card.payCount = 0
@@ -114,7 +114,7 @@ exports.getGroupInfo = async(group, code) => {
 
 exports.formatPhotos = async(siteId, photos) => {
 	photos.map(photo => {
-		const pay = photo.orderHistory[0] || photo.isFree  ? true : false
+		const pay = photo.orderHistory[0] || photo.isFree ? true : false
 		let wMP4 = null
 		let originalInfo = null
 		let thumbnail = null
