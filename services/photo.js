@@ -37,7 +37,7 @@ exports.groupPhotos = async (code, bindOn) => {
 			parkName: 'PictureAir',
 			ocrCard: false,
 			faceCard: false,
-			type: 0,
+			type: siteInfo[group._id.siteId].parkCardCode == code ? 1 : 0,
 			pageUrl: 'http://web.pictureair.com/',
 			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
 			bgUrl: '/sites/common/background.png',
