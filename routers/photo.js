@@ -3,7 +3,9 @@ const router = new Router()
 router.get('/', (ctx, next) => {
 	ctx.body = 'photo index!';
 })
-router.get('photo', (ctx, next) => {
-	ctx.body = 'photo!';
+router.get('listPhotos', (ctx, next) => {
+	
+  
+
 })
 module.exports = router
