@@ -76,13 +76,12 @@ router.post('wxpayFromApp', async (ctx, next) => {
 //回调，验证是否支付成功
 router.post('wxNotifyToAppPay', async (message, req, res, next) => {
     log('返回调用支付：'+message)
-    var payQuery = {}
-
+    
     const data = await parseStringAsync(message)
-
+    var payQuery = {}
     payQuery.appid = data.xml.appid
     payQuery.mch_id = data.xml.mch_id
-    payQuery.transaction_id = data.xml.transaction_id
+    payQuery.transaction_id = data.xml.transaction_id //微信订单号
     payQuery.out_trade_no = data.xml.out_trade_no
     payQuery.nonce_str = (uuid.v4()).replace(/-/g, '')
 
