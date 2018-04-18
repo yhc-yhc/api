@@ -100,7 +100,7 @@ app.use(async(ctx, next) => {
 		throw {
 			status: 10006,
 			message: httpStatus.common.system['10006'][ctx.LG],
-			router: ctx.url
+			router: ctx._url
 		}
 	}
 	const params = httpStatus[ctx.service][ctx.fun].params
@@ -117,7 +117,7 @@ app.use(async(ctx, next) => {
 		throw {
 			status: 10006,
 			message: httpStatus.common.system['10006'][ctx.LG],
-			router: ctx.url
+			router: ctx._url
 		}
 	}
 	await next()
@@ -132,7 +132,7 @@ app.use(async(ctx, next) => {
 			throw {
 				status: 10006,
 				message: httpStatus.common.system['10006'][ctx.LG],
-				router: ctx.url
+				router: ctx._url
 			}
 		}
 		if (!certs.public) {
@@ -151,7 +151,7 @@ app.use(async(ctx, next) => {
 			throw {
 				status: 10005,
 				message: httpStatus.common.system['10005'][ctx.LG],
-				router: ctx.url
+				router: ctx._url
 			}
 		} else {
 			log(userStr)

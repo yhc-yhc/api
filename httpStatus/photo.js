@@ -1,5 +1,4 @@
 module.exports = {
-
     listPhotos: {
         method: 'get',
         desc: "获取照片列表",
