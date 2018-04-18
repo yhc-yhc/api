@@ -63,7 +63,7 @@ exports.getGroupInfo = async (group, code) => {
 		parkName: global.siteInfo[group._id.siteId].parkName,
 		ocrCard: global.siteInfo[group._id.siteId].ocrCard || false,
 		faceCard: global.siteInfo[group._id.siteId].faceCard || false,
-		type: global.siteInfo[group._id.siteId].type || 0,
+		type: siteInfo[group._id.siteId].parkCardCode == code ? 1 : 0,
 		pageUrl: global.siteInfo[group._id.siteId].pageUrl,
 		shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
 		bgUrl: global.siteInfo[group._id.siteId].bgUrl,

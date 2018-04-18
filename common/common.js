@@ -59,6 +59,7 @@ async function getSiteInfo() {
 		siteId: 1,
 		name: 1,
 		bgUrl: 1,
+		parkCardCode: 1
 	})
 	global.siteInfo = parks.reduce((pre, cur) => {
 		pre[cur.siteId] = {
@@ -68,7 +69,7 @@ async function getSiteInfo() {
 			pageUrl: cur.pageUrl || 'http://web.pictureair.com/',
 			ocrCard: cur.ocrCard || false,
 			faceCard: cur.faceCard || false,
-			type: cur.type || 0
+			parkCardCode: cur.parkCardCode || ''
 		}
 		return pre
 	}, {})
