@@ -34,9 +34,9 @@ router.get('listPhotos', async (ctx, next) => {
 				isFree: false
 			}]
 		}
-		if (ctx.params.gteId) {
+		if (ctx.params.lastId) {
 			query._id = {
-				$gt: ctx.params.gteId
+				$gt: ctx.params.lastId
 			}
 		}
 	} else {
