@@ -27,7 +27,9 @@ router.post('thirdLogin', async (ctx, next) => {
 		openid: ctx.params.openid,
 		LG: ctx.params.lg,
 		_url: ctx._url,
-		terminal: ctx.params.terminal
+		terminal: ctx.params.terminal,
+		fbId:ctx.params.fbId,
+		fbName:ctx.params.fbName
 	}
 
 	//判断接收的是wx/fb	

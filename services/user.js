@@ -97,9 +97,6 @@ exports.fbLogin = async loginparams => {
 		openIds: {
 			fb: id
 		},
-		coverHeaderImage: userInfo.picture.data.url,
-		gender: user_info.gender,
-		country: user_info.locale,
 		registerTerminal: loginparams.terminal, //终端类型ios,adriod
 		creDatetime: new Date(),
 		updDatetime: new Date(),

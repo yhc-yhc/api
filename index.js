@@ -8,7 +8,7 @@ app.use(bodyParser({
 	"textLimit": "10mb"
 }))
 
-app.use(async(ctx, next) => {
+app.use(async (ctx, next) => {
 	const start = new Date()
 	ctx.method == 'GET' ? ctx.req.query = ctx.request.query : ctx.req.body = ctx.request.body
 	ctx.LG = 'en-US'
@@ -46,7 +46,7 @@ app.use(async(ctx, next) => {
 })
 
 // format api response result
-app.use(async(ctx, next) => {
+app.use(async (ctx, next) => {
 	await next()
 	if (ctx.body) {
 		const obj = Object.assign({}, httpStatus.common.success)
@@ -58,7 +58,7 @@ app.use(async(ctx, next) => {
 })
 
 // api is exists
-app.use(async(ctx, next) => {
+app.use(async (ctx, next) => {
 	let b = httpStatus[ctx.service] && httpStatus[ctx.service][ctx.fun] &&
 		httpStatus[ctx.service][ctx.fun].method.toUpperCase() == ctx.method.toUpperCase()
 	if (!b) {
@@ -72,7 +72,7 @@ app.use(async(ctx, next) => {
 })
 
 // api params is correct
-app.use(async(ctx, next) => {
+app.use(async (ctx, next) => {
 	if (ctx.request.is('multipart/*')) {
 		const {
 			files,
@@ -124,7 +124,7 @@ app.use(async(ctx, next) => {
 })
 
 // api token is correct
-app.use(async(ctx, next) => {
+app.use(async (ctx, next) => {
 	if (global.httpStatus[ctx.service][ctx.fun].headers.token ||
 		global.httpStatus[ctx.service][ctx.fun].params.token) {
 		let token = ctx.headers.token || ctx.params.token
@@ -144,25 +144,26 @@ app.use(async(ctx, next) => {
 				algorithm: 'RS512'
 			})
 		} catch (err) {
+			error.status = 420
 			throw err
 		}
 		let userStr = await cache.getAsync('access_token:' + tokenObj.audience)
 		if (!userStr) {
 			throw {
-				status: 10005,
+				status: 420,
 				message: httpStatus.common.system['10005'][ctx.LG],
 				router: ctx._url
 			}
 		} else {
 			log(userStr)
 			ctx.user = JSON.parse(userStr)
-			// if (ctx.user.user.uuid != tokenObj.uuid) {
-			// 	throw {
-			// 		status: 448,
-			// 		message: httpStatus.common.system['10005'][ctx.LG],
-			// 		router: ctx.url
-			// 	}
-			// }
+			if (ctx.user.user.uuid != tokenObj.uuid) {
+				throw {
+					status: 448,
+					message: httpStatus.common.system['10005'][ctx.LG],
+					router: ctx.url
+				}
+			}
 		}
 	}
 	await next()

@@ -6,9 +6,8 @@ router.get('/', (ctx, next) => {
 })
 
 router.get('listPhotos', async (ctx, next) => {
-	let query
-	if (ctx.params.code && ctx.params.shootDate) {
-		query = {
+	
+		const query = {
 			siteId: ctx.params.siteId,
 			'customerIds.code': ctx.params.code,
 			shootOn: {
@@ -39,16 +38,7 @@ router.get('listPhotos', async (ctx, next) => {
 				$gt: ctx.params.lastId
 			}
 		}
-	} else {
-		const park = await model.park.findOne({
-			siteId: ctx.params.siteId
-		})
-		const code = park.parkCardCode
-		query = {
-			siteId: ctx.params.siteId,
-			'customerIds.code': code
-		}
-	}
+	
 	let photos
 	if (ctx.params.useLimit) {
 		photos = await model.photo.find(query).limit(parseInt(ctx.params.limit) || 50).sort({

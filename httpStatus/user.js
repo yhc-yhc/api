@@ -16,7 +16,9 @@ module.exports = {
 			uuid: [1, 'String', "设备的uuid"],
 			type: [1, 'String', "wx/fb"],
 			terminal: [1, 'String', "ios/adriod,按照之前的0或1传"],
-			lg: [1, 'String', 'en/us']
+			lg: [1, 'String', 'en/us'],
+			fbId:[0,'String',"为facebook获取的用户id时，必传"],
+			fbName:[0,'String',"为facebook获取的用户name时，必传"]
 		},
 		response: {
 			token: '2bd415d0c0e3a096d64e26f'
