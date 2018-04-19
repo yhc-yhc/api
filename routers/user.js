@@ -70,6 +70,8 @@ router.post('thirdLogin', async (ctx, next) => {
 	const key = 'access_token:' + endeurl.md5(user_name)
 	user.uuid = ctx.params.uuid
 	user.visitIP = visitIP
+	user.pppCodes = []
+	user.coupons = []
 	cache.set(key, JSON.stringify({
 		userid,
 		user
