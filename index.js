@@ -158,11 +158,7 @@ app.use(async (ctx, next) => {
 			}
 		} else {
 			ctx.user = JSON.parse(userStr)
-          
-			log('router_url: '+ctx.url,'ctx.user.user.uuid:'+ctx.user.user.uuid ,'tokenObj.uuid:'+tokenObj.uuid)
-            
-			if (ctx.user.user.uuid != tokenObj.uuid) {
-				log('access_token来了')
+			if (ctx.user.user.uuid != tokenObj.uuid || ctx.user.user.visitIP != tokenObj.visitIP) {
 				throw {
 					status: 448,
 					message: httpStatus.common.system['10005'][ctx.LG],

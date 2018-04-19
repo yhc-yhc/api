@@ -26,7 +26,6 @@ router.post('thirdLogin', async (ctx, next) => {
 		openid: ctx.params.openid,
 		LG: ctx.params.lg,
 		_url: ctx._url,
-		uuid: ctx.params.uuid,
 		terminal: ctx.params.terminal,
 		fbId: ctx.params.fbId,
 		fbName: ctx.params.fbName
@@ -60,14 +59,17 @@ router.post('thirdLogin', async (ctx, next) => {
 	})
 	const userid = _user._id.toString()
 
+	let visitIP = ctx.request.ip.replace(/::ffff:/g, '')
 	const tokenParams = {
 		lg: ctx.params.lg,
 		t: ctx.params.terminal,
-		visitIP: ctx.request.ip.replace(/::ffff:/g, ''),
+		visitIP: visitIP,
 		uuid: ctx.params.uuid
 	}
 	const access_token = await services.user.createToken(user_name, tokenParams)
 	const key = 'access_token:' + endeurl.md5(user_name)
+	user.uuid = ctx.params.uuid
+	user.visitIP = visitIP
 	cache.set(key, JSON.stringify({
 		userid,
 		user
