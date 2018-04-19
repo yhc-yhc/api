@@ -158,7 +158,9 @@ app.use(async (ctx, next) => {
 			}
 		} else {
 			ctx.user = JSON.parse(userStr)
-			if (ctx.user.user.uuid != tokenObj.uuid || ctx.user.user.visitIP != tokenObj.visitIP) {
+			let bToken = (tokenObj.uuid && ctx.user.user.uuid != tokenObj.uuid) ||
+				(tokenObj.visitIP && ctx.user.user.visitIP != tokenObj.visitIP)
+			if (bToken) {
 				throw {
 					status: 448,
 					message: httpStatus.common.system['10005'][ctx.LG],
