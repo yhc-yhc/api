@@ -127,7 +127,6 @@ app.use(async (ctx, next) => {
 
 // api token is correct
 app.use(async (ctx, next) => {
-	log('登录的类型：'+ctx.params.type)
 	if (global.httpStatus[ctx.service][ctx.fun].headers.token ||
 		global.httpStatus[ctx.service][ctx.fun].params.token) {
 		let token = ctx.headers.token || ctx.params.token
