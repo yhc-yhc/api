@@ -14,7 +14,7 @@ module.exports = {
 		desc: '第三方登录',
 		headers: {},
 		params: {
-			access_token: [1, 'String', "第三方登录认证的token"],
+			access_token: [0, 'String', "微信登录必传"],
 			openid: [0, 'String', "app认证的openid，授权用户唯一标识,微信为必需"],
 			uuid: [1, 'String', "设备的uuid"],
 			type: [1, 'String', "wx/fb"],

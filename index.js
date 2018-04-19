@@ -159,6 +159,7 @@ app.use(async (ctx, next) => {
 		} else {
 			ctx.user = JSON.parse(userStr)
 			if (ctx.user.user.uuid != tokenObj.uuid) {
+				log('access_token来了')
 				throw {
 					status: 448,
 					message: httpStatus.common.system['10005'][ctx.LG],
