@@ -159,9 +159,9 @@ app.use(async (ctx, next) => {
 			}
 		} else {
 			ctx.user = JSON.parse(userStr)
-
-			log('ctx.user.user.uuid:'+ctx.user.user.uuid ,'tokenObj.uuid:'+tokenObj.uuid)
-
+          
+			log('router_url: '+ctx.url,'ctx.user.user.uuid:'+ctx.user.user.uuid ,'tokenObj.uuid:'+tokenObj.uuid)
+            
 			if (ctx.user.user.uuid != tokenObj.uuid) {
 				log('access_token来了')
 				throw {
