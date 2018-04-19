@@ -7,8 +7,8 @@ module.exports = {
         },
         params: {
             siteId: [1, 'String', 'siteId'],
-            code: [1, 'String', '共享不传，个人传。如果传了，shootDate必传'],
-            shootDate: [1, 'String', '时间的字符串格式，YYYY/MM/DD。如果传了，code必传'],
+            shootDate: [1, 'String', '时间的字符串格式，YYYY/MM/DD'],
+            code: [0, 'String', '共享不传，个人传。'],
             isPaid: [0, 'String', '-1: 全部, 0: 未购买, 1: 已购买, 默认-1'],
             limit: [0, 'Number', '显示条数,默认50'],
             lastId: [0, 'String', '上拉加载图片最后一个id，默认空'],
