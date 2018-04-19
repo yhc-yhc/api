@@ -1,19 +1,18 @@
-const Router = require('koa-router')
 const router = new Router()
-const services = loaddir('./services')
+const services = loaddir('services')
 
-router.post('sendsms', async (ctx, next) => {
-	const body = ctx.req.body
-	const api = httpStatus[ctx._url][ctx.method]
-	let cacheKey = `smscode_${body.areaCode}${body.phone}`
+router.post('sendSMS', async (ctx, next) => {
+	let cacheKey = `smscode_${ctx.params.areaCode}${ctx.params.phone}`
 	let code = await cache.getAsync(cacheKey)
 	if (code) {
 		log(cacheKey, code)
-		throw api.error.smsSending || httpStatus.errorLoss
+		throw {
+			message: `${ctx.params.areaCode}-${ctx.params.phone} is sending...`
+		}
 	}
 	let vcode = ('' + Math.random()).match(/\d{6}/)[0]
 	cache.set(cacheKey, vcode, 'EX', config.cacheExpire.smsvcode)
-	const rs = await sendsms(body.areaCode, body.phone, config.sms.tpl_map.register, [vcode])
+	const rs = await services.user.sendSMS(ctx.params.areaCode, ctx.params.phone, config.sms.tpl_map.register, [vcode])
 	if (rs.body.result) {
 		log(rs.body)
 		throw api.error.getSmsErr || httpStatus.errorLoss

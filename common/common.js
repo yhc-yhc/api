@@ -12,7 +12,6 @@ global.mqExchange = require('../mq/conn.js').mqExchange
 global.mqPub = require('../mq/conn.js').mqPub
 global.mqSub = require('../mq/conn.js').mqSub
 global.endeurl = require('../tools/endeurl.js')
-global.sendsms = require('../tools/sms.js')
 
 global.request = Promise.promisifyAll(Promise.promisify(require('request')))
 Promise.promisifyAll(redis.RedisClient.prototype)

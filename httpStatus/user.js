@@ -1,9 +1,12 @@
 module.exports = {
-	sendSms: {
+	sendSMS: {
 		method: 'POST',
 		desc: "向指定的手机号码发送短信",
 		headers: {},
-		params: {},
+		params: {
+			areaCode: [1, 'String', "区号,如+86"],
+			phone: [1, 'String', "手机号码"]
+		},
 		resDesc: {}
 	},
 	thirdLogin: {
@@ -17,8 +20,8 @@ module.exports = {
 			type: [1, 'String', "wx/fb"],
 			terminal: [1, 'String', "ios/adriod,按照之前的0或1传"],
 			lg: [1, 'String', 'en/us'],
-			fbId:[0,'String',"为facebook获取的用户id时，必传"],
-			fbName:[0,'String',"为facebook获取的用户name时，必传"]
+			fbId: [0, 'String', "为facebook获取的用户id时，必传"],
+			fbName: [0, 'String', "为facebook获取的用户name时，必传"]
 		},
 		response: {
 			token: '2bd415d0c0e3a096d64e26f'

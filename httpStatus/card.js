@@ -1,4 +1,3 @@
-const face = require('./face.js')
 module.exports = {
 	listCards: {
 		method: 'GET',

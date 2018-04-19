@@ -1,9 +1,5 @@
-const Router = require('koa-router')
 const router = new Router()
 const services = loaddir('services')
-router.get('/', (ctx, next) => {
-	ctx.body = 'photo index!';
-})
 
 router.get('listPhotos', async (ctx, next) => {
 	const query = {
@@ -13,6 +9,7 @@ router.get('listPhotos', async (ctx, next) => {
 			$lt: new Date(new Date(ctx.params.shootDate).getTime() + 86400000)
 		}
 	}
+	//个人照片永远没有共享
 	if (ctx.params.code) {
 		query['customerIds.code'] = ctx.params.code
 	} else {
@@ -23,22 +20,14 @@ router.get('listPhotos', async (ctx, next) => {
 		query['customerIds.code'] = code
 	}
 	if (ctx.params.isPaid == 1) {
-		query['$or'] = [{
-			'orderHistory.0': {
-				$exists: true
-			}
-		}, {
-			isFree: true
-		}]
+		query['orderHistory.0'] = {
+			$exists: true
+		}
 	}
 	if (ctx.params.isPaid == 0) {
-		query['$and'] = [{
-			'orderHistory.0': {
-				$exists: false
-			}
-		}, {
-			isFree: false
-		}]
+		query['orderHistory.0'] = {
+			$exists: false
+		}
 	}
 	if (ctx.params.lastId) {
 		query._id = {

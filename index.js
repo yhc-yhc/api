@@ -30,13 +30,15 @@ app.use(async (ctx, next) => {
 			logUtil.logResponse(ctx, ms)
 		}
 	} catch (err) {
+		const response = httpStatus[ctx.service][ctx.fun].response || {}
 		ctx.body = {
 			status: err.status || 10001,
 			message: err.message || httpStatus.common.system['10001'][ctx.LG],
-			result: {
+			errorInfo: {
 				router: err.router,
 				stack: err.stack
-			}
+			},
+			result: Array.isArray(response) ? [] : {}
 		}
 		if (ctx.service != 'sync') {
 			let ms = new Date() - start
@@ -155,7 +157,6 @@ app.use(async (ctx, next) => {
 				router: ctx._url
 			}
 		} else {
-			log(userStr)
 			ctx.user = JSON.parse(userStr)
 			if (ctx.user.user.uuid != tokenObj.uuid) {
 				throw {

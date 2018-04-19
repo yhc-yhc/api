@@ -1,36 +1,6 @@
+const router = new Router()
 const uuid = require('uuid')
-const xml2js = require('xml2js')
-const router = require('koa-router')()
-const Parser = new xml2js.Parser()
-
-const parseStringAsync = xml => {
-    return new Promise((resolve, reject) => {
-        Parser.parseString(xml, (err, result) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve(result)
-            }
-        })
-    })
-}
-const objTostring = function(obj) {
-    var preSign = '';
-    for (let key in obj) {
-        preSign += `${key}=${obj[key]}&`
-    }
-    return preSign
-}
-
-const objToXml = function(obj) {
-    let xml = '<xml>'
-    for (let key in obj) {
-        xml += `<${key}>${obj[key]}</${key}>`
-    }
-    xml += '</xml>'
-    return xml
-}
-
+const services = loaddir('services')
 
 //后端发起支付请求，再转给app进行支付
 router.post('wxpayFromApp', async (ctx, next) => {
@@ -47,16 +17,16 @@ router.post('wxpayFromApp', async (ctx, next) => {
         trade_type: 'APP'
     }
 
-    const objStr = objTostring(order)
+    const objStr = services.pay.objTostring(order)
     const preSign = objStr + 'key=3ebbd8d903e74e70844340d2fc66cbab'
     order.sign = crypto.createHash('md5').update(preSign, 'utf8').digest('hex').toUpperCase()
-    const xml = objToXml(order)
+    const xml = services.pay.objToXml(order)
     const data = await request.postAsync({
         url: 'https://api.mch.weixin.qq.com/pay/unifiedorder',
         body: xml
     })
     console.log("返回的信息： " + JSON.stringify(data.body));
-    const result = await parseStringAsync(data.body)
+    const result = await services.pay.parseStringAsync(data.body)
 
     const paysign2 = {
         appid: result.xml.appid,
@@ -67,7 +37,7 @@ router.post('wxpayFromApp', async (ctx, next) => {
         timestamp: new Date().getTime()
     }
 
-    const payPrestr = objTostring(paysign2) + 'key=3ebbd8d903e74e70844340d2fc66cbab'
+    const payPrestr = services.pay.objTostring(paysign2) + 'key=3ebbd8d903e74e70844340d2fc66cbab'
     //二次签名后将数据返回给app前端，由app进行支付吊起
     paysign2.sign = crypto.createHash('md5').update(payPrestr, 'utf8').digest('hex').toUpperCase()
     log(paysign2)
@@ -77,7 +47,7 @@ router.post('wxpayFromApp', async (ctx, next) => {
 router.post('wxNotifyToAppPay', async (message, req, res, next) => {
     log('返回调用支付：'+message)
     
-    const data = await parseStringAsync(message)
+    const data = await services.pay.parseStringAsync(message)
     var payQuery = {}
     payQuery.appid = data.xml.appid
     payQuery.mch_id = data.xml.mch_id
@@ -85,15 +55,15 @@ router.post('wxNotifyToAppPay', async (message, req, res, next) => {
     payQuery.out_trade_no = data.xml.out_trade_no
     payQuery.nonce_str = (uuid.v4()).replace(/-/g, '')
 
-    var payQueryString = objTostring(xmlParser) + 'key=3ebbd8d903e74e70844340d2fc66cbab'
+    var payQueryString = services.pay.objTostring(xmlParser) + 'key=3ebbd8d903e74e70844340d2fc66cbab'
     payQuery.sign = crypto.createHash('md5').update(payQueryString, 'utf8').digest('hex').toUpperCase()
     //查询订单是否支付成功
     const data1 = await request.postAsync({
         url: 'https://api.mch.weixin.qq.com/pay/orderquery',
-        body: objToXml(payQuery)
+        body: services.pay.objToXml(payQuery)
     })
 
-    const result = await parseStringAsync(data1.body)
+    const result = await services.pay.parseStringAsync(data1.body)
     if (result.xml.return_code && result.xml.return_code == 'SUCCESS' && result.xml.trade_state == 'SUCCESS') {
      
 

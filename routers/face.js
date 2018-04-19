@@ -1,4 +1,3 @@
-const Router = require('koa-router')
 const router = new Router()
 const services = loaddir('services')
 let sourceLine = 0.667
