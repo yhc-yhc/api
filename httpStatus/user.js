@@ -27,7 +27,21 @@ module.exports = {
 			token: '2bd415d0c0e3a096d64e26f'
 		},
 		resDesc: {
-			'token': ['String', '认证标志'],
+			'token': ['String', '认证标志']
 		}
+	},
+	updateUser:{
+		method: 'POST',
+		desc: '更新用户信息',
+		headers: {},
+		params:{
+			userName: [1, 'String', "用户名字/昵称"],
+			name: [0, 'String', "用户名字/昵称"],
+			email: [0, 'String', "-1 未知 0 女 1 男"],
+			mobile: [0, 'String', "手机号,如果传了，格式必需正确"],
+			birthday: [0, 'String', "生日"]
+		},
+		response: {},
+		resDesc: {}
 	}
 }

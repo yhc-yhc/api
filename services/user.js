@@ -135,3 +135,51 @@ exports.sendSMS = async (areaCode, mobile, tplMap, contentAry) => {
 		json: true
 	})
 }
+
+exports.userParams = async(pm)=>{
+   //1.接收前端传过来的参数
+    let user ={
+    	userName:pm.userName
+    }
+
+    if(pm.name && pm.name.trim()!=''){
+    	user.name =pm.name
+    }
+    if(pm.gender && pm.gender.trim()!=''){
+    	user.gender =pm.gender
+    }
+
+    const regEmail = /^\s*\w+(?:\.{0,1}[\w-]+)*@[a-zA-Z0-9]+(?:[-.][a-zA-Z0-9]+)*\.[a-zA-Z]+\s*$/
+    if(pm.email && pm.email.trim()!=''){
+       	if(!regEmail.exec(pm.email.trim())){
+	         throw {
+				status: 10003,
+				message: '邮件格式错误！'
+			}
+       }
+      user.email =pm.email
+    	
+    }
+
+    const regMP=/^[1][3,4,5,7,8][0-9]{9}$/
+    if(pm.mobile && pm.mobile.trim()!=''){
+    	if(!regMP.test(pm.mobile.trim())){
+           throw {
+				status: 10003,
+				message: '手机号码不合法！'
+			}
+
+    	}
+    	user.mobile =pm.mobile
+    }
+
+    if(pm.birthday && pm.birthday.trim()){
+    	user.birthday =pm.birthday
+    }
+
+    if(pm.country && pm.country.trim()!=''){
+    	user.country =pm.country
+    }
+  return user
+
+}
