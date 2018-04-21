@@ -39,9 +39,7 @@ router.post('thirdLogin', async (ctx, next) => {
 			break;
 		case 'fb':
 			user = await services.user.fbLogin(loginParam)
-			log('facebook获取的user:', user)
 			break;
-
 	}
 	log(28, user)
 	const user_name = user.userName
@@ -81,32 +79,56 @@ router.post('thirdLogin', async (ctx, next) => {
 	}
 })
 
-//{"UserName":"3434343","name":"aaaaa","sex":"name"}
-router.post('updateUser',async(ctx,next)=>{
-    const pm = ctx.params
-    const user = await services.user.userParams(pm)
 
-    log('前端传过来的user信息：'+JSON.stringify(user))
-
-    const userInfo = await model.user.findOne({userName:user.userName},{userName:1,gender:1})
-
-    log('find user result : '+userInfo)
-
-    if(!userInfo){
-       throw {
+router.post('updateUser', async (ctx, next) => {
+	const pm = ctx.params
+	const user = await services.user.userParams(pm)
+	log('前端传过来的user信息：' + JSON.stringify(user))
+	const userInfo = await model.user.findOne({
+		userName: user.userName
+	}, {
+		_id:1,
+		userName: 1,
+		gender: 1
+	})
+	log('find user result : ' + userInfo)
+	if (!userInfo) {
+		throw {
 			status: 10003,
 			message: httpStatus.common.system['10003'][ctx.LG],
 			router: ctx._url
 		}
-    }
-   await model.user.update({userName:pm.userName},user)
-   const updateUser = await model.user.findOne({userName:user.userName},{_id:-1,userName:1,gender:1,name:1,email:1,mobile:1,birthday:1,country:1})
- 
-   log('更新后的updateUser: '+updateUser)
-  user.uuid = ctx.params.uuid
-  user.visitIP = ctx.request.ip.replace(/::ffff:/g, '')
-  const key = 'access_token:' + endeurl.md5(user.userName)
-  cache.set(key, JSON.stringify({user}), 'EX', 604800) // 7*24*60*60
+	}
+	await model.user.update({
+		userName: pm.userName
+	}, user)
+	const updateUser = await model.user.findOne({
+		userName: user.userName
+	}, {
+		_id: -1,
+		userName: 1,
+		gender: 1,
+		name: 1,
+		email: 1,
+		mobile: 1,
+		birthday: 1,
+		country: 1
+	})
+	log('更新后的updateUser: ' + updateUser)
+
+	// const userid = userInfo._id.toString()
+	// user.uuid = ctx.params.uuid
+	// user.visitIP = ctx.request.ip.replace(/::ffff:/g, '')
+	// user.pppCodes = userInfo.pppCodes
+	// user.coupons = userInfo.coupons
+	// user.customerIds = userInfo.customerIds
+	// user.userPP = userInfo.userPP
+
+	// const key = 'access_token:' + endeurl.md5(user.userName)
+	// cache.setex(key, JSON.stringify({
+	// 	userid,
+	// 	user
+	// }), 'EX', 604800) // 7*24*60*60
 
 })
 

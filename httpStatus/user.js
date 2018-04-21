@@ -30,16 +30,18 @@ module.exports = {
 			'token': ['String', '认证标志']
 		}
 	},
-	updateUser:{
+	updateUser: {
 		method: 'POST',
 		desc: '更新用户信息',
 		headers: {},
-		params:{
+		params: {
 			userName: [1, 'String', "用户名字/昵称"],
 			name: [0, 'String', "用户名字/昵称"],
-			email: [0, 'String', "-1 未知 0 女 1 男"],
+			gender: [0, 'String', "-1 未知 0 女 1 男"],
+			email: [0, 'String', "邮箱,如果传了，邮箱格式必需正确"],
 			mobile: [0, 'String', "手机号,如果传了，格式必需正确"],
-			birthday: [0, 'String', "生日"]
+			birthday: [0, 'String', "生日,年月日"],
+			country: [0, 'String', "国家"]
 		},
 		response: {},
 		resDesc: {}
