@@ -82,15 +82,20 @@ router.post('thirdLogin', async (ctx, next) => {
 
 router.post('updateUser', async (ctx, next) => {
 	const pm = ctx.params
-	const user_name = ctx.user.userName
-
-	const user = await services.user.userParams(pm)
+	const user_name = ctx.user.user.userName
+    log(86,user_name)
+	const userQuery = await services.user.userParams(pm)
 	const userInfo = await model.user.findOne({
 		userName: user_name
 	}, {
-		_id:1,
+		_id: -1,
 		userName: 1,
-		gender: 1
+		gender: 1,
+		name: 1,
+		email: 1,
+		mobile: 1,
+		birthday: 1,
+		country: 1
 	})
 	log('find user result : ' + userInfo)
 	if (!userInfo) {
@@ -102,7 +107,7 @@ router.post('updateUser', async (ctx, next) => {
 	}
 	await model.user.update({
 		userName: user_name
-	}, user)
+	}, userQuery)
 	const updateUser = await model.user.findOne({
 		userName: user_name
 	}, {
@@ -115,7 +120,7 @@ router.post('updateUser', async (ctx, next) => {
 		birthday: 1,
 		country: 1
 	})
-	// log('更新后的updateUser: ' + updateUser)
+	 log('更新后的updateUser: ' + updateUser)
 
 	// const userid = userInfo._id.toString()
 	// user.uuid = ctx.params.uuid
