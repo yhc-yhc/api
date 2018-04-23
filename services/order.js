@@ -41,7 +41,7 @@ exports.orderFomat = (order, park) => {
 			productType: item.productType,
 			count: item.count,
 			currency: park.currency || '',
-			parkName: park.parkName || ''
+			parkName: park.name || ''
 		})
 
 	}

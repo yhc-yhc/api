@@ -7,7 +7,6 @@ module.exports = {
 		},
 		params: {
 			isPay: [1, 'boolean', "订单状态是否交易成功"]
-
 		},
 		response: {
 			"orders": [{
