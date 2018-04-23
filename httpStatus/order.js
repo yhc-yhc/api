@@ -1,5 +1,5 @@
 module.exports = {
-	getOrdersStatus: {
+	listOrders: {
 		method: 'GET',
 		desc: "查询订单是否交易成功",
 		headers: {
@@ -27,6 +27,9 @@ module.exports = {
 					"parkName": "LEGOLAND®️ Japan"
 				}]
 			}]
+		},
+		resDesc: {
+			orderStatus: ['String', '1:未付款,2:处理中,3:已完成,4:已取消,5:已退款,6:交易失败']
 		}
 	}
 }
