@@ -138,9 +138,7 @@ exports.sendSMS = async (areaCode, mobile, tplMap, contentAry) => {
 
 exports.userParams = async pm => {
 	//1.接收前端传过来的参数
-	let user = {
-		userName: pm.userName
-	}
+	let user = {}
 
 	if (pm.name && pm.name.trim() != '') {
 		user.name = pm.name
