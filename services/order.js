@@ -24,7 +24,7 @@ exports.orderFomat = (order, park) => {
 	const obj = {}
 	obj.orderCode = order.orderCode
 	obj.transCode = order.transCode
-	obj.createdOn = order.createdOn
+	obj.createdOn = new Date(order.createdOn).getTime()
 	obj.couponsList = order.couponsList
 	obj.orderStatus = getOrderStatus(order.orderStatus.status)
 	obj.totalPrice = order.orderProducts.resume.totalPrice.toString()
