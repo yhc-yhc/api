@@ -12,6 +12,7 @@ module.exports = {
     siteId: String,  //parkId 线下使用
     parkCode: String,    //乐园简码与条码包含的简码相同
     bgUrl: String, // 乐园对就卡的背景图
+    barUrl: String, // 乐园对就卡的背景图
     cardUrl: String,
     name: {type: String},   //乐园名称
     description: {type: String},   //描述

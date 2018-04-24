@@ -58,6 +58,7 @@ async function getSiteInfo() {
 		siteId: 1,
 		name: 1,
 		bgUrl: 1,
+		barUrl: 1
 		parkCardCode: 1
 	})
 	global.siteInfo = parks.reduce((pre, cur) => {
