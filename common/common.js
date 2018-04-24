@@ -65,7 +65,7 @@ async function getSiteInfo() {
 		pre[cur.siteId] = {
 			parkName: cur.name || 'PictureAir',
 			bgUrl: cur.bgUrl || '/sites/common/background.png',
-			barUrl: cur.barUrl || '/sites/common/background.png',
+			barUrl: cur.barUrl || '/sites/common/cardBagPP.png',
 			pageUrl: cur.pageUrl || 'http://web.pictureair.com/',
 			ocrCard: cur.ocrCard || false,
 			faceCard: cur.faceCard || false,
