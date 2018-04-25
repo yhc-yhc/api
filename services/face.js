@@ -1,5 +1,3 @@
-const idGenerate = require('nanoid/generate')
-const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const faceai = require('../faceai.js')
 
 exports.getFaceInfo = async(faceObj, date, siteId, code) => {

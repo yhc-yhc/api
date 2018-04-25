@@ -12,6 +12,7 @@ global.mqExchange = require('../mq/conn.js').mqExchange
 global.mqPub = require('../mq/conn.js').mqPub
 global.mqSub = require('../mq/conn.js').mqSub
 global.endeurl = require('../tools/endeurl.js')
+global.alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 
 global.request = Promise.promisifyAll(Promise.promisify(require('request')))
 Promise.promisifyAll(redis.RedisClient.prototype)
@@ -58,13 +59,14 @@ async function getSiteInfo() {
 		siteId: 1,
 		name: 1,
 		bgUrl: 1,
+		barUrl: 1,
 		parkCardCode: 1
 	})
 	global.siteInfo = parks.reduce((pre, cur) => {
 		pre[cur.siteId] = {
 			parkName: cur.name || 'PictureAir',
 			bgUrl: cur.bgUrl || '/sites/common/background.png',
-			barUrl: cur.barUrl || '/sites/common/background.png',
+			barUrl: cur.barUrl || '/sites/common/cardBagPP.png',
 			pageUrl: cur.pageUrl || 'http://web.pictureair.com/',
 			ocrCard: cur.ocrCard || false,
 			faceCard: cur.faceCard || false,

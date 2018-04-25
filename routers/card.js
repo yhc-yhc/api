@@ -1,5 +1,5 @@
 const router = new Router()
-const services = loaddir('./services')
+const services = loaddir('services')
 
 router.get('listCards', async(ctx, next) => {
 	const user = await model.user.findOne({
@@ -37,13 +37,29 @@ router.get('listCards', async(ctx, next) => {
 	})
 	ctx.body = cards
 })
-
-
-router.get('getPPCodes',async(ctx,next)=>{
- const ppCodes = ctx.params.ppCode?(ctx.params.ppCode).split(',') : null
- const userInfoCache = ctx.user.user
- ctx.body = {
- 	user:JSON.stringify(userInfoCache)
- }
+router.post('batchCreate', async(ctx, next) => {
+	let type
+	switch (ctx.params.type) {
+		case '0':
+			type = 'A1'
+			break
+		default:
+			type = 'ER'
+	}
+	if (type == 'ER') {
+		throw {
+			message: 'can not service for this type'
+		}
+	}
+	if (ctx.params.remain !== 'pic60ture01air') {
+		throw {
+			message: 'can not service for you'
+		}
+	}
+	const codes = await services.card.createCardCodes(ctx.params.siteId, type, ctx.params.count, ctx.params.expiredOn)
+	const timeStr = moment().format('YYYYMMDDHH:mm:ss')
+	const fileName = `./attachments/${ctx.params.siteId}_${type}_${ctx.params.count}_${timeStr}.txt`
+	await Promise.all([services.card.createCodeFile(codes, fileName), services.card.saveCodesToDB(codes, type)])
+	await services.card.sendFileEmail(fileName)
 })
 module.exports = router
