@@ -48,5 +48,24 @@ module.exports = {
         resDesc: {
 
         }
+    },
+    predown:{
+        method: 'POST',
+        desc: '一键下载准备photoIDs',
+        headers: {
+             token: [1, 'String', "用户认证id"]
+        },
+        params: {
+          // photoIds:[1, 'String', "要下载的photo id，多个用逗号隔开"]
+        },
+        resDesc: {}
+    },
+    down:{
+        method: 'GET',
+        desc: '下载photoIDs,进行打包压缩',
+        headers: {},
+        params: {
+         key:[1, 'String', "要下载的photokey"]
+        }
     }
 }

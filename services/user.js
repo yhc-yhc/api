@@ -20,7 +20,63 @@ exports.createToken = async (userName, params) => {
 		algorithm: 'RS512'
 	})
 }
+async function resUser(uName) {
 
+	const r_user = await model.user.findOne({
+		userName: uName
+	}, {
+		mobile: 1,
+		email: 1,
+		gender: 1,
+		birthday: 1,
+		address: 1,
+		favoriteLocationIds: 1,
+		hiddenPPList: 1,
+		favoritePhotos: 1,
+		hiddenPPList: 1,
+		favoritePhotos: 1,
+		likePhotos: 1,
+		emailVerified: 1,
+		disabled: 1,
+		disablereason: 1,
+		userLink: 1
+	})
+	return r_user ? r_user : ''
+}
+
+function toUserJson(res_user) {
+	const PPCode = "PWUP" + mongoose.Types.ObjectId().toString().substr(12, 12).toUpperCase()
+	const jsonObj = {
+        creDatetime: new Date(),
+		updDatetime: new Date(),
+		userPP: PPCode,
+		customerIds: [{
+			code: PPCode
+		}],
+		userType: 'user',
+		mobile: res_user.mobile || '',
+		email: res_user.email || '',
+		country: res_user.country || '',
+		gender: res_user.gender || -1,
+		birthday: res_user.birthday || '',
+		address: res_user.address && res_user.address.length > 0 ? res_user.address : [],
+		coverHeaderImage: res_user.coverHeaderImage || '',
+		favoriteLocationIds: res_user.favoriteLocationIds && res_user.favoriteLocationIds.length > 0 ? res_user.favoriteLocationIds : [],
+		qq: '',
+		hiddenPPList: res_user.hiddenPPList && res_user.hiddenPPList.length > 0 ? res_user.hiddenPPList : [],
+		favoritePhotos: res_user.favoritePhotos && res_user.favoritePhotos.length > 0 ? res_user.favoritePhotos : [],
+		likePhotos: res_user.likePhotos && res_user.likePhotos.length > 0 ? res_user.likePhotos : [],
+		emailVerified: false,
+		disabled: false,
+		disablereason: '',
+		customerIdsLen: 12,
+		lgcode: 'en-US',
+		photosNum: res_user.photosNum || 0,
+		userLink: res_user.userLink || ''
+	}
+	return jsonObj
+
+}
 exports.wxLogin = async loginparams => {
 
 
@@ -50,7 +106,8 @@ exports.wxLogin = async loginparams => {
 		}
 	}
 	const userInfo = JSON.parse(userInfoRes.body)
-	const PPCode = "PWUP" + mongoose.Types.ObjectId().toString().substr(12, 12).toUpperCase()
+	const res_user = await resUser(userInfo.nickname)
+	const userExtraParam = toUserJson(res_user)
 	const user = {
 		userName: userInfo.nickname,
 		name: userInfo.nickname,
@@ -58,52 +115,33 @@ exports.wxLogin = async loginparams => {
 			wx: userInfo.openid
 		},
 		gender: userInfo.sex,
-		country: userInfo.country,
-		coverHeaderImage: userInfo.headimgurl,
 		unionid: userInfo.unionid, //用户的unionid是唯一的。换句话说，同一用户，对同一个微信开放平台下的不同应用，unionid是相同的
-		registerTerminal: loginparams.terminal, //终端类型ios,adriod
-		creDatetime: new Date(),
-		updDatetime: new Date(),
-		userPP: PPCode,
-		customerIds: [{
-			code: PPCode
-		}]
+		registerTerminal: loginparams.terminal //终端类型ios,adriod
+		
+	}
+
+	for(let info in userExtraParam){
+		user[info] = userExtraParam[info]
 	}
 	return user
 }
 
 exports.fbLogin = async loginparams => {
-
-	//.利用token获取用户基本信息
-	// const fb_token = loginparams.token
-	// const fb_query = 'fields=link,id,name,picture,first_name,gender&'
-	// const user_res = await request.getAsync({
-	// 	url: `https://graph.facebook.com/me?${fb_query}access_token=${fb_token}`
-	// })
-	// if (user_res.statusCode != 200) {
-	// 	throw {
-	// 		status: 10003,
-	// 		message: httpStatus.common.system['10003'][loginparams.LG],
-	// 		router: loginparams._url
-	// 	}
-	// }
-	// const user_info = JSON.parse(user_res.body)
 	const id = loginparams.fbId
 	const fbUserName = loginparams.fbName
-	const PPCode = "PWUP" + mongoose.Types.ObjectId().toString().substr(12, 12).toUpperCase()
+	const res_user = await resUser(fbUserName)
+	const userExtraParam = toUserJson(res_user)
 	const user = {
 		userName: fbUserName,
 		name: fbUserName,
 		openIds: {
 			fb: id
 		},
-		registerTerminal: loginparams.terminal, //终端类型ios,adriod
-		creDatetime: new Date(),
-		updDatetime: new Date(),
-		userPP: PPCode,
-		customerIds: [{
-			code: PPCode
-		}]
+		gender: res_user.gender || -1,
+		registerTerminal: loginparams.terminal //终端类型ios,adriod
+	}
+	for(let info in userExtraParam){
+		user[info] = userExtraParam[info]
 	}
 	return user
 }

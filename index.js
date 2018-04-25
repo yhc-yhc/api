@@ -47,13 +47,14 @@ app.use(async (ctx, next) => {
 	}
 })
 
-// format api response result
+// format api response result err: zip can't open
 app.use(async (ctx, next) => {
 	await next()
 	if (ctx.body) {
 		const obj = Object.assign({}, httpStatus.common.success)
 		obj.result = ctx.body
 		ctx.body = obj
+
 	} else {
 		ctx.body = httpStatus.common.success
 	}
@@ -73,7 +74,7 @@ app.use(async (ctx, next) => {
 	await next()
 })
 
-// api params is correct
+// // api params is correct
 app.use(async (ctx, next) => {
 	if (ctx.request.is('multipart/*')) {
 		const {
@@ -125,7 +126,7 @@ app.use(async (ctx, next) => {
 	await next()
 })
 
-// api token is correct
+// // api token is correct
 app.use(async (ctx, next) => {
 	if (global.httpStatus[ctx.service][ctx.fun].headers.token ||
 		global.httpStatus[ctx.service][ctx.fun].params.token) {
