@@ -38,4 +38,12 @@ router.get('listCards', async(ctx, next) => {
 	ctx.body = cards
 })
 
+
+router.get('getPPCodes',async(ctx,next)=>{
+ const ppCodes = ctx.params.ppCode?(ctx.params.ppCode).split(',') : null
+ const userInfoCache = ctx.user.user
+ ctx.body = {
+ 	user:JSON.stringify(userInfoCache)
+ }
+})
 module.exports = router

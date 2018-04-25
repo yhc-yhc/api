@@ -45,5 +45,16 @@ module.exports = {
 			payCount: ['Int', "卡内购买的照片数量"],
 			photos: ['Araay', "只显示两张照片的x512地址数据， 如果只有一张，就重复两次"],
 		}
+	},
+	getPPCodes:{
+       	method: 'GET',
+		desc: "显示用户的所有卡",
+		headers: {
+			token: [1, 'String', "标识用户身份"]
+		},
+		params: {
+			 ppCode: [0, 'String', "参数"],
+		}
+
 	}
 }
