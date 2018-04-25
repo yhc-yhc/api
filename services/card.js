@@ -56,7 +56,7 @@ exports.saveCodesToDB = async(codes, type) => {
 		days: 1,
 		expiredDay: 1,
 		expiredOn: new Date(code[3]),
-		active: true,
+		active: false,
 		createdOn: new Date(),
 		createdBy: 'system-josh',
 	}))
