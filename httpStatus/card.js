@@ -45,5 +45,18 @@ module.exports = {
 			payCount: ['Int', "卡内购买的照片数量"],
 			photos: ['Araay', "只显示两张照片的x512地址数据， 如果只有一张，就重复两次"],
 		}
+	},
+	batchCreate: {
+		method: 'POST',
+		desc: "批量生成卡",
+		headers: {
+			// token: [1, 'String', "标识用户身份"]
+		},
+		params: {
+			count: [1, 'Number', "生成卡的张数"],
+			type: [1, 'Number', "生成卡的类型"],
+			expiredOn: [1, 'String', "YYYYMMDD"],
+			remain: [1, 'String', "预留对比字样，以确认操作"],
+		}
 	}
 }

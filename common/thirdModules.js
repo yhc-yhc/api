@@ -11,6 +11,9 @@ global.mongoose = require('mongoose')
 global.redis = require('redis')
 global.amqp = require('amqp')
 global.jwt = require('jsonwebtoken')
+global.idGenerate = require('nanoid/generate')
+global.nodemailer = require('nodemailer')
+
 
 global.Koa = require('koa')
 global.logger = require('koa-logger')
