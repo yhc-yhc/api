@@ -47,6 +47,11 @@ router.post('batchCreate', async(ctx, next) => {
 		default:
 			type = 'ER'
 	}
+	if (type == 'ER') {
+		throw {
+			message: 'can not service for this type'
+		}
+	}
 	if (ctx.params.remain !== 'pic60ture01air') {
 		throw {
 			message: 'can not service for you'
