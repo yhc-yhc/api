@@ -37,6 +37,7 @@ router.get('listCards', async(ctx, next) => {
 	})
 	ctx.body = cards
 })
+
 router.post('batchCreate', async(ctx, next) => {
 	let type
 	switch (ctx.params.type) {
@@ -59,7 +60,7 @@ router.post('batchCreate', async(ctx, next) => {
 	const codes = await services.card.createCardCodes(ctx.params.siteId, type, ctx.params.count, ctx.params.expiredOn)
 	const timeStr = moment().format('YYYYMMDDHH:mm:ss')
 	const fileName = `./attachments/${ctx.params.siteId}_${type}_${ctx.params.count}_${timeStr}.txt`
-	await Promise.all([services.card.createCodeFile(codes, fileName), services.card.saveCodesToDB(codes, type)])
+	await Promise.all([services.card.createCodeFile(codes, fileName), services.card.saveCodesToDB(codes, type, ctx.params.siteIds)])
 	await services.card.sendFileEmail(ctx.params.siteId, fileName)
 })
 module.exports = router

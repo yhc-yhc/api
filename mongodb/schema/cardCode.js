@@ -1,4 +1,5 @@
 module.exports = {
+    siteIds: { type: [String] },
     PPPCode: {type: String, index: true},  //pp+卡号
     SN: {type: String, index: true},//对应的序列号
     PPPType: String,//photoPassPlus的类型

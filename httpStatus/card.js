@@ -57,6 +57,8 @@ module.exports = {
 			type: [1, 'Number', "生成卡的类型"],
 			expiredOn: [1, 'String', "YYYYMMDD"],
 			remain: [1, 'String', "预留对比字样，以确认操作"],
+			siteId: [1, 'String', "生成卡的 siteId"],
+			siteIds: [1, 'Array', "可以激活的 siteId"],
 		}
 	}
 }

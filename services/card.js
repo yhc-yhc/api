@@ -47,12 +47,13 @@ exports.createCodeFile = async(codes, fileName) => {
 	return true
 }
 
-exports.saveCodesToDB = async(codes, type) => {
+exports.saveCodesToDB = async(codes, type, siteIds) => {
 	const _codes = codes.map(code => ({
 		PPPCode: code[1],
 		SN: code[2],
 		PPPType: type,
 		oType: type,
+		siteIds: siteIds,
 		days: 1,
 		expiredDay: 1,
 		expiredOn: new Date(code[3]),
