@@ -58,15 +58,15 @@ exports.saveCodesToDB = async(codes, type) => {
 		expiredOn: new Date(code[3]),
 		active: true,
 		createdOn: new Date(),
-		createdBy: 'system',
+		createdBy: 'system-josh',
 	}))
 	const rs = await model.cardCode.create(_codes)
 	return true
 }
 
-exports.sendFileEmail = async fileName => {
+exports.sendFileEmail = async (siteId, fileName) => {
 	const email_content = `Dear all,<br>
-  		 Kindly find the attachments for the codes that you created. <br>
+  		Kindly find the attachments for that card codes you generated to ${siteId} in ${process.env.RUN || 'dev'} environment. <br>
 	thanks<br>`
 	const data = {
 		from: `<do-not-reply@disneyphotopass.com.hk>`,
@@ -80,14 +80,24 @@ exports.sendFileEmail = async fileName => {
 		}]
 	}
 	const smtpTransport = nodemailer.createTransport({
-        host: "smtp.office365.com",
-        port: 587,
-        ssl: false,
-        auth: {
-            user: 'do-not-reply@disneyphotopass.com.hk',
-            pass: 'CN-SH-PA-6001'
-        }
-    })
+		host: "smtp.office365.com",
+		port: 587,
+		ssl: false,
+		auth: {
+			user: 'do-not-reply@disneyphotopass.com.hk',
+			pass: 'CN-SH-PA-6001'
+		}
+		// pool: true,
+		// host: 'smtp.office365.com',
+		// port: 587,
+		// secure: false,
+		// auth: {
+		// 	user: 'do-not-reply@pictureair.com',
+		// 	pass: 'CN-SH-PA-6001'
+		// },
+		// maxConnections: 10,
+		// maxMessages: 1000
+	})
 	return new Promise((resolve, reject) => {
 		smtpTransport.sendMail(data, function(err, res) {
 			if (err) {

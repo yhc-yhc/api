@@ -61,7 +61,7 @@ router.post('batchCreate', async(ctx, next) => {
 	const timeStr = moment().format('YYYYMMDDHH:mm:ss')
 	const fileName = `./attachments/${ctx.params.siteId}_${type}_${ctx.params.count}_${timeStr}.txt`
 	await Promise.all([services.card.createCodeFile(codes, fileName), services.card.saveCodesToDB(codes, type)])
-	await services.card.sendFileEmail(fileName)
+	await services.card.sendFileEmail(ctx.params.siteId, fileName)
 })
 
 module.exports = router
