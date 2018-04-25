@@ -45,7 +45,7 @@ exports.groupPhotos = async (code, bindOn) => {
 			pageUrl: 'http://web.pictureair.com/',
 			shareLink: `https://web.pictureair.com/?src=pictureaircard&vid=${code}`,
 			bgUrl: '/sites/common/background.png',
-			barUrl: '/sites/common/background.png',
+			barUrl: '/sites/common/cardBagPP.png',
 			photoCount: 0,
 			allowPay: false,
 			payCount: 0,
