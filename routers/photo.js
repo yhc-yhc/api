@@ -2,7 +2,6 @@ const router = new Router()
 const services = loaddir('services')
 const uuid = require('uuid')
 const archiver = require('archiver')
-const fs = require('fs')
 const send = require('koa-send')
 
 const oss = require('ali-oss').Wrapper
@@ -110,7 +109,7 @@ router.get('down', async (ctx, next) => {
 	}
   
 	const zipath = `${uuid.v4().replace(/-/g, '')}.zip`
-	const output = fs.createWriteStream(zipath)
+	const output = fse.createWriteStream(zipath)
 	const zipAchiver = archiver('zip')
 	zipAchiver.pipe(output)
 	for (let photo of photoInfo) {
@@ -129,6 +128,6 @@ router.get('down', async (ctx, next) => {
 	await zipAchiver.finalize()
 	ctx.attachment(zipath)
 	await send(ctx, zipath)
-	fs.unlink(zipath)
+	fse.unlink(zipath)
 })
 module.exports = router

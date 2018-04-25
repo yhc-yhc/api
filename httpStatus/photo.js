@@ -56,7 +56,7 @@ module.exports = {
              token: [1, 'String', "用户认证id"]
         },
         params: {
-          // photoIds:[1, 'String', "要下载的photo id，多个用逗号隔开"]
+           photoIds:[1, 'String', "要下载的photo id，多个用逗号隔开"]
         },
         resDesc: {}
     },

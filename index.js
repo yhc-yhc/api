@@ -47,14 +47,14 @@ app.use(async (ctx, next) => {
 	}
 })
 
-// format api response result err: zip can't open
+// format api response result err: zip can't open,so add return
 app.use(async (ctx, next) => {
 	await next()
+	if (ctx.fun == 'down') return
 	if (ctx.body) {
 		const obj = Object.assign({}, httpStatus.common.success)
 		obj.result = ctx.body
 		ctx.body = obj
-
 	} else {
 		ctx.body = httpStatus.common.success
 	}
